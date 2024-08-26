@@ -23,7 +23,7 @@
 
 
   el-project-grande-backend:
-    image: el-project-grande-db
+    image: elprojectgrande
     build:
       context: .
       dockerfile: ElProjectGrande/Dockerfile
