@@ -1,0 +1,6 @@
+﻿services:
+  elprojectgrande:
+    image: elprojectgrande
+    build:
+      context: .
+      dockerfile: ElProjectGrande/Dockerfile
