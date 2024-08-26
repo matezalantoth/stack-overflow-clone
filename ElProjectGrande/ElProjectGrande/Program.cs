@@ -14,6 +14,7 @@ builder.Services.AddDbContext<ApiDbContext>();
 builder.Services.AddSingleton<IUserFactory, UserFactory>();
 builder.Services.AddSingleton<IUserVerifier, UserVerifier>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 
 var app = builder.Build();
 
