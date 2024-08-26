@@ -9,7 +9,8 @@ public class UserFactory(IUserVerifier userVerifier) : IUserFactory
         var password = userVerifier.HashPassword(newUser.Password, out var salt);
         var user = new User
         {
-            Id = Guid.NewGuid(), Name = newUser.Name, Email = newUser.Email, Password = password,
+            Id = Guid.NewGuid(), Name = newUser.Name, UserName = newUser.UserName, Email = newUser.Email,
+            Password = password,
             DoB = newUser.DoB, Salt = salt
         };
         var question = new Question { Answers = [], Content = "test question", User = user };
@@ -40,7 +41,7 @@ public class UserFactory(IUserVerifier userVerifier) : IUserFactory
                 Content = answer.Content,
                 Id = answer.Id,
                 QuestionId = answer.Question.Id,
-                Username = user.Name
+                Username = user.UserName,
             }).ToList();
         }
 
@@ -50,13 +51,14 @@ public class UserFactory(IUserVerifier userVerifier) : IUserFactory
             {
                 Content = question.Content,
                 Id = question.Id,
-                Username = user.Name
+                Username = user.UserName,
             }).ToList();
         }
 
         return new UserDTO
         {
             Id = user.Id,
+            UserName = user.UserName,
             Answers = answers,
             Questions = questions
         };
