@@ -13,7 +13,6 @@ public class UserController(IUserRepository userRepository, IUserFactory userFac
     {
         try
         {
-            Console.WriteLine("testing");
             var user = userFactory.CreateUser(newUser);
             userRepository.CreateUser(user);
             return Ok(userFactory.CreateUserDTO(user));

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Bálint\\RiderProjects\\El-Project-Grande\\ElProjectGrande\\ElProjectGrande\\ElProjectGrande.csproj": {}
+    "/Users/matezalantoth/RiderProjects/El-Project-Grande/ElProjectGrande/ElProjectGrande/ElProjectGrande.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Bálint\\RiderProjects\\El-Project-Grande\\ElProjectGrande\\ElProjectGrande\\ElProjectGrande.csproj": {
+    "/Users/matezalantoth/RiderProjects/El-Project-Grande/ElProjectGrande/ElProjectGrande/ElProjectGrande.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Bálint\\RiderProjects\\El-Project-Grande\\ElProjectGrande\\ElProjectGrande\\ElProjectGrande.csproj",
+        "projectUniqueName": "/Users/matezalantoth/RiderProjects/El-Project-Grande/ElProjectGrande/ElProjectGrande/ElProjectGrande.csproj",
         "projectName": "ElProjectGrande",
-        "projectPath": "C:\\Users\\Bálint\\RiderProjects\\El-Project-Grande\\ElProjectGrande\\ElProjectGrande\\ElProjectGrande.csproj",
-        "packagesPath": "C:\\Users\\Bálint\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Bálint\\RiderProjects\\El-Project-Grande\\ElProjectGrande\\ElProjectGrande\\obj\\",
+        "projectPath": "/Users/matezalantoth/RiderProjects/El-Project-Grande/ElProjectGrande/ElProjectGrande/ElProjectGrande.csproj",
+        "packagesPath": "/Users/matezalantoth/.nuget/packages/",
+        "outputPath": "/Users/matezalantoth/RiderProjects/El-Project-Grande/ElProjectGrande/ElProjectGrande/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Bálint\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/matezalantoth/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -32,15 +32,34 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "DotNetEnv": {
+              "target": "Package",
+              "version": "[3.1.1, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "MySql.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.5, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
@@ -66,7 +85,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.206/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
