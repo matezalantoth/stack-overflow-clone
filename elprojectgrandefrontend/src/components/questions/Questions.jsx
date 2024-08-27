@@ -1,22 +1,26 @@
-import './Questions.css';
+
 import {useEffect, useState} from "react";
 
 export default function Questions() {
-    const [questions, setQuestions] = useState([]);
+    const [questions, setQuestions] = useState(null);
 
 
     useEffect(() => {
         const fetchQuestions = async () => {
-            try{
-                const res = await fetch("http://localhost:8080/Question" , {
-                    method: "GET",
-                    headers: {"content-type": "application/json"},
-                });
+            // try{
+                const res = await fetch("/api/Question",
+                    {
+                        headers : {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+
+                    });
                 const data = await res.json();
                 setQuestions(data);
-            } catch (error){
-                console.log(error);
-            }
+            // } catch (error){
+            //     console.log(error);
+            // }
         };
         fetchQuestions();
     }, []);
