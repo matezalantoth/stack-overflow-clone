@@ -26,6 +26,7 @@ builder.Services.AddSingleton<IUserFactory, UserFactory>();
 builder.Services.AddSingleton<IUserVerifier, UserVerifier>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddSingleton<IQuestionFactory, QuestionFactory>();
 
 var app = builder.Build();
 

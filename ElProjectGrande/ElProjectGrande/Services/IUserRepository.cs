@@ -13,4 +13,6 @@ public interface IUserRepository
     public bool IsUserLoggedIn(Guid sessionToken);
 
     public void LogoutUser(Guid sessionToken);
+
+    public ValueTask<User?> GetUserBySessionToken(Guid sessionToken);
 }

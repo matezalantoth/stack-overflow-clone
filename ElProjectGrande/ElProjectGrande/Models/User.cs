@@ -9,9 +9,9 @@ public class User
     public string Password { get; set; }
     public byte[] Salt { get; set; }
     public DateTime DoB { get; set; }
-    public List<Question> Questions { get; set; }
-    public List<Answer> Answers { get; set; }
-    public Guid SessionToken { get; set; } = Guid.Empty;
+    public List<Question> Questions { get; set; } = new List<Question>();
+    public List<Answer> Answers { get; set; } = new List<Answer>();
+    public Guid SessionToken { get; set; } = Guid.NewGuid();
 
     public override string ToString()
     {

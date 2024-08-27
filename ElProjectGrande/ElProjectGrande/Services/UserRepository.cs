@@ -43,4 +43,15 @@ public class UserRepository(ApiDbContext context) : IUserRepository
         context.Users.Update(user);
         context.SaveChanges();
     }
+
+    public ValueTask<User?> GetUserBySessionToken(Guid sessionToken)
+    {
+        var partialUser = context.Users.FirstOrDefault(u => u.SessionToken == sessionToken);
+        if (partialUser == null)
+        {
+            throw new ArgumentException("This session token is invalid");
+        }
+
+        return GetUserById(partialUser.Id);
+    }
 }
