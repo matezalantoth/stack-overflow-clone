@@ -40,6 +40,7 @@ public class ApiDbContext : DbContext
             entity.Property(u => u.Password).IsRequired();
             entity.Property(u => u.Salt).IsRequired();
             entity.Property(u => u.DoB).IsRequired();
+            entity.Property(u => u.SessionToken).IsRequired();
 
             entity.HasMany(u => u.Questions)
                 .WithOne(q => q.User)
