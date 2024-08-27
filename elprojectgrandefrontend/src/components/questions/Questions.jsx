@@ -8,7 +8,7 @@ export default function Questions() {
     useEffect(() => {
         const fetchQuestions = async () => {
             try{
-                const res = await fetch("" , {
+                const res = await fetch("http://localhost:8080/Question" , {
                     method: "GET",
                     headers: {"content-type": "application/json"},
                 });
@@ -20,14 +20,17 @@ export default function Questions() {
         };
         fetchQuestions();
     }, []);
-
-    return (
+    console.log(questions)
+    return questions ? (
         <div className="questions">
             {questions.map((question, index) => (
                 <div className="question" key={index} onClick={() => {}}>
-                    <p>{question.name}</p>
+                    <p>{question.content}</p>
                 </div>
             ))}
         </div>
-    )
+    ):
+        <div>
+            Loading
+        </div>
 }
