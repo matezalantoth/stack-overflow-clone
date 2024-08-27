@@ -20,4 +20,27 @@ public class UserRepository(ApiDbContext context) : IUserRepository
             .Include(u => u.Answers)
             .FirstOrDefaultAsync(u => u.Id == id);
     }
+
+    public Guid GetNewSessionToken()
+    {
+        return Guid.NewGuid();
+    }
+
+    public bool IsUserLoggedIn(Guid sessionToken)
+    {
+        return context.Users.FirstOrDefault(u => u.SessionToken == sessionToken) != null;
+    }
+
+    public void LogoutUser(Guid sessionToken)
+    {
+        var user = context.Users.FirstOrDefault(u => u.SessionToken == sessionToken);
+        if (user == null)
+        {
+            throw new ArgumentException("This session token could not be found");
+        }
+
+        user.SessionToken = Guid.Empty;
+        context.Users.Update(user);
+        context.SaveChanges();
+    }
 }

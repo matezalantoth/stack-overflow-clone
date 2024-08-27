@@ -11,7 +11,7 @@ public class UserFactory(IUserVerifier userVerifier) : IUserFactory
         {
             Id = Guid.NewGuid(), Name = newUser.Name, UserName = newUser.UserName, Email = newUser.Email,
             Password = password,
-            DoB = newUser.DoB, Salt = salt
+            DoB = newUser.DoB, Salt = salt, SessionToken = Guid.NewGuid()
         };
         var question = new Question { Answers = [], Content = "test question", User = user };
         var answer = new Answer
@@ -32,8 +32,6 @@ public class UserFactory(IUserVerifier userVerifier) : IUserFactory
         var answers = new List<AnswerDTO>();
         var questions = new List<QuestionDTO>();
 
-        Console.WriteLine(user.Answers);
-        Console.WriteLine(user.Questions);
         if (user.Answers != null && user.Answers.Count != 0)
         {
             answers = user.Answers.Select(answer => new AnswerDTO
