@@ -7,6 +7,7 @@ import AnswersElement from "./AnswersElement.jsx";
 export default function ProfilePage ()
 {
     const [user, setUser] = useState(null)
+    const[selectedTab, setSelectedTab] = useState(null)
 
 
     useEffect(() => {
@@ -33,15 +34,20 @@ export default function ProfilePage ()
     // console.log(user.username)
 
     return user ?  (
-        <div className="Users">
+            <div className="Users">
 
-            <div className="user">
-                <p>{user.userName}</p>
+                <div className="user">
+                    <p>{user.userName}</p>
+                </div>
+                
+                <div>
+                    <span  onClick={() => {setSelectedTab('answer')}}>Answers</span> || <span onClick={() => {setSelectedTab('question')}}>Questions</span>
+                </div>
+                {selectedTab ? selectedTab === 'question'? 
+                    <QuestionsElement questions={user.questions}/> : 
+                    <AnswersElement answers={user.answers}/>:<></>}
+
             </div>
-            <QuestionsElement questions={user.questions}/>
-            <AnswersElement answers={user.answers}/>
-
-        </div>
         ) :
         <div>
             loading

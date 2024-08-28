@@ -5,7 +5,7 @@ export default function AnswersElement ({answers})
         <div id= "AnswerHolder" >
             {answers.map(answer => {
                 console.log(answer)
-                (<div><div>{answer.postedAt}</div><div>{answer}</div></div>)
+               return (<div><div>{answer.content}</div><div>{answer.postedAt}</div></div>)
             })}
         </div>
     )
