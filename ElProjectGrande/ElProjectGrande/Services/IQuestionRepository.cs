@@ -6,7 +6,7 @@ public interface IQuestionRepository
 {
     public IEnumerable<QuestionDTO> GetQuestions();
 
-    public Question? GetQuestionById(Guid id);
+    public Task<Question?> GetQuestionById(Guid id);
 
     public QuestionDTO CreateQuestion(Question question);
 

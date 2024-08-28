@@ -48,7 +48,7 @@ public class QuestionsController(
     {
         try
         {
-            var question = questionRepository.GetQuestionById(id);
+            var question = await questionRepository.GetQuestionById(id);
             if (question == null)
             {
                 throw new ArgumentException($"Question of id {id} could not be found!");
@@ -69,12 +69,12 @@ public class QuestionsController(
     }
 
     [HttpPut("{id}")]
-    public ActionResult<QuestionDTO> UpdateQuestion([FromHeader(Name = "Authorization")] Guid sessionToken,
+    public async Task<ActionResult<QuestionDTO>> UpdateQuestion([FromHeader(Name = "Authorization")] Guid sessionToken,
         [FromBody] UpdatedQuestion updatedQuestion, Guid id)
     {
         try
         {
-            var question = questionRepository.GetQuestionById(id);
+            var question = await questionRepository.GetQuestionById(id);
             if (question == null)
             {
                 throw new ArgumentException($"Question of id {id} could not be found!");
