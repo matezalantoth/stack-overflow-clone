@@ -1,4 +1,4 @@
-import './welcomePage.css'
+
 import {Component} from "react";
 import Questions from "../../components/questions/Questions.jsx";
 
