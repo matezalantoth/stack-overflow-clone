@@ -25,9 +25,12 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<ApiDbContext>();
 builder.Services.AddSingleton<IUserFactory, UserFactory>();
 builder.Services.AddSingleton<IUserVerifier, UserVerifier>();
+builder.Services.AddSingleton<IQuestionFactory, QuestionFactory>();
+builder.Services.AddSingleton<IAnswerFactory, AnswerFactory>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-builder.Services.AddSingleton<IQuestionFactory, QuestionFactory>();
+builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+
 
 var app = builder.Build();
 
