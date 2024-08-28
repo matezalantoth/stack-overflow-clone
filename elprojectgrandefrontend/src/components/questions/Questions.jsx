@@ -7,7 +7,7 @@ export default function Questions() {
 
     useEffect(() => {
         const fetchQuestions = async () => {
-            // try{
+             try{
                 const res = await fetch("/api/Question",
                     {
                         headers : {
@@ -18,9 +18,9 @@ export default function Questions() {
                     });
                 const data = await res.json();
                 setQuestions(data);
-            // } catch (error){
-            //     console.log(error);
-            // }
+             } catch (error){
+                 console.log(error);
+             }
         };
         fetchQuestions();
     }, []);

@@ -22,10 +22,10 @@ export default function App()
         <StrictMode>
             <CookiesProvider>
                 <BrowserRouter>
-                    <Navbar />
+                    <Navbar cookies={cookies}/>
                     <Routes>
                         <Route path="/" element={<WelcomePage cookies={cookies}/>} />
-                        <Route path="/singup" element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path="/signup" element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/login" element={<LoginPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                     </Routes>
                     <Toaster/>
