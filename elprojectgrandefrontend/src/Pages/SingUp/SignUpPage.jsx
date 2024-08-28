@@ -12,9 +12,11 @@ export const SignupPage = (props) => {
     const showErrorToast = (data) => toast.error(data.message);
     useEffect(() => {
         if (
-            newUserData.username &&
+            newUserData.Name &&
+            newUserData.userName &&
             newUserData.email &&
-            newUserData.password
+            newUserData.password &&
+            newUserData.doB
         ) {
             setSubmittable(true);
         }
@@ -27,7 +29,7 @@ export const SignupPage = (props) => {
     console.log(submittable);
 
     const handleSignup = async () => {
-        const response = await fetch('http://localhost:5166/User', {
+        const response = await fetch('/api/User/signup', {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
@@ -43,7 +45,7 @@ export const SignupPage = (props) => {
     };
 
     const loginNewUser = async () => {
-        const response = await fetch('http://localhost:5166/User/Login', {
+        const response = await fetch('/api/User/Login', {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
@@ -62,11 +64,23 @@ export const SignupPage = (props) => {
                     <br/>
                     <div className='flex flex-col gap-6'>
                         <label className='block text-sm font-medium text-gray-900  -mb-4'>
+                            Your Name:
+                        </label>
+                        <input
+                            onChange={(event) => {
+                                setNewUserData({...newUserData, Name: event.target.value});
+                            }}
+                            type='text'
+                            required
+                            placeholder='Your name'
+                            className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
+                        />
+                        <label className='block text-sm font-medium text-gray-900  -mb-4'>
                             Your Username:
                         </label>
                         <input
                             onChange={(event) => {
-                                setNewUserData({...newUserData, username: event.target.value});
+                                setNewUserData({...newUserData, userName: event.target.value});
                             }}
                             type='text'
                             required
@@ -100,6 +114,18 @@ export const SignupPage = (props) => {
                             }}
                             required
                         />
+                        <label className='block text-sm font-medium text-gray-900  -mb-4'>
+                            Date of Birth:
+                        </label>
+                        <input
+                            onChange={(event) => {
+                                setNewUserData({...newUserData, doB: event.target.value});
+                            }}
+                            type='datetime'
+                            required
+                            placeholder='yyyy-mm-dd'
+                            className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
+                        />
                     </div>
                     <button
                         onClick={(event) => {
@@ -110,22 +136,12 @@ export const SignupPage = (props) => {
                             ) {
                                 handleSignup(event).then((data) => {
                                     if (data.message) {
-                                        showErrorToast(data);
+                                        showErrorToast(data.message);
                                     } else {
-                                        showSuccessToast({
-                                            message: 'Succesfully created account!',
-                                        });
-                                        loginNewUser().then((data) => {
-                                            if (data.message) {
-                                                showErrorToast(data.message);
-                                            } else {
-                                                setUserLoginCookies(data);
-                                                navigate('/profile');
-                                            }
-                                        })
-
+                                        setUserLoginCookies(data);
+                                        navigate('/profile');
                                     }
-                                });
+                                })
                             } else {
                                 showErrorToast({
                                     message: 'Your password or email is invalid',
