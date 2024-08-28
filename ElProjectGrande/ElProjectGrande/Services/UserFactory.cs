@@ -11,19 +11,8 @@ public class UserFactory(IUserVerifier userVerifier) : IUserFactory
         {
             Id = Guid.NewGuid(), Name = newUser.Name, UserName = newUser.UserName, Email = newUser.Email,
             Password = password,
-            DoB = newUser.DoB, Salt = salt, SessionToken = Guid.NewGuid()
+            DoB = newUser.DoB, Salt = salt
         };
-        var question = new Question { Answers = [], Content = "test question", User = user };
-        var answer = new Answer
-        {
-            Id = Guid.NewGuid(), Question = question, Content = "test answer", User = user
-        };
-        question.Answers.Add(answer);
-        user.Questions = [question];
-        user.Answers =
-        [
-            answer
-        ];
         return user;
     }
 
@@ -37,9 +26,8 @@ public class UserFactory(IUserVerifier userVerifier) : IUserFactory
             answers = user.Answers.Select(answer => new AnswerDTO
             {
                 Content = answer.Content,
-                Id = answer.Id,
-                QuestionId = answer.Question.Id,
                 Username = user.UserName,
+                PostedAt = answer.PostedAt
             }).ToList();
         }
 
@@ -48,8 +36,10 @@ public class UserFactory(IUserVerifier userVerifier) : IUserFactory
             questions = user.Questions.Select(question => new QuestionDTO
             {
                 Content = question.Content,
-                Id = question.Id,
+                PostedAt = question.PostedAt,
                 Username = user.UserName,
+                Title = question.Title,
+                Id = question.Id
             }).ToList();
         }
 

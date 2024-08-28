@@ -15,7 +15,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigins", innerBuilder =>
     {
         innerBuilder
-            .WithOrigins("http://localhost:5173") // Specify the allowed origin for your frontend
+            .WithOrigins("http://localhost:5173")
+
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
@@ -26,6 +27,7 @@ builder.Services.AddSingleton<IUserFactory, UserFactory>();
 builder.Services.AddSingleton<IUserVerifier, UserVerifier>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddSingleton<IQuestionFactory, QuestionFactory>();
 
 var app = builder.Build();
 

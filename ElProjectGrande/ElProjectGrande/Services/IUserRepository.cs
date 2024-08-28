@@ -8,9 +8,17 @@ public interface IUserRepository
 
     public ValueTask<User?> GetUserById(Guid id);
 
+    public ValueTask<User?> GetUserByEmail(string email);
+
+    public Task<bool> AreCredentialsTaken(string email, string username);
+
     public Guid GetNewSessionToken();
+
+    public Guid LoginUser(User user);
 
     public bool IsUserLoggedIn(Guid sessionToken);
 
     public void LogoutUser(Guid sessionToken);
+
+    public ValueTask<User?> GetUserBySessionToken(Guid sessionToken);
 }
