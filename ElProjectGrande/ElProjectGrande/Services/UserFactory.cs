@@ -38,7 +38,8 @@ public class UserFactory(IUserVerifier userVerifier) : IUserFactory
                 Content = question.Content,
                 PostedAt = question.PostedAt,
                 Username = user.UserName,
-                Title = question.Title
+                Title = question.Title,
+                Id = question.Id
             }).ToList();
         }
 
