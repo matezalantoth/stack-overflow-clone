@@ -35,11 +35,29 @@ public class ApiDbContext : DbContext
 
             entity.HasIndex(u => u.Id).IsUnique();
 
-            entity.Property(u => u.Name).IsRequired().HasMaxLength(100);
-            entity.Property(u => u.Email).IsRequired().HasMaxLength(100);
-            entity.Property(u => u.Password).IsRequired();
-            entity.Property(u => u.Salt).IsRequired();
-            entity.Property(u => u.DoB).IsRequired();
+            entity.Property(u => u.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(u => u.UserName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(u => u.Email)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(u => u.Password)
+                .IsRequired();
+
+            entity.Property(u => u.Salt)
+                .IsRequired();
+
+            entity.Property(u => u.DoB)
+                .IsRequired();
+
+            entity.Property(u => u.SessionToken)
+                .IsRequired();
 
             entity.HasMany(u => u.Questions)
                 .WithOne(q => q.User)
@@ -56,9 +74,18 @@ public class ApiDbContext : DbContext
         {
             entity.HasKey(q => q.Id);
 
-            entity.HasIndex(q => q.Id);
+            entity.HasIndex(q => q.Id).IsUnique();
 
-            entity.Property(q => q.Content).IsRequired().HasMaxLength(500);
+            entity.Property(q => q.Title)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(q => q.Content)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            entity.Property(q => q.PostedAt)
+                .IsRequired();
 
             entity.HasOne(q => q.User)
                 .WithMany(u => u.Questions)
@@ -74,9 +101,14 @@ public class ApiDbContext : DbContext
         {
             entity.HasKey(a => a.Id);
 
-            entity.HasIndex(a => a.Id);
+            entity.HasIndex(a => a.Id).IsUnique();
 
-            entity.Property(a => a.Content).IsRequired().HasMaxLength(500);
+            entity.Property(a => a.Content)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            entity.Property(a => a.PostedAt)
+                .IsRequired();
 
             entity.HasOne(a => a.User)
                 .WithMany(u => u.Answers)

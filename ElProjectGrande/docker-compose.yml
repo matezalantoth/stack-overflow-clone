@@ -13,13 +13,15 @@
 
   db-setup-migrate:
     image: mcr.microsoft.com/dotnet/sdk:8.0
-    command: sh -c "dotnet tool install --global dotnet-ef && export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet ef database update --project /app/ElProjectGrande/ElProjectGrande.csproj"
+    command: sh -c "cat /app/ElProjectGrande/ElProjectGrande.csproj && dotnet tool install --global dotnet-ef && /root/.dotnet/tools/dotnet-ef database update --project /app/ElProjectGrande/ElProjectGrande.csproj"
     depends_on:
       - el-project-grande-db
     volumes:
       - .:/app
+    env_file:
+      - ./ElProjectGrande/.env
     environment:
-      - ConnectionStrings__MySql=Server=${DOCKER_SERVER_NAME};Database=${DB_NAME};User=${DB_USERNAME};Password=${DB_USER_PASSWORD};Port=${DB_PORT};
+      - ConnectionStrings__MySql=Server=el-project-grande-db;Database=el-project-grande-db;User=root;Password=admin;Port=3306;
 
 
   el-project-grande-backend:
@@ -31,5 +33,7 @@
       - db-setup-migrate
     ports:
       - "8080:8080"
+    env_file:
+      - ./ElProjectGrande/.env
     environment:
-      - ConnectionStrings__MySql=Server=${DOCKER_SERVER_NAME};Database=${DB_NAME};User=${DB_USERNAME};Password=${DB_USER_PASSWORD};Port=${DB_PORT};
+      - ConnectionStrings__MySql=Server=el-project-grande-db;Database=el-project-grande-db;User=root;Password=admin;Port=3306;

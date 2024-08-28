@@ -20,4 +20,58 @@ public class UserRepository(ApiDbContext context) : IUserRepository
             .Include(u => u.Answers)
             .FirstOrDefaultAsync(u => u.Id == id);
     }
+
+    public async ValueTask<User?> GetUserByEmail(string email)
+    {
+        return await context.Users
+            .Include(u => u.Questions)
+            .Include(u => u.Answers)
+            .FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public Task<bool> AreCredentialsTaken(string email, string username)
+    {
+        return context.Users.AnyAsync(u => u.Email == email || u.UserName == username);
+    }
+
+    public Guid GetNewSessionToken()
+    {
+        return Guid.NewGuid();
+    }
+
+    public Guid LoginUser(User user)
+    {
+        user.SessionToken = GetNewSessionToken();
+        context.SaveChanges();
+        return user.SessionToken;
+    }
+
+    public bool IsUserLoggedIn(Guid sessionToken)
+    {
+        return context.Users.FirstOrDefault(u => u.SessionToken == sessionToken) != null;
+    }
+
+    public void LogoutUser(Guid sessionToken)
+    {
+        var user = context.Users.FirstOrDefault(u => u.SessionToken == sessionToken);
+        if (user == null)
+        {
+            throw new ArgumentException("This session token could not be found");
+        }
+
+        user.SessionToken = Guid.Empty;
+        context.Users.Update(user);
+        context.SaveChanges();
+    }
+
+    public ValueTask<User?> GetUserBySessionToken(Guid sessionToken)
+    {
+        var partialUser = context.Users.FirstOrDefault(u => u.SessionToken == sessionToken);
+        if (partialUser == null)
+        {
+            throw new ArgumentException("This session token is invalid");
+        }
+
+        return GetUserById(partialUser.Id);
+    }
 }
