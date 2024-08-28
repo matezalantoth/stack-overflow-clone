@@ -42,4 +42,55 @@ public class QuestionController(
             return NotFound(e.Message);
         }
     }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteQuestion([FromHeader(Name = "Authorization")] Guid sessionToken, Guid id)
+    {
+        try
+        {
+            var question = questionRepository.GetQuestionById(id);
+            if (question == null)
+            {
+                throw new ArgumentException($"Question of id {id} could not be found!");
+            }
+
+            if (question.User.SessionToken != sessionToken)
+            {
+                return Unauthorized("You do not have permission to delete this question");
+            }
+
+            questionRepository.DeleteQuestion(question, question.User);
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            return NotFound(e.Message);
+        }
+    }
+
+    [HttpPut("{id}")]
+    public ActionResult<QuestionDTO> UpdateQuestion([FromHeader(Name = "Authorization")] Guid sessionToken,
+        [FromBody] UpdatedQuestion updatedQuestion, Guid id)
+    {
+        try
+        {
+            var question = questionRepository.GetQuestionById(id);
+            if (question == null)
+            {
+                throw new ArgumentException($"Question of id {id} could not be found!");
+            }
+
+            if (question.User.SessionToken != sessionToken)
+            {
+                return Unauthorized("You do not have permission to update this question");
+            }
+
+            var updated = questionFactory.CreateNewUpdatedQuestionFromUpdatesAndOriginal(updatedQuestion, question);
+            return Ok(questionRepository.UpdateQuestion(updated));
+        }
+        catch (Exception e)
+        {
+            return NotFound(e.Message);
+        }
+    }
 }

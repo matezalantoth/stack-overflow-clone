@@ -12,4 +12,11 @@ public class QuestionFactory : IQuestionFactory
             UserId = user.Id, PostedAt = newQuestion.PostedAt, Answers = []
         };
     }
+
+    public Question CreateNewUpdatedQuestionFromUpdatesAndOriginal(UpdatedQuestion updatedQuestion, Question question)
+    {
+        question.Title = updatedQuestion.Title;
+        question.Content = updatedQuestion.Content;
+        return question;
+    }
 }
