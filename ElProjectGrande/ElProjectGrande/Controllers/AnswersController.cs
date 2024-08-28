@@ -6,14 +6,24 @@ namespace ElProjectGrande.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AnswersController(IAnswerRepository answerRepository) : ControllerBase
+public class AnswersController(
+    IAnswerRepository answerRepository,
+    IUserRepository userRepository,
+    IQuestionRepository questionRepository,
+    IAnswerFactory answerFactory) : ControllerBase
 {
     [HttpGet]
-    public ActionResult<IEnumerable<AnswerDTO>> GetAllAnswersForQuestion(Guid id)
+    public async Task<ActionResult<IEnumerable<AnswerDTO>>> GetAllAnswersForQuestion(Guid questionId)
     {
         try
         {
-            return Ok(answerRepository.GetAllAnswersFromQuestion(id));
+            var question = await questionRepository.GetQuestionById(questionId);
+            if (question == null)
+            {
+                throw new ArgumentException($"Question of id {questionId} could not be found");
+            }
+
+            return Ok(answerRepository.GetAllAnswersFromQuestion(question));
         }
         catch (Exception e)
         {
@@ -21,10 +31,81 @@ public class AnswersController(IAnswerRepository answerRepository) : ControllerB
         }
     }
 
-    // [HttpPost]
-    // public ActionResult<AnswerDTO> PostNewAnswerToQuestion([FromHeader(Name = "Authorization")] Guid sessionToken,
-    //     Guid questionId)
-    // {
-    //
-    // }
+    [HttpPost]
+    public async Task<ActionResult<AnswerDTO>> PostNewAnswerToQuestion(
+        [FromHeader(Name = "Authorization")] Guid sessionToken,
+        Guid questionId, [FromBody] NewAnswer newAnswer)
+    {
+        try
+        {
+            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var question = await questionRepository.GetQuestionById(questionId);
+            if (user == null || question == null)
+            {
+                return NotFound("This user or question could not be found");
+            }
+
+            var answer = answerFactory.CreateAnswer(newAnswer, question, user);
+            return Ok(await answerRepository.CreateAnswer(answer, user, question));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500);
+        }
+    }
+
+    [HttpDelete("{answerId}")]
+    public async Task<ActionResult> DeleteAnswer([FromHeader(Name = "Authorization")] Guid sessionToken, Guid answerId)
+    {
+        try
+        {
+            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var answer = await answerRepository.GetAnswerById(answerId);
+            if (user == null || answer == null)
+            {
+                return NotFound("This answer or user could not be found!");
+            }
+
+            if (user.Id != answer.UserId)
+            {
+                return Forbid();
+            }
+
+            answerRepository.DeleteAnswer(answer, user);
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500);
+        }
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<AnswerDTO>> UpdateAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+        Guid id, [FromBody] string newContent)
+    {
+        try
+        {
+            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var answer = await answerRepository.GetAnswerById(id);
+            if (user == null || answer == null)
+            {
+                return NotFound("This user or answer could not be found");
+            }
+
+            if (user.Id != answer.UserId)
+            {
+                return Forbid();
+            }
+
+            var newAnswer = answerFactory.UpdateAnswer(newContent, answer);
+            return Ok(await answerRepository.UpdateAnswer(newAnswer));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500);
+        }
+    }
 }
