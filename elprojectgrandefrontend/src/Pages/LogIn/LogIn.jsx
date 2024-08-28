@@ -20,7 +20,7 @@ export const LoginPage = (props) => {
 
 
     const handleLogin = async () => {
-        const response = await fetch('/api/User/Login', {
+        const response = await fetch('/api/Users/login', {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
