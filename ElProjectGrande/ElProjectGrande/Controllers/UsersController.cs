@@ -75,7 +75,7 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     }
 
     [HttpGet]
-    public async Task<ActionResult<User>> GetUser(Guid userId)
+    public async Task<ActionResult<UserDTO>> GetUser(Guid userId)
     {
         var user = await userRepository.GetUserById(userId);
         if (user == null)
