@@ -27,7 +27,7 @@ export const SignupPage = (props) => {
     console.log(submittable);
 
     const handleSignup = async () => {
-        const response = await fetch('http://localhost:5166/User', {
+        const response = await fetch('/api/User/signup', {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
