@@ -14,7 +14,10 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
 
     public Question? GetQuestionById(Guid id)
     {
-        return context.Questions.Include(q => q.User).FirstOrDefault(q => q.Id == id);
+        return context.Questions
+            .Include(q => q.User)
+            .Include(q => q.Answers)
+            .FirstOrDefault(q => q.Id == id);
     }
 
     public QuestionDTO CreateQuestion(Question question)

@@ -6,7 +6,7 @@ namespace ElProjectGrande.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class QuestionController(
+public class QuestionsController(
     IQuestionRepository questionRepository,
     IUserRepository userRepository,
     IQuestionFactory questionFactory) : ControllerBase
