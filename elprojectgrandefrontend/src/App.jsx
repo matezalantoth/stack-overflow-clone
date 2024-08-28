@@ -22,7 +22,7 @@ export default function App()
         <StrictMode>
             <CookiesProvider>
                 <BrowserRouter>
-                    <Navbar cookies={cookies}/>
+                    <Navbar cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>
                     <Routes>
                         <Route path="/" element={<WelcomePage cookies={cookies}/>} />
                         <Route path="/signup" element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
