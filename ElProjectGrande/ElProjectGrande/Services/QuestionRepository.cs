@@ -12,12 +12,12 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
             { Content = q.Content, Username = q.User.UserName, Title = q.Title, PostedAt = q.PostedAt, Id = q.Id });
     }
 
-    public Question? GetQuestionById(Guid id)
+    public Task<Question?> GetQuestionById(Guid id)
     {
         return context.Questions
             .Include(q => q.User)
             .Include(q => q.Answers)
-            .FirstOrDefault(q => q.Id == id);
+            .FirstOrDefaultAsync(q => q.Id == id);
     }
 
     public QuestionDTO CreateQuestion(Question question)
