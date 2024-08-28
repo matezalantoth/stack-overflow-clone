@@ -12,4 +12,10 @@ public class AnswerFactory : IAnswerFactory
             UserId = user.Id, Question = question, QuestionId = question.Id
         };
     }
+
+    public Answer UpdateAnswer(string newContent, Answer answer)
+    {
+        answer.Content = newContent;
+        return answer;
+    }
 }
