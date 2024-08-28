@@ -4,25 +4,33 @@ import {faSearch} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 export default function Navbar (props) {
-    const {cookies} = props;
+    const {cookies, setUserLoginCookies} = props;
     const navigate = useNavigate();
     const location = useLocation();
     const [question, setQuestion] = useState(null);
     console.log(cookies.user);
 
-    /*useEffect(() => {
-        const fetchQuestion = async () => {
-            const response = await fetch(`htt5166p://localhost:/Question/${id}`);
-            const data = await response.json();
-            setQuestion(data);
-        }
 
-        fetchQuestion();
+    useEffect(() => {
+        navigate('/login');
+    }, [cookies]);
 
-    }, [])
-        */
 
-    return (<div className='inline-flex w-full'>
+
+   const handleLogout = async () => {
+   const response = await fetch("api/users/logout", {
+       method: 'POST',
+       headers: {
+           'Authorization': cookies.user
+       }
+   })
+       setUserLoginCookies(null);
+
+   }
+
+
+
+    return (<div className='inline-flex w-full justify-between'>
 
         <button className='ml-2 mt-2 border-2 border-blue-600 h-10 text-white px-2 w-20 bg-blue-600 rounded text-sm'
                 onClick={() => {
@@ -45,6 +53,13 @@ export default function Navbar (props) {
             </div>}
         {location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/profile' ? <></> :
             <>
+            {!cookies.user && (<button
+                    className='mr-2 mt-2 border-2 border-black h-10 text-black-700 w-20 px-2 rounded text-sm hover:underline'
+                    onClick={() => {
+                        navigate('/signup');
+                    }}>
+                    Sign up
+                </button>)}
                 <button
                     className='mr-2 mt-2 border-2 border-blue-600 h-10 text-blue-600 w-20 px-2 rounded text-sm'
                     onClick={() => {
@@ -53,6 +68,13 @@ export default function Navbar (props) {
                 </button>
             </>
         }
+        {cookies.user && (<button
+            className='mr-2 mt-2 border-2 border-red-600 h-10 text-red-700 w-20 px-2 rounded text-sm hover:underline '
+            onClick={() => {
+                handleLogout();
+            }}>
+            Logout
+        </button>)}
 
     </div>)
 }

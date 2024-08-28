@@ -8,7 +8,7 @@ export default function Questions() {
     useEffect(() => {
         const fetchQuestions = async () => {
              try{
-                const res = await fetch("/api/Question",
+                const res = await fetch("/api/Questions",
                     {
                         headers : {
                             'Content-Type': 'application/json',
