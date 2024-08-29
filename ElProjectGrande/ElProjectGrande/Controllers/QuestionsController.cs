@@ -1,3 +1,4 @@
+using ElProjectGrande.Extensions;
 using ElProjectGrande.Models;
 using ElProjectGrande.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,26 @@ public class QuestionsController(
     public IEnumerable<QuestionDTO> GetQuestions()
     {
         return questionRepository.GetQuestions();
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<QuestionDTO>> GetQuestionById(Guid id)
+    {
+        try
+        {
+            var question = await questionRepository.GetQuestionById(id);
+            if (question == null)
+            {
+                throw new ArgumentException();
+            }
+
+            return Ok(question.ToDTO());
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return NotFound("This question could not be found");
+        }
     }
 
     [HttpPost]

@@ -43,4 +43,11 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
         await dbContext.SaveChangesAsync();
         return answer.ToDTO();
     }
+
+    public async Task<AnswerDTO> AcceptAnswer(Answer answer)
+    {
+        answer.Accepted = true;
+        await dbContext.SaveChangesAsync();
+        return answer.ToDTO();
+    }
 }

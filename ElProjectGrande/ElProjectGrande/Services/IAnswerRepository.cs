@@ -13,4 +13,6 @@ public interface IAnswerRepository
     public void DeleteAnswer(Answer answer, User user);
 
     public Task<AnswerDTO> UpdateAnswer(Answer answer);
+
+    public Task<AnswerDTO> AcceptAnswer(Answer answer);
 }
