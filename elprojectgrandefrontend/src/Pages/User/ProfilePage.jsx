@@ -36,11 +36,11 @@ export default function ProfilePage ({cookies, setUserLoginCookies})
 
     return user ?  (
             <div className="Users">
-
+                
                 <div className="user">
-                    <p>{user.name}</p>
-                    <p>{user.email}</p>
-                    <p>{user.userName}</p>
+                    <p> Name: {user.name}</p>
+                    <p> Email: {user.email}</p>
+                    <p> UserName: {user.userName}</p>
                 </div>
 
                 <div>
@@ -54,5 +54,6 @@ export default function ProfilePage ({cookies, setUserLoginCookies})
         ) :
         <div>
             loading
+            
         </div>
 }
