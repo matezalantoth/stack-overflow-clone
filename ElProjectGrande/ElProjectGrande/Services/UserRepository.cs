@@ -64,9 +64,9 @@ public class UserRepository(ApiDbContext context) : IUserRepository
         context.SaveChanges();
     }
 
-    public Task<User?> GetUserBySessionToken(Guid sessionToken)
+    public async ValueTask<User?> GetUserBySessionToken(Guid sessionToken)
     {
-        return context.Users
+        return await context.Users
             .Include(u => u.Questions)
             .Include(u => u.Answers)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);

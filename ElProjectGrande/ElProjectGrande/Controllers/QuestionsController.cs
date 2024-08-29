@@ -34,8 +34,9 @@ public class QuestionsController(
                 throw new Exception("User could not be found");
             }
 
+            Console.WriteLine(user.UserName);
             var question = questionFactory.CreateQuestion(newQuestion, user);
-            return Ok(questionRepository.CreateQuestion(question));
+            return Ok(questionRepository.CreateQuestion(question, user));
         }
         catch (Exception e)
         {
