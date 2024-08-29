@@ -30,7 +30,7 @@ export default function App()
                         <Route path="/signup" element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/login" element={<LoginPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/profile" element={<ProfilePage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
-                        <Route path='question/:id' element={<QuestionPage cookies={cookies}/>}/>
+                        <Route path='question/:questionId' element={<QuestionPage cookies={cookies}/>}/>
                     </Routes>
                     <Toaster/>
 

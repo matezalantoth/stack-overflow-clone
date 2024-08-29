@@ -1,19 +1,23 @@
 import {useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 
-export default function QuestionPage ()
+export default function QuestionPage ({cookies})
 {
     
-const useParams = useParams()
+    const { questionId} = useParams();
     
     const[questionData, setQuestionData] = useState(null)
     
     
         useEffect(() =>{
-            const fetchQuestions = async () => {
+            const fetchQuestion = async () => {
                try {
                    
-                   const res = fetch('http://localhost:5212/Questions')
+                   const res = await fetch('/api/Questions/'+ questionId, {
+                       headers: {
+                           'Authorization': cookies.user
+                       }
+                   })
                    console.log(res)
                    const data = await res.json()
                    setQuestionData(data)
@@ -21,18 +25,18 @@ const useParams = useParams()
                    console.log(error)
                }
             }
-            fetchQuestions();
+            fetchQuestion();
         }, [])
+        console.log(questionData)
         
-        
-        return (
+        return questionData ? (
             
-            <div className="Question-Holder">
-                {questionData.map(question => (
-                    <p>{question.content}</p>
-                ))}
+            
+            <div id="Question-Holder">
+                {questionData.content}
             </div>
-        )
+        ):
+            <></>
         
         
         
