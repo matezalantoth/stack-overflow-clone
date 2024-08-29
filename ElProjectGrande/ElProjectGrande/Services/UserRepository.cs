@@ -64,14 +64,11 @@ public class UserRepository(ApiDbContext context) : IUserRepository
         context.SaveChanges();
     }
 
-    public ValueTask<User?> GetUserBySessionToken(Guid sessionToken)
+    public Task<User?> GetUserBySessionToken(Guid sessionToken)
     {
-        var partialUser = context.Users.FirstOrDefault(u => u.SessionToken == sessionToken);
-        if (partialUser == null)
-        {
-            throw new ArgumentException("This session token is invalid");
-        }
-
-        return GetUserById(partialUser.Id);
+        return context.Users
+            .Include(u => u.Questions)
+            .Include(u => u.Answers)
+            .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 }

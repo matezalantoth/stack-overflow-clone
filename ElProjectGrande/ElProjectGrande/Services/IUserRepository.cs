@@ -20,5 +20,5 @@ public interface IUserRepository
 
     public void LogoutUser(Guid sessionToken);
 
-    public ValueTask<User?> GetUserBySessionToken(Guid sessionToken);
+    public Task<User?> GetUserBySessionToken(Guid sessionToken);
 }
