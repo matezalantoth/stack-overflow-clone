@@ -29,7 +29,7 @@ export const SignupPage = (props) => {
     console.log(submittable);
 
     const handleSignup = async () => {
-        const response = await fetch('/api/User/signup', {
+        const response = await fetch('/api/Users/signup', {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',

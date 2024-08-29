@@ -8,7 +8,7 @@ public interface IQuestionRepository
 
     public Task<Question?> GetQuestionById(Guid id);
 
-    public QuestionDTO CreateQuestion(Question question);
+    public QuestionDTO CreateQuestion(Question question, User user);
 
     public void DeleteQuestion(Question question, User user);
 

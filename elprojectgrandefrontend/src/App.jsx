@@ -3,6 +3,7 @@ import './style.css'
 import {BrowserRouter, Routes, Route} from "react-router-dom"
 import {CookiesProvider, useCookies} from 'react-cookie';
 import {SignupPage} from "./Pages/SingUp/SignUpPage.jsx";
+import ProfilePage from "./Pages/User/ProfilePage.jsx";
 
 
 import WelcomePage from './Pages/Welcome/WelcomePage'
@@ -22,11 +23,12 @@ export default function App()
         <StrictMode>
             <CookiesProvider>
                 <BrowserRouter>
-                    <Navbar cookies={cookies}/>
+                    <Navbar cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>
                     <Routes>
                         <Route path="/" element={<WelcomePage cookies={cookies}/>} />
                         <Route path="/signup" element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/login" element={<LoginPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path="/profile" element={<ProfilePage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                     </Routes>
                     <Toaster/>
 

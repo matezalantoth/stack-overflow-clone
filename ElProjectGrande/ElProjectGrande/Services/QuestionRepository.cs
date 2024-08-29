@@ -20,14 +20,8 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
             .FirstOrDefaultAsync(q => q.Id == id);
     }
 
-    public QuestionDTO CreateQuestion(Question question)
+    public QuestionDTO CreateQuestion(Question question, User user)
     {
-        var user = context.Users.FirstOrDefault(u => u.Id == question.UserId);
-        if (user == null)
-        {
-            throw new ArgumentException("User not found!");
-        }
-
         user.Questions.Add(question);
         context.Questions.Add(question);
         context.SaveChanges();
