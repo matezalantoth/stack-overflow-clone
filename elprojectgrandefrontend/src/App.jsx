@@ -10,6 +10,7 @@ import WelcomePage from './Pages/Welcome/WelcomePage'
 import Navbar from './components/navbar/Navbar'
 import {Toaster} from "react-hot-toast";
 import {LoginPage} from "./Pages/LogIn/LogIn.jsx";
+import QuestionPage from "./Pages/QuestionPage.jsx";
 
 export default function App() 
 {
@@ -29,6 +30,7 @@ export default function App()
                         <Route path="/signup" element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/login" element={<LoginPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/profile" element={<ProfilePage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path='question/:id' element={<QuestionPage cookies={cookies}/>}/>
                     </Routes>
                     <Toaster/>
 
