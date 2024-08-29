@@ -8,8 +8,9 @@ public static class AnswerExtensions
     {
         return new AnswerDTO
         {
+            Id = answer.Id,
             Content = answer.Content, PostedAt = answer.PostedAt, Username = answer.User.UserName,
-            Question = answer.Question.ToDTO()
+            Question = answer.Question.ToDTO(), Accepted = answer.Accepted
         };
     }
 }

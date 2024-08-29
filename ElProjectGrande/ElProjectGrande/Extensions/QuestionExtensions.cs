@@ -9,7 +9,7 @@ public static class QuestionExtensions
         return new QuestionDTO
         {
             Title = question.Title, Username = question.User.UserName, PostedAt = question.PostedAt, Id = question.Id,
-            Content = question.Content
+            Content = question.Content, HasAccepted = question.HasAccepted()
         };
     }
 }
