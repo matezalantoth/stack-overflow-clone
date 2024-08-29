@@ -108,4 +108,36 @@ public class AnswersController(
             return StatusCode(500);
         }
     }
+
+    [HttpPost("/accept/{answerId}")]
+    public async Task<ActionResult<AnswerDTO>> AcceptAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+        Guid answerId)
+    {
+        try
+        {
+            var answer = await answerRepository.GetAnswerById(answerId);
+            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            if (answer == null || user == null)
+            {
+                return NotFound("this answer or user could not be found");
+            }
+
+            if (answer.Question.UserId != user.Id)
+            {
+                return Forbid();
+            }
+
+            if (answer.Question.HasAccepted())
+            {
+                return BadRequest("This question already has an accepted answer");
+            }
+
+            return Ok(await answerRepository.AcceptAnswer(answer));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
 }

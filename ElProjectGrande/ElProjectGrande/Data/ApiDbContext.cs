@@ -110,6 +110,9 @@ public class ApiDbContext : DbContext
             entity.Property(a => a.PostedAt)
                 .IsRequired();
 
+            entity.Property(a => a.Accepted)
+                .IsRequired();
+
             entity.HasOne(a => a.User)
                 .WithMany(u => u.Answers)
                 .HasForeignKey(a => a.UserId);
