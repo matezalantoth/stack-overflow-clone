@@ -2,9 +2,10 @@ import {useEffect, useState} from "react";
 import QuestionsElement from "./QuestionsElement.jsx";
 import Questions from "../../components/questions/Questions.jsx";
 import AnswersElement from "./AnswersElement.jsx";
+import {Cookies} from "react-cookie";
 
 
-export default function ProfilePage ()
+export default function ProfilePage ({cookies, setUserLoginCookies})
 {
     const [user, setUser] = useState(null)
     const[selectedTab, setSelectedTab] = useState(null)
@@ -13,14 +14,14 @@ export default function ProfilePage ()
     useEffect(() => {
         const fetchUsers = async () => {
             try{
-                const res = await fetch(`https://localhost:7223/Users?userId=497836d3-5d7f-4ccb-9ca1-7f8383785022`,
+                const res = await fetch(`https://localhost:7223/Users`,
                     {
                         headers : {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
+                            'Authorization': cookies.user
                         }
 
                     });
+                console.log(res)
                 const data = await res.json();
                 setUser(data);
             } catch (error){
@@ -37,9 +38,11 @@ export default function ProfilePage ()
             <div className="Users">
 
                 <div className="user">
+                    <p>{user.name}</p>
+                    <p>{user.email}</p>
                     <p>{user.userName}</p>
                 </div>
-                
+
                 <div>
                     <span  onClick={() => {setSelectedTab('answer')}}>Answers</span> || <span onClick={() => {setSelectedTab('question')}}>Questions</span>
                 </div>
