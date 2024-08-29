@@ -7,4 +7,6 @@ public class QuestionDTO
     public string Username { get; set; }
     public string Title { get; set; }
     public DateTime PostedAt { get; set; }
+
+    public bool HasAccepted { get; set; }
 }

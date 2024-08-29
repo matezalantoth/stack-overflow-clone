@@ -1,4 +1,5 @@
 using ElProjectGrande.Data;
+using ElProjectGrande.Extensions;
 using ElProjectGrande.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,8 +9,10 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
 {
     public IEnumerable<QuestionDTO> GetQuestions()
     {
-        return context.Questions.Select(q => new QuestionDTO
-            { Content = q.Content, Username = q.User.UserName, Title = q.Title, PostedAt = q.PostedAt, Id = q.Id });
+        return context.Questions
+            .Include(q => q.Answers)
+            .Include(q => q.User)
+            .Select(q => q.ToDTO());
     }
 
     public Task<Question?> GetQuestionById(Guid id)
@@ -20,14 +23,8 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
             .FirstOrDefaultAsync(q => q.Id == id);
     }
 
-    public QuestionDTO CreateQuestion(Question question)
+    public QuestionDTO CreateQuestion(Question question, User user)
     {
-        var user = context.Users.FirstOrDefault(u => u.Id == question.UserId);
-        if (user == null)
-        {
-            throw new ArgumentException("User not found!");
-        }
-
         user.Questions.Add(question);
         context.Questions.Add(question);
         context.SaveChanges();
