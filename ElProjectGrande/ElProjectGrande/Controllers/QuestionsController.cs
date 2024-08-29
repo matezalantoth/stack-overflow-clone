@@ -1,3 +1,4 @@
+using ElProjectGrande.Extensions;
 using ElProjectGrande.Models;
 using ElProjectGrande.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,26 @@ public class QuestionsController(
         return questionRepository.GetQuestions();
     }
 
+    [HttpGet("{id}")]
+    public async Task<ActionResult<QuestionDTO>> GetQuestionById(Guid id)
+    {
+        try
+        {
+            var question = await questionRepository.GetQuestionById(id);
+            if (question == null)
+            {
+                throw new ArgumentException();
+            }
+
+            return Ok(question.ToDTO());
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return NotFound("This question could not be found");
+        }
+    }
+
     [HttpPost]
     public async Task<ActionResult<QuestionDTO>> PostQuestion([FromBody] NewQuestion newQuestion,
         [FromHeader(Name = "Authorization")] Guid sessionToken)
@@ -34,8 +55,9 @@ public class QuestionsController(
                 throw new Exception("User could not be found");
             }
 
+            Console.WriteLine(user.UserName);
             var question = questionFactory.CreateQuestion(newQuestion, user);
-            return Ok(questionRepository.CreateQuestion(question));
+            return Ok(questionRepository.CreateQuestion(question, user));
         }
         catch (Exception e)
         {
