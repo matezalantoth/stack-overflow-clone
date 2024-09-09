@@ -12,7 +12,7 @@ public class UserFactory(IUserVerifier userVerifier) : IUserFactory
         {
             Id = Guid.NewGuid(), Name = newUser.Name, UserName = newUser.UserName, Email = newUser.Email,
             Password = password,
-            DoB = newUser.DoB, Salt = salt
+            DoB = newUser.DoB, Salt = salt, Karma = 0
         };
         return user;
     }
