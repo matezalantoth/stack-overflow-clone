@@ -68,6 +68,9 @@ public class ApiDbContext : DbContext
                 .WithOne(a => a.User)
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(u => u.Karma)
+                .IsRequired();
         });
 
         modelBuilder.Entity<Question>(entity =>

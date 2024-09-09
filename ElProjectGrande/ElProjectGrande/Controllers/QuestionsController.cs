@@ -55,6 +55,9 @@ public class QuestionsController(
                 throw new Exception("User could not be found");
             }
 
+            var karma = 5;
+            userRepository.UpdateKarma(user, karma);
+            
             Console.WriteLine(user.UserName);
             var question = questionFactory.CreateQuestion(newQuestion, user);
             return Ok(questionRepository.CreateQuestion(question, user));
