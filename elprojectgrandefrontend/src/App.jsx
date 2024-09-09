@@ -20,7 +20,6 @@ export default function App()
 {
     const[cookies, setCookies] = useCookies(['user'])
     
-    
     function setUserLoginCookies(user) {
         setCookies('user', user, {path: '/'})
     }
