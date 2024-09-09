@@ -1,14 +1,16 @@
 import {useEffect, useState} from "react";
 import QuestionsElement from "./QuestionsElement.jsx";
-import Questions from "../../components/questions/Questions.jsx";
 import AnswersElement from "./AnswersElement.jsx";
-import {Cookies} from "react-cookie";
+import {useCookies} from 'react-cookie';
+import {useNavigate} from 'react-router-dom';
 
 
-export default function ProfilePage ({cookies, setUserLoginCookies})
+export default function ProfilePage ()
 {
     const [user, setUser] = useState(null)
     const[selectedTab, setSelectedTab] = useState(null)
+    const navigate = useNavigate();
+    const[cookies] = useCookies(['user'])
 
 
     useEffect(() => {
@@ -21,7 +23,6 @@ export default function ProfilePage ({cookies, setUserLoginCookies})
                         }
 
                     });
-                console.log(res)
                 const data = await res.json();
                 setUser(data);
             } catch (error){
@@ -30,17 +31,20 @@ export default function ProfilePage ({cookies, setUserLoginCookies})
         };
         fetchUsers();
     }, []);
-    
-    console.log(user)
-    // console.log(user.username)
+
+    useEffect(() => {
+        if(!cookies.user){
+            navigate('/login')
+        }
+    }, [])
 
     return user ?  (
             <div className="Users">
-
+                
                 <div className="user">
-                    <p>{user.name}</p>
-                    <p>{user.email}</p>
-                    <p>{user.userName}</p>
+                    <p> Name: {user.name}</p>
+                    <p> Email: {user.email}</p>
+                    <p> UserName: {user.userName}</p>
                 </div>
 
                 <div>
@@ -54,5 +58,6 @@ export default function ProfilePage ({cookies, setUserLoginCookies})
         ) :
         <div>
             loading
+            
         </div>
 }

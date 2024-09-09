@@ -21,7 +21,7 @@
     env_file:
       - ./ElProjectGrande/.env
     environment:
-      - ConnectionStrings__MySql=Server=el-project-grande-db;Database=el-project-grande-db;User=root;Password=admin;Port=3306;
+      - ConnectionStrings__MySql=Server=${DOCKER_SERVER_NAME};Database=${DB_NAME};User=${DB_USERNAME};Password=${DB_USER_PASSWORD};Port=${DB_PORT};
 
 
   el-project-grande-backend:
@@ -36,4 +36,4 @@
     env_file:
       - ./ElProjectGrande/.env
     environment:
-      - ConnectionStrings__MySql=Server=el-project-grande-db;Database=el-project-grande-db;User=root;Password=admin;Port=3306;
+      - ConnectionStrings__MySql=Server=${DOCKER_SERVER_NAME};Database=${DB_NAME};User=${DB_USERNAME};Password=${DB_USER_PASSWORD};Port=${DB_PORT};

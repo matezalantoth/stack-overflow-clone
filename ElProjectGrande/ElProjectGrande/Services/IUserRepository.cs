@@ -21,4 +21,6 @@ public interface IUserRepository
     public void LogoutUser(Guid sessionToken);
 
     public ValueTask<User?> GetUserBySessionToken(Guid sessionToken);
+    
+    public void UpdateKarma(User user, int karma);
 }

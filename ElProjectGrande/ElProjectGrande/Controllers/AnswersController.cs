@@ -46,6 +46,10 @@ public class AnswersController(
             }
 
             var answer = answerFactory.CreateAnswer(newAnswer, question, user);
+            
+            var karma = 5;
+            userRepository.UpdateKarma(user, karma);
+            
             return Ok(await answerRepository.CreateAnswer(answer, user, question));
         }
         catch (Exception e)
@@ -131,6 +135,10 @@ public class AnswersController(
             {
                 return BadRequest("This question already has an accepted answer");
             }
+            
+            var answerUser = answer.User;
+            var karma = 20;
+            userRepository.UpdateKarma(answerUser, karma);
 
             return Ok(await answerRepository.AcceptAnswer(answer));
         }
