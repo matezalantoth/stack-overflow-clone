@@ -16,7 +16,7 @@ export default function ProfilePage ()
     useEffect(() => {
         const fetchUsers = async () => {
             try{
-                const res = await fetch(`https://localhost:7223/Users`,
+                const res = await fetch(`/api/Users`,
                     {
                         headers : {
                             'Authorization': cookies.user
@@ -33,10 +33,11 @@ export default function ProfilePage ()
     }, []);
 
     useEffect(() => {
-        if(!cookies.user){
-            navigate('/login')
-        }
-    }, [])
+            if(!cookies.user){
+                navigate('/login')
+            }
+
+    }, [cookies])
 
     return user ?  (
             <div className="Users">
