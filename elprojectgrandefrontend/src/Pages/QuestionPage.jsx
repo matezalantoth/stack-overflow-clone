@@ -43,7 +43,7 @@ export default function QuestionPage() {
 
     const postAnswer = async () => {
         try {
-            const res = await fetch('http://localhost:5212/Answers?questionId=' + questionId, {
+            const res = await fetch('/api/Answers?questionId=' + questionId, {
                 method: "POST",
                 headers: {
                     'Authorization': cookies.user,

@@ -86,4 +86,16 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
 
         return Ok(user.ToDTO());
     }
+
+    [HttpGet("/getUserByUserName")]
+    public async Task<ActionResult<UserDTO>> GetUserByUserName(string userName)
+    {
+        var user = await userRepository.GetUserByUserName(userName);
+        if (user == null)
+        {
+            throw new ArgumentException($"User of username: {userName} could not be found");
+        }
+
+        return Ok(user.ToDTO());
+    }
 }

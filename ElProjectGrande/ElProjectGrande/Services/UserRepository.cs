@@ -78,4 +78,10 @@ public class UserRepository(ApiDbContext context) : IUserRepository
         context.Users.Update(user);
         context.SaveChanges();
     }
+
+    public async ValueTask<User?> GetUserByUserName(string username)
+    {
+        return await context.Users.Include(u => u.Questions)
+            .Include(u => u.Answers).FirstOrDefaultAsync(u => u.UserName == username);
+    }
 }
