@@ -71,4 +71,11 @@ public class UserRepository(ApiDbContext context) : IUserRepository
             .Include(u => u.Answers)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
+
+    public void UpdateKarma(User user, int karma)
+    {
+        user.Karma += karma;
+        context.Users.Update(user);
+        context.SaveChanges();
+    }
 }

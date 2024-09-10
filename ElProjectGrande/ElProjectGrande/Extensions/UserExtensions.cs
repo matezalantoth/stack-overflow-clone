@@ -8,6 +8,7 @@ public static class UserExtensions
     {
         var answers = new List<AnswerDTO>();
         var questions = new List<QuestionDTO>();
+        var karma = 0;
 
         if (user.Answers != null && user.Answers.Count != 0)
         {
@@ -19,10 +20,15 @@ public static class UserExtensions
             questions = user.Questions.Select(question => question.ToDTO()).ToList();
         }
 
+        if (user.Karma != null && user.Karma != 0)
+        {
+            karma = user.Karma;
+        }
+
         return new UserDTO
         {
             UserName = user.UserName, Name = user.Name, SessionToken = user.SessionToken, Answers = answers,
-            Email = user.Email, Questions = questions
+            Email = user.Email, Questions = questions, Karma = karma
         };
     }
 }

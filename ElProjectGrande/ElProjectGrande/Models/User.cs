@@ -9,6 +9,8 @@ public class User
     public string Password { get; set; }
     public byte[] Salt { get; set; }
     public DateTime DoB { get; set; }
+    
+    public int Karma { get; set; }
     public List<Question> Questions { get; init; } = [];
     public List<Answer> Answers { get; init; } = [];
     public Guid SessionToken { get; set; } = Guid.NewGuid();
