@@ -124,6 +124,9 @@ public class ApiDbContext : DbContext
                 .WithMany(q => q.Answers)
                 .HasForeignKey(a => a.QuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(a => a.Votes)
+                .IsRequired();
         });
     }
 }

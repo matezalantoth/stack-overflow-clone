@@ -148,4 +148,69 @@ public class AnswersController(
             throw;
         }
     }
+
+    [HttpPatch("{id}/upvote")]
+    public async Task<ActionResult> UpVoteAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+        Guid id)
+    {
+        try
+        {
+            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var answer = await answerRepository.GetAnswerById(id);
+            if (user == null || answer == null)
+            {
+                return NotFound("This user or answer could not be found");
+            }
+
+            if (user.Id != answer.UserId)
+            {
+                return Forbid();
+            }
+
+            var vote = 1;
+            answerRepository.VoteAnswer(answer, vote);
+            var answerUser = answer.User;
+            userRepository.UpdateKarma(answerUser, vote);
+
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500);
+        }
+    }
+
+    [HttpPatch("{id}/downvote")]
+    public async Task<ActionResult> DownVoteAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+        Guid id)
+    {
+        try
+        {
+            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var answer = await answerRepository.GetAnswerById(id);
+            if (user == null || answer == null)
+            {
+                return NotFound("This user or answer could not be found");
+            }
+
+            if (user.Id != answer.UserId)
+            {
+                return Forbid();
+            }
+
+            var vote = -1;
+            answerRepository.VoteAnswer(answer, vote);
+            var answerUser = answer.User;
+            userRepository.UpdateKarma(answerUser, vote);
+
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500);
+        }
+    }
+    
 }
