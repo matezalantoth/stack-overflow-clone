@@ -8,25 +8,26 @@ export default function AskQuestion() {
     const navigate = useNavigate();
     const [question, setQuestion] = useState({});
     const [submittable, setSubmittable] = useState(false);
-    const showErrorToast = (data) => toast.error(data.message);
+    const showErrorToast = (message) => toast.error(message);
+    const showSuccessToast = (message) => toast.success(message);
 
     useEffect(() => {
         if (
             question.title &&
             question.content
         ) {
-           setSubmittable(true);
+            setSubmittable(true);
         }
     }, [question]);
 
     useEffect(() => {
-        if(!cookies.user){
+        if (!cookies.user) {
             navigate('/login');
         }
     }, [cookies])
 
     const createQuestion = async () => {
-        const res = await fetch('/api/Questions',{
+        const res = await fetch('/api/Questions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -39,8 +40,7 @@ export default function AskQuestion() {
                 postedAt: new Date(Date.now()).toISOString()
             }),
         });
-        const data = await res.json();
-        return data;
+        return await res.json();
     }
 
     return (
@@ -83,9 +83,14 @@ export default function AskQuestion() {
                         onClick={(event) => {
                             event.preventDefault();
                             createQuestion(event).then((data) => {
-                                if (data.message) {
-                                    showErrorToast(data.message);
+                                console.log(data);
+                                if (data.id) {
+                                    showSuccessToast("Successfully posted question!");
+                                    navigate('/question/' + data.id);
+                                    return;
                                 }
+                                showErrorToast("Something went wrong")
+
                             });
                         }}
                     >
