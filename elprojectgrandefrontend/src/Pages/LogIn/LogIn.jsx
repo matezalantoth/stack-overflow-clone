@@ -2,22 +2,22 @@
 import  {useEffect, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import {toast} from 'react-hot-toast';
+import {useCookies} from "react-cookie";
 
-export const LoginPage = (props) => {
-    const {cookies, setUserLoginCookies} = props;
+export const LoginPage = ({ setUserLoginCookies } ) => {
     const navigate = useNavigate();
     const [userDetails, setUserDetails] = useState({
         email: null,
         password: null,
     });
+    const [cookies] = useCookies(['user']);
+
     const showErrorToast = (message) => toast.error(message);
     const showSuccessToast = (message) => toast.success(message);
     useEffect(() => {
-        if (cookies.user) {
-            navigate('/profile')
-        }
-    }, [])
-
+            if (cookies.user) {
+                navigate('/profile')}
+    }, [cookies])
 
     const handleLogin = async () => {
         const response = await fetch('/api/Users/login', {
@@ -27,8 +27,7 @@ export const LoginPage = (props) => {
             },
             body: JSON.stringify(userDetails),
         });
-        const data = await response.json();
-        return data;
+        return await response.json();
     };
 
     return (
@@ -79,15 +78,16 @@ export const LoginPage = (props) => {
                                     userDetails.password.match(/([a-z?'!0-9])/gi).join('') ===
                                     userDetails.password
                                 ) {
-                                    const data = await handleLogin();
-                                    if (data.message) {
-                                        showErrorToast(data.message);
-                                    } else {
-                                        setUserLoginCookies(data);
-                                        console.log(cookies)
-                                        showSuccessToast('Successfully signed in!');
-                                        navigate('/profile');
+                                    try {
+                                        const data = await handleLogin();
+                                            setUserLoginCookies(data);
+                                            showSuccessToast('Successfully signed in!');
+
+                                    } catch (e) {
+                                        console.error(e);
+                                        showErrorToast("Some of your details are invalid");
                                     }
+
                                 } else {
                                     showErrorToast('That email or password is invalid');
                                 }

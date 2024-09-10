@@ -1,9 +1,10 @@
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {toast} from "react-hot-toast";
+import {useCookies} from "react-cookie";
 
-export default function AskQuestion(props) {
-    const { cookies } = props;
+export default function AskQuestion() {
+    const [cookies] = useCookies(['user']);
     const navigate = useNavigate();
     const [question, setQuestion] = useState({});
     const [submittable, setSubmittable] = useState(false);
@@ -17,6 +18,12 @@ export default function AskQuestion(props) {
            setSubmittable(true);
         }
     }, [question]);
+
+    useEffect(() => {
+        if(!cookies.user){
+            navigate('/login');
+        }
+    }, [cookies])
 
     const createQuestion = async () => {
         const res = await fetch('/api/Questions',{
@@ -37,51 +44,55 @@ export default function AskQuestion(props) {
     }
 
     return (
-        <div className='flex-col justify-center'>
-            <h1 className='text-xl font-medium text-gray-900'>
-                Ask Question
-            </h1>
-            <form className='space-y-6' action='#'>
-                <div className='flex flex-col justify-center border-2 border-black rounded-lg shadow sm:p-6 md:p-8'>
-                    <label className='block mb-2 text-sm font-medium text-gray-900'>
-                        Title
-                    </label>
-                    <input onChange={(event) => {
-                        setQuestion({...question, title: event.target.value});
-                    }}
-                           type='text'
-                           required
-                           placeholder='Title'
-                           className='bg-white border-2 border-black rounded-lg shadow'
-                    />
-                </div>
-                <div className='flex flex-col justify-center border-2 border-black rounded-lg shadow sm:p-6 md:p-8'>
-                    <label className='block mb-2 text-sm font-medium text-gray-900'>
-                        Details of your question
-                    </label>
-                    <div className='relative overflow-auto w-full flex flex-col'>
-                        <input onChange={(event) => {
-                            setQuestion({...question, content: event.target.value});
-                        }}
-                               type='text'
-                               required
-                               placeholder='question'
-                               className='bg-white border-2 border-black rounded-md shadow'
-                        />
+        <div className="flex flex-col items-center justify-center mt-24 p-4">
+            <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6">
+                <h1 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
+                    Ask a Question
+                </h1>
+                <form className="space-y-6" action="#">
+                    <div className="flex flex-col">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Title
+                        </label>
+                        <textarea
+                            onChange={(event) => {
+                                setQuestion({...question, title: event.target.value});
+                            }}
+                            required
+                            placeholder="Enter your question title"
+                            className="border border-gray-300 rounded-lg px-4 py-2 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        ></textarea>
                     </div>
-                </div>
-                <button className='block mb-2 text-sm font-medium text-blue-500 border border-blue-500 rounded-lg shadow sm:p-6 md:p-8'
-                onClick={(event) => {
-                    event.preventDefault();
-                    createQuestion(event).then((data) => {
-                        if (data.message) {
-                            showErrorToast(data.message);
-                        }
-                    });
-                }}>
-                   submit
-                </button>
-            </form>
+
+                    <div className="flex flex-col">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Details of your question
+                        </label>
+                        <textarea
+                            onChange={(event) => {
+                                setQuestion({...question, content: event.target.value});
+                            }}
+                            required
+                            placeholder="Provide more details about your question"
+                            className="border border-gray-300 rounded-lg px-4 py-2 h-32 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        ></textarea>
+                    </div>
+
+                    <button
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg transition duration-200 shadow-md focus:ring-2 focus:ring-blue-300"
+                        onClick={(event) => {
+                            event.preventDefault();
+                            createQuestion(event).then((data) => {
+                                if (data.message) {
+                                    showErrorToast(data.message);
+                                }
+                            });
+                        }}
+                    >
+                        Submit
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }

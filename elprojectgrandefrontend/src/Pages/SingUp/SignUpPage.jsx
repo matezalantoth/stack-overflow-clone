@@ -2,14 +2,15 @@
 import {useEffect, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import {toast} from 'react-hot-toast';
+import {useCookies} from "react-cookie";
 
-export const SignupPage = (props) => {
-    const {cookies, setUserLoginCookies} = props;
+export const SignupPage = ({ setUserLoginCookies}) => {
     const [newUserData, setNewUserData] = useState({});
     const [submittable, setSubmittable] = useState(false);
     const navigate = useNavigate();
     const showSuccessToast = (data) => toast.success(data.message);
     const showErrorToast = (data) => toast.error(data.message);
+    const [cookies] = useCookies(['user']);
     useEffect(() => {
         if (
             newUserData.Name &&
@@ -21,12 +22,6 @@ export const SignupPage = (props) => {
             setSubmittable(true);
         }
     }, [newUserData]);
-
-    if (cookies.user) {
-        navigate('/profile');
-    }
-
-    console.log(submittable);
 
     const handleSignup = async () => {
         const response = await fetch('/api/Users/signup', {
@@ -44,17 +39,12 @@ export const SignupPage = (props) => {
         return data;
     };
 
-    const loginNewUser = async () => {
-        const response = await fetch('/api/User/Login', {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify({email: newUserData.email, password: newUserData.password}),
-        });
-        const data = await response.json();
-        return data;
-    };
+    useEffect(() => {
+        if (cookies.user) {
+            navigate('/profile');
+        }
+    }, [cookies])
+
 
     return (
         <div className='relative flex justify-center top-48'>
