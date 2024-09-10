@@ -78,4 +78,32 @@ public class UserRepository(ApiDbContext context) : IUserRepository
         context.Users.Update(user);
         context.SaveChanges();
     }
+
+    public void Upvote(User user, Guid answerGuid)
+    {
+        user.Upvotes.Add(answerGuid);
+        context.Users.Update(user);
+        context.SaveChanges();
+    }
+
+    public void Downvote(User user, Guid answerGuid)
+    {
+        user.Downvotes.Add(answerGuid);
+        context.Users.Update(user);
+        context.SaveChanges();
+    }
+
+    public void RemoveUpvote(User user, Guid answerGuid)
+    {
+        user.Upvotes.Remove(answerGuid);
+        context.Users.Update(user);
+        context.SaveChanges();
+    }
+
+    public void RemoveDownvote(User user, Guid answerGuid)
+    {
+        user.Downvotes.Remove(answerGuid);
+        context.Users.Update(user);
+        context.SaveChanges();
+    }
 }

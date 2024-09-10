@@ -23,4 +23,12 @@ public interface IUserRepository
     public ValueTask<User?> GetUserBySessionToken(Guid sessionToken);
     
     public void UpdateKarma(User user, int karma);
+    
+    public void Upvote(User user, Guid answerGuid);
+    
+    public void Downvote(User user, Guid answerGuid);
+    
+    public void RemoveUpvote(User user, Guid answerGuid);
+    
+    public void RemoveDownvote(User user, Guid answerGuid);
 }

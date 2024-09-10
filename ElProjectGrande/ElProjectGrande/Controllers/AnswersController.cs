@@ -167,10 +167,20 @@ public class AnswersController(
                 return Forbid();
             }
 
+            if (user.Upvotes.Contains(answer.Id))
+            {
+                return BadRequest("You can't upvote the same answer twice");
+            }
+
+            if (user.Downvotes.Contains(answer.Id))
+            {
+                userRepository.RemoveDownvote(user, answer.Id);
+            }
             var vote = 1;
             answerRepository.VoteAnswer(answer, vote);
             var answerUser = answer.User;
             userRepository.UpdateKarma(answerUser, vote);
+            userRepository.Upvote(user, answer.Id);
 
             return NoContent();
         }
@@ -198,11 +208,22 @@ public class AnswersController(
             {
                 return Forbid();
             }
+            
+            if (user.Downvotes.Contains(answer.Id))
+            {
+                return BadRequest("You can't downvote the same answer twice");
+            }
+
+            if (user.Upvotes.Contains(answer.Id))
+            {
+                userRepository.RemoveUpvote(user, answer.Id);
+            }
 
             var vote = -1;
             answerRepository.VoteAnswer(answer, vote);
             var answerUser = answer.User;
             userRepository.UpdateKarma(answerUser, vote);
+            userRepository.Downvote(user, answer.Id);
 
             return NoContent();
         }

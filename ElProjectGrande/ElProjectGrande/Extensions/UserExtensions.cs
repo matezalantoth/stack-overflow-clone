@@ -9,6 +9,8 @@ public static class UserExtensions
         var answers = new List<AnswerDTO>();
         var questions = new List<QuestionDTO>();
         var karma = 0;
+        var upvotes = new List<Guid>();
+        var downvotes = new List<Guid>();
 
         if (user.Answers != null && user.Answers.Count != 0)
         {
@@ -25,10 +27,20 @@ public static class UserExtensions
             karma = user.Karma;
         }
 
+        if (user.Upvotes != null && user.Upvotes.Count != 0)
+        {
+            upvotes = user.Upvotes.Select(upvote => upvote).ToList();
+        }
+
+        if (user.Downvotes != null && user.Downvotes.Count != 0)
+        {
+            downvotes = user.Downvotes.Select(upvote => upvote).ToList();
+        }
+
         return new UserDTO
         {
             UserName = user.UserName, Name = user.Name, SessionToken = user.SessionToken, Answers = answers,
-            Email = user.Email, Questions = questions, Karma = karma
+            Email = user.Email, Questions = questions, Karma = karma, Upvotes = upvotes, Downvotes = downvotes
         };
     }
 }
