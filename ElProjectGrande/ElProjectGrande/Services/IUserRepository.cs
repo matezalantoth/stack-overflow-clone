@@ -23,4 +23,6 @@ public interface IUserRepository
     public ValueTask<User?> GetUserBySessionToken(Guid sessionToken);
     
     public void UpdateKarma(User user, int karma);
+
+    public ValueTask<User?> GetUserByUserName(string username);
 }
