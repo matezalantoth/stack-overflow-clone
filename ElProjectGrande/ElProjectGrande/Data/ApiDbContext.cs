@@ -84,8 +84,7 @@ public class ApiDbContext : DbContext
                 .HasMaxLength(200);
 
             entity.Property(q => q.Content)
-                .IsRequired()
-                .HasMaxLength(500);
+                .IsRequired();
 
             entity.Property(q => q.PostedAt)
                 .IsRequired();
@@ -107,8 +106,7 @@ public class ApiDbContext : DbContext
             entity.HasIndex(a => a.Id).IsUnique();
 
             entity.Property(a => a.Content)
-                .IsRequired()
-                .HasMaxLength(500);
+                .IsRequired();
 
             entity.Property(a => a.PostedAt)
                 .IsRequired();
