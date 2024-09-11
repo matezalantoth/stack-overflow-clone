@@ -4,7 +4,6 @@ import {useCookies} from "react-cookie";
 import {toast} from "react-hot-toast";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowDown, faArrowUp, faCheck} from "@fortawesome/free-solid-svg-icons";
-import error from "eslint-plugin-react/lib/util/error.js";
 
 export default function QuestionPage() {
     const [cookies] = useCookies(['user']);
@@ -123,6 +122,125 @@ export default function QuestionPage() {
         }
     }
 
+    const sendUpvote = async (id) => {
+        await fetch('/api/Answers/' + id + '/upvote', {
+            method: 'PATCH',
+            headers: {
+                Authorization: cookies.user
+            }
+        })
+    }
+
+
+    const sendDownvote = async (id) => {
+
+        await fetch('/api/Answers/' + id + '/downvote', {
+            method: 'PATCH',
+            headers: {
+                Authorization: cookies.user
+            }
+        })
+    }
+
+    const checkIfUpvoted = (id) => {
+        return user.upvotes.some(identifier => identifier === id);
+    }
+    const checkIfDownvoted = (id) => {
+        return user.downvotes.some(identifier => identifier === id);
+    }
+
+    const handleUpvoting = async (answer) => {
+        if (checkIfUpvoted(answer.id)) {
+            try {
+                await sendUpvote(answer.id);
+            } catch (e) {
+                console.log(e);
+                showErrorToast("Something went wrong");
+                return;
+            }
+
+            setAnswers(prevAnswers =>
+                prevAnswers.map(ans =>
+                    ans.id === answer.id ? {...ans, votes: ans.votes - 1} : ans
+                )
+            );
+
+            setUser(prevUser => ({
+                ...prevUser,
+                upvotes: prevUser.upvotes.filter(answerId => answerId !== answer.id)
+            }));
+        } else {
+            try {
+                await sendUpvote(answer.id);
+            } catch (error) {
+                console.log(error);
+                showErrorToast("Something went wrong");
+                return;
+            }
+
+            setAnswers(prevAnswers =>
+                prevAnswers.map(ans =>
+                    ans.id === answer.id ? {
+                        ...ans,
+                        votes: checkIfDownvoted(answer.id) ? ans.votes + 2 : ans.votes + 1
+                    } : ans
+                )
+            );
+
+            setUser(prevUser => ({
+                ...prevUser,
+                upvotes: [...prevUser.upvotes, answer.id],
+                downvotes: prevUser.downvotes.filter(ide => ide !== answer.id)
+            }));
+        }
+    };
+
+    const handleDownvoting = async (answer) => {
+        if (checkIfDownvoted(answer.id)) {
+            try {
+                await sendDownvote(answer.id);
+            } catch (e) {
+                console.log(e);
+                showErrorToast("Something went wrong");
+                return;
+            }
+
+            setAnswers(prevAnswers =>
+                prevAnswers.map(ans =>
+                    ans.id === answer.id ? {...ans, votes: ans.votes + 1} : ans
+                )
+            );
+
+            setUser(prevUser => ({
+                ...prevUser,
+                downvotes: prevUser.downvotes.filter(ansId => ansId !== answer.id)
+            }));
+        } else {
+            try {
+                await sendDownvote(answer.id);
+            } catch (e) {
+                console.log(e);
+                showErrorToast("Something went wrong");
+                return;
+            }
+
+            setAnswers(prevAnswers =>
+                prevAnswers.map(ans =>
+                    ans.id === answer.id ? {
+                        ...ans,
+                        votes: checkIfUpvoted(answer.id) ? ans.votes - 2 : ans.votes - 1
+                    } : ans
+                )
+            );
+
+            setUser(prevUser => ({
+                ...prevUser,
+                downvotes: [...prevUser.downvotes, answer.id],
+                upvotes: prevUser.upvotes.filter(ansId => ansId !== answer.id)
+            }));
+        }
+    };
+
 
     return questionData && answers && user ? (
         <>
@@ -137,18 +255,28 @@ export default function QuestionPage() {
             </div>
             {
                 answers.map(answer => {
-                    console.log(questionData);
+                    console.log(answer.votes);
                     return (
                         <div
                             className="w-3/4 min-h-40 mt-12 p-6 bg-white rounded-lg shadow-md block m-auto">
                             <div className="flex">
                                 <div className="w-1/12 border-r-2 justify-between">
                                     <div
-                                        className="text-center text-3xl text-gray-400 hover:text-black transition block">
+                                        onClick={() => {
+                                            handleUpvoting(answer);
+                                        }}
+                                        className={'text-center text-3xl hover:text-black transition block cursor-pointer ' + (checkIfUpvoted(answer.id) ? '' : 'text-gray-400')}>
                                         <FontAwesomeIcon icon={faArrowUp}/>
                                     </div>
                                     <div
-                                        className="text-center text-3xl text-gray-400 hover:text-black transition block">
+                                        className="text-center text-3xl transition block">
+                                        {answer.votes}
+                                    </div>
+                                    <div
+                                        onClick={() => {
+                                            handleDownvoting(answer);
+                                        }}
+                                        className={"text-center text-3xl hover:text-black transition block cursor-pointer " + (checkIfDownvoted(answer.id) ? '' : 'text-gray-400')}>
                                         <FontAwesomeIcon icon={faArrowDown}/>
                                     </div>
                                     {user.userName === questionData.username && !questionData.hasAccepted ? <div
@@ -157,7 +285,7 @@ export default function QuestionPage() {
                                             handleAccept(answer.id)
                                         }} icon={faCheck}/>
                                     </div> : <></>}
-                                    {questionData.hasAccepted ? <div
+                                    {questionData.hasAccepted && answer.accepted ? <div
                                         className="text-center text-3xl text-green-500 transition block">
                                         <FontAwesomeIcon icon={faCheck}/>
                                     </div> : <></>}
