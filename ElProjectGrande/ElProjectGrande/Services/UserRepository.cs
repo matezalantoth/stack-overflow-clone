@@ -68,7 +68,11 @@ public class UserRepository(ApiDbContext context) : IUserRepository
     {
         return await context.Users
             .Include(u => u.Questions)
+            .ThenInclude(q => q.Answers)
+            .ThenInclude(a => a.User)
             .Include(u => u.Answers)
+            .ThenInclude(a => a.Question)
+            .ThenInclude(q => q.User)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
@@ -77,5 +81,39 @@ public class UserRepository(ApiDbContext context) : IUserRepository
         user.Karma += karma;
         context.Users.Update(user);
         context.SaveChanges();
+    }
+
+    public void Upvote(User user, Guid answerGuid)
+    {
+        user.Upvotes.Add(answerGuid);
+        context.Users.Update(user);
+        context.SaveChanges();
+    }
+
+    public void Downvote(User user, Guid answerGuid)
+    {
+        user.Downvotes.Add(answerGuid);
+        context.Users.Update(user);
+        context.SaveChanges();
+    }
+
+    public void RemoveUpvote(User user, Guid answerGuid)
+    {
+        user.Upvotes.Remove(answerGuid);
+        context.Users.Update(user);
+        context.SaveChanges();
+    }
+
+    public void RemoveDownvote(User user, Guid answerGuid)
+    {
+        user.Downvotes.Remove(answerGuid);
+        context.Users.Update(user);
+        context.SaveChanges();
+
+    public async ValueTask<User?> GetUserByUserName(string username)
+    {
+        return await context.Users.Include(u => u.Questions)
+            .Include(u => u.Answers).FirstOrDefaultAsync(u => u.UserName == username);
+
     }
 }

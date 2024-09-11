@@ -4,7 +4,7 @@ using ElProjectGrande.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 
-DotNetEnv.Env.Load(".env");
+DotNetEnv.Env.Load("../.env");
 builder.Services.AddControllers();
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -16,7 +16,6 @@ builder.Services.AddCors(options =>
     {
         innerBuilder
             .WithOrigins("http://localhost:5173")
-
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();

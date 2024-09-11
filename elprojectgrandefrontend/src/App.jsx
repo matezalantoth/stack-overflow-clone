@@ -14,6 +14,7 @@ import {LoginPage} from "./Pages/LogIn/LogIn.jsx";
 import QuestionPage from "./Pages/QuestionPage.jsx";
 
 import AskQuestion from "./Pages/AskQuestion/AskQuestion.jsx";
+import PublicUser from "./Pages/User/PublicUser.jsx";
 
 
 export default function App() 
@@ -35,6 +36,7 @@ export default function App()
                         <Route path="/askquestion" element={<AskQuestion cookies={cookies}/>}/>
                         <Route path="/profile" element={<ProfilePage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path='question/:questionId' element={<QuestionPage cookies={cookies}/>}/>
+                        <Route path='/user/:userName' element={<PublicUser/>}/>
                     </Routes>
                     <Toaster/>
 

@@ -1,4 +1,6 @@
 using ElProjectGrande.Models;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ElProjectGrande.Data;
 
@@ -59,6 +61,9 @@ public class ApiDbContext : DbContext
             entity.Property(u => u.SessionToken)
                 .IsRequired();
 
+            entity.Property(u => u.Karma)
+                .IsRequired();
+
             entity.HasMany(u => u.Questions)
                 .WithOne(q => q.User)
                 .HasForeignKey(q => q.UserId)
@@ -69,8 +74,28 @@ public class ApiDbContext : DbContext
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+
             entity.Property(u => u.Karma)
                 .IsRequired();
+
+            var guidListConverter = new ValueConverter<List<Guid>, string>(
+                v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Guid.Parse).ToList()
+            );
+
+            var guidListComparer = new ValueComparer<List<Guid>>(
+                (c1, c2) => c1.SequenceEqual(c2),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            );
+            
+            entity.Property(u => u.Upvotes)
+                .HasConversion(guidListConverter)
+                .Metadata.SetValueComparer(guidListComparer);
+            
+            entity.Property(u => u.Downvotes)
+                .HasConversion(guidListConverter)
+                .Metadata.SetValueComparer(guidListComparer);
         });
 
         modelBuilder.Entity<Question>(entity =>
@@ -81,11 +106,11 @@ public class ApiDbContext : DbContext
 
             entity.Property(q => q.Title)
                 .IsRequired()
-                .HasMaxLength(200);
+                .HasColumnType("text");
 
             entity.Property(q => q.Content)
                 .IsRequired()
-                .HasMaxLength(500);
+                .HasColumnType("text");
 
             entity.Property(q => q.PostedAt)
                 .IsRequired();
@@ -108,7 +133,7 @@ public class ApiDbContext : DbContext
 
             entity.Property(a => a.Content)
                 .IsRequired()
-                .HasMaxLength(500);
+                .HasColumnType("text");
 
             entity.Property(a => a.PostedAt)
                 .IsRequired();
@@ -124,6 +149,9 @@ public class ApiDbContext : DbContext
                 .WithMany(q => q.Answers)
                 .HasForeignKey(a => a.QuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(a => a.Votes)
+                .IsRequired();
         });
     }
 }
