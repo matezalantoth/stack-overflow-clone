@@ -4,11 +4,12 @@ import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCookies } from "react-cookie";
 
-export default function Navbar({ setUserLoginCookies }) {
+export default function Navbar({ setUserLoginCookies, setsearchQuestion, normalQuestion}) {
     const navigate = useNavigate();
     const location = useLocation();
     const [cookies] = useCookies(['user']);
     const [cookiesHaveBeenSet, setCookiesHaveBeenSet] = useState(false);
+    const[searchTerm, setSearchTerm] = useState("");
 
     const handleLogout = async () => {
         await fetch("api/users/logout", {
@@ -20,6 +21,8 @@ export default function Navbar({ setUserLoginCookies }) {
         setUserLoginCookies(null);
         setCookiesHaveBeenSet(true);
     };
+    
+    
 
     useEffect(() => {
         if (cookiesHaveBeenSet) {
@@ -28,7 +31,15 @@ export default function Navbar({ setUserLoginCookies }) {
         }
     }, [cookies, cookiesHaveBeenSet]);
 
-    return (
+    // useEffect(() => {
+    //     if (searchTerm) { 
+    //         setsearchQuestion(normalQuestion.filter((q) =>q.title.toLowerCase().includes(searchTerm)))
+    //     } else {
+    //         setsearchQuestion(normalQuestion); 
+    //     }
+    // }, [searchTerm, setsearchQuestion]);
+
+    return normalQuestion? (
         <div className='flex w-full justify-between items-center px-4 py-2'>
             <div className='flex items-center'>
                 <button
@@ -51,10 +62,17 @@ export default function Navbar({ setUserLoginCookies }) {
                 <div className="w-full lg:w-1/2 mx-auto">
                     <div className="relative w-full">
                         <input
+                            list="searchbarDatabase"
                             type="text"
+                            // onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full py-2 pl-10 pr-4 text-gray-700 bg-white border border-gray-300 rounded-full focus:border-blue-500 focus:outline-none focus:ring"
                             placeholder="Search..."
                         />
+                        <datalist id= "searchbarDatabase">
+                            {normalQuestion.map((question) => {
+                                return <option value = {question.title}/>
+                            })}
+                        </datalist>
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <FontAwesomeIcon className="text-gray-400" icon={faSearch} />
                         </div>
@@ -89,5 +107,7 @@ export default function Navbar({ setUserLoginCookies }) {
                 )}
             </div>
         </div>
-    );
+    ):
+        <></>
+    
 }
