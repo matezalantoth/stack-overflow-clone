@@ -88,11 +88,11 @@ public class ApiDbContext : DbContext
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                 c => c.ToList()
             );
-            
+
             entity.Property(u => u.Upvotes)
                 .HasConversion(guidListConverter)
                 .Metadata.SetValueComparer(guidListComparer);
-            
+
             entity.Property(u => u.Downvotes)
                 .HasConversion(guidListConverter)
                 .Metadata.SetValueComparer(guidListComparer);
