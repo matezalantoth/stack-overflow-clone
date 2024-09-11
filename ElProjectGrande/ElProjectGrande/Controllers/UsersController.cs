@@ -75,13 +75,26 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         }
     }
 
-    [HttpGet]
+    [HttpGet("GetBySessionToken")]
     public async Task<ActionResult<UserDTO>> GetUser([FromHeader(Name = "Authorization")] Guid sessionToken)
     {
         var user = await userRepository.GetUserBySessionToken(sessionToken);
+        Console.WriteLine(user);
         if (user == null)
         {
             throw new ArgumentException($"User of session token: {sessionToken} could not be found");
+        }
+
+        return Ok(user.ToDTO());
+    }
+
+    [HttpGet("/getUserByUserName")]
+    public async Task<ActionResult<UserDTO>> GetUserByUserName(string userName)
+    {
+        var user = await userRepository.GetUserByUserName(userName);
+        if (user == null)
+        {
+            throw new ArgumentException($"User of username: {userName} could not be found");
         }
 
         return Ok(user.ToDTO());

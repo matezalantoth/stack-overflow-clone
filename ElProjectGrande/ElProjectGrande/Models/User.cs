@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ElProjectGrande.Models;
 
 public class User
@@ -15,21 +18,4 @@ public class User
     public List<Question> Questions { get; init; } = [];
     public List<Answer> Answers { get; init; } = [];
     public Guid SessionToken { get; set; } = Guid.NewGuid();
-
-    public override string ToString()
-    {
-        string stringified = "questions: [";
-        foreach (Question question in Questions)
-        {
-            stringified += question.ToString() + Environment.NewLine;
-        }
-
-        stringified += "]";
-        foreach (Answer answer in Answers)
-        {
-            stringified += answer.ToString() + Environment.NewLine;
-        }
-
-        return stringified;
-    }
 }

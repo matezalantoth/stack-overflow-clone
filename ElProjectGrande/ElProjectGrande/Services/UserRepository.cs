@@ -68,7 +68,11 @@ public class UserRepository(ApiDbContext context) : IUserRepository
     {
         return await context.Users
             .Include(u => u.Questions)
+            .ThenInclude(q => q.Answers)
+            .ThenInclude(a => a.User)
             .Include(u => u.Answers)
+            .ThenInclude(a => a.Question)
+            .ThenInclude(q => q.User)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
@@ -105,5 +109,11 @@ public class UserRepository(ApiDbContext context) : IUserRepository
         user.Downvotes.Remove(answerGuid);
         context.Users.Update(user);
         context.SaveChanges();
+
+    public async ValueTask<User?> GetUserByUserName(string username)
+    {
+        return await context.Users.Include(u => u.Questions)
+            .Include(u => u.Answers).FirstOrDefaultAsync(u => u.UserName == username);
+
     }
 }
