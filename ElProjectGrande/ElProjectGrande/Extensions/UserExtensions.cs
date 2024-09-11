@@ -6,13 +6,6 @@ public static class UserExtensions
 {
     public static UserDTO ToDTO(this User user)
     {
-        Console.WriteLine($"UserName: {user.UserName}");
-        Console.WriteLine($"Name: {user.Name}");
-        Console.WriteLine($"SessionToken: {user.SessionToken}");
-        Console.WriteLine($"Answers: {user.Answers}");
-        Console.WriteLine($"Email: {user.Email}");
-        Console.WriteLine($"Questions: {user.Questions}");
-        Console.WriteLine($"Karma: {user.Karma}");
 
 
         return new UserDTO
