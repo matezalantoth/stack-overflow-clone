@@ -120,14 +120,14 @@ public class UserRepository(ApiDbContext context) : IUserRepository
     }
 
     public async ValueTask<User?> GetUserByUserName(string username)
-        {
-            return await context.Users.Include(u => u.Questions)
-                .ThenInclude(q => q.Answers)
-                .ThenInclude(a => a.User)
-                .Include(u => u.Answers)
-                .ThenInclude(a => a.Question)
-                .ThenInclude(q => q.User).FirstOrDefaultAsync(u => u.UserName == username);
 
-        }
-    
+    {
+        return await context.Users.Include(u => u.Questions)
+            .ThenInclude(q => q.Answers)
+            .ThenInclude(a => a.User)
+            .Include(u => u.Answers)
+            .ThenInclude(a => a.Question)
+            .ThenInclude(q => q.User).FirstOrDefaultAsync(u => u.UserName == username);
+    }
+
 }

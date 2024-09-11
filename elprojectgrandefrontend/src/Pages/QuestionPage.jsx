@@ -1,4 +1,4 @@
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {useCookies} from "react-cookie";
 import {toast} from "react-hot-toast";
@@ -14,6 +14,7 @@ export default function QuestionPage() {
     const [user, setUser] = useState(null);
     const [reply, setReply] = useState({content: ""});
     const [submittable, setSubmittable] = useState(false);
+    const navigate = useNavigate();
     const showErrorToast = (message) => toast.error(message);
     const showSuccessToast = (message) => toast.success(message);
 
@@ -102,18 +103,41 @@ export default function QuestionPage() {
 
     };
 
+    const handleAccept = async (id) => {
+        const res = await fetch('/api/accept/' + id, {
+            method: 'POST',
+            headers: {
+                Authorization: cookies.user
+            }
+        });
+        const data = await res.json();
+        if (data.question) {
+            setQuestionData({...questionData, hasAccepted: true});
+            const updatedAnswers = answers.map(ans => {
+                if (ans.id === data.id) {
+                    return {...ans, accepted: true}
+                }
+                return ans;
+            })
+            setAnswers(updatedAnswers);
+        }
+    }
+
 
     return questionData && answers && user ? (
         <>
             <div className="w-3/4 mx-auto mt-12 p-6 bg-white rounded-lg shadow-md">
-                <span
-                    className="text-xs text-gray-500 hover:underline cursor-pointer">{questionData.username}</span><span
+                <span onClick={() => {
+                    navigate("/user/" + questionData.username)
+                }}
+                      className="text-xs text-gray-500 hover:underline cursor-pointer">{questionData.username}</span><span
                 className="text-xs text-gray-500 cursor-pointer"> | {formatTimeDifference(questionData.postedAt)}</span>
                 <h1 className="text-2xl font-bold text-blue-500 mb-4 break-words">{questionData.title}</h1>
                 <div className="text-black break-words">{questionData.content}</div>
             </div>
             {
                 answers.map(answer => {
+                    console.log(questionData);
                     return (
                         <div
                             className="w-3/4 min-h-40 mt-12 p-6 bg-white rounded-lg shadow-md block m-auto">
@@ -127,14 +151,23 @@ export default function QuestionPage() {
                                         className="text-center text-3xl text-gray-400 hover:text-black transition block">
                                         <FontAwesomeIcon icon={faArrowDown}/>
                                     </div>
-                                    {user.userName === questionData.username ? <div
-                                        className="text-center text-3xl text-gray-400 hover:text-green-500 transition block">
+                                    {user.userName === questionData.username && !questionData.hasAccepted ? <div
+                                        className="text-center text-3xl text-gray-400 hover:text-green-500 transition block cursor-pointer">
+                                        <FontAwesomeIcon onClick={() => {
+                                            handleAccept(answer.id)
+                                        }} icon={faCheck}/>
+                                    </div> : <></>}
+                                    {questionData.hasAccepted ? <div
+                                        className="text-center text-3xl text-green-500 transition block">
                                         <FontAwesomeIcon icon={faCheck}/>
                                     </div> : <></>}
 
                                 </div>
                                 <div className="w-11/12 pl-6">
                                 <span
+                                    onClick={() => {
+                                        navigate("/user/" + answer.username)
+                                    }}
                                     className="text-xs text-gray-500 hover:underline cursor-pointer">{answer.username}</span><span
                                     className="text-xs text-gray-500 cursor-pointer"> | {formatTimeDifference(answer.postedAt)}</span>
                                     <div className="text-black break-words whitespace-normal">
