@@ -31,4 +31,7 @@ public interface IUserRepository
     public void RemoveUpvote(User user, Guid answerGuid);
     
     public void RemoveDownvote(User user, Guid answerGuid);
+
+    public ValueTask<User?> GetUserByUserName(string username);
+
 }

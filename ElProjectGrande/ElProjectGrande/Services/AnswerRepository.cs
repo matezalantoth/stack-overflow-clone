@@ -21,6 +21,13 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
         return answer.ToDTO();
     }
 
+    public IEnumerable<AnswerDTO> GetAllAnswersByQuestionId(Guid questionId)
+    {
+        return dbContext.Answers.Where(a => a.QuestionId == questionId)
+            .Include(a => a.Question)
+            .Include(a => a.User).Select(a => a.ToDTO());
+    }
+
     public Task<Answer?> GetAnswerById(Guid id)
     {
         return dbContext.Answers
