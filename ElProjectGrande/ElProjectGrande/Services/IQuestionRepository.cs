@@ -13,4 +13,6 @@ public interface IQuestionRepository
     public void DeleteQuestion(Question question, User user);
 
     public QuestionDTO UpdateQuestion(Question question);
+
+    public IEnumerable<QuestionDTO> GetTrendingQuestions();
 }

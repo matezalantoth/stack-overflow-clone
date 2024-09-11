@@ -52,4 +52,15 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
             Username = question.User.UserName
         };
     }
+
+    public IEnumerable<QuestionDTO> GetTrendingQuestions()
+    {
+        DateTime sevenDaysAgo = DateTime.Today.AddDays(-7);
+        return context.Questions
+            .Include(q => q.Answers)
+            .Include(q => q.User)
+            .OrderByDescending(q => q.Answers.Count(ans => ans.PostedAt >= sevenDaysAgo))
+            .Take(5)
+            .Select(q => q.ToDTO());
+    }
 }
