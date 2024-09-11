@@ -75,10 +75,11 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         }
     }
 
-    [HttpGet]
+    [HttpGet("GetBySessionToken")]
     public async Task<ActionResult<UserDTO>> GetUser([FromHeader(Name = "Authorization")] Guid sessionToken)
     {
         var user = await userRepository.GetUserBySessionToken(sessionToken);
+        Console.WriteLine(user);
         if (user == null)
         {
             throw new ArgumentException($"User of session token: {sessionToken} could not be found");

@@ -5,27 +5,26 @@ import {useCookies} from 'react-cookie';
 import {useNavigate} from 'react-router-dom';
 
 
-export default function ProfilePage ()
-{
+export default function ProfilePage() {
     const [user, setUser] = useState(null)
-    const[selectedTab, setSelectedTab] = useState(null)
+    const [selectedTab, setSelectedTab] = useState(null)
     const navigate = useNavigate();
-    const[cookies] = useCookies(['user'])
+    const [cookies] = useCookies(['user'])
 
 
     useEffect(() => {
         const fetchUsers = async () => {
-            try{
-                const res = await fetch(`/api/Users`,
+            try {
+                const res = await fetch(`/api/Users/GetBySessionToken`,
                     {
-                        headers : {
+                        headers: {
                             'Authorization': cookies.user
                         }
 
                     });
                 const data = await res.json();
                 setUser(data);
-            } catch (error){
+            } catch (error) {
                 console.log(error);
             }
         };
@@ -33,13 +32,13 @@ export default function ProfilePage ()
     }, []);
 
     useEffect(() => {
-            if(!cookies.user){
-                navigate('/login')
-            }
+        if (!cookies.user) {
+            navigate('/login')
+        }
 
     }, [cookies])
 
-    return user ?  (
+    return user ? (
             <div className="Users">
 
                 <div className="user bg-white p-6 rounded-lg shadow-lg max-w-sm ml-0">
@@ -61,12 +60,15 @@ export default function ProfilePage ()
                 </div>
 
                 <div className="m-auto flex justify-center mt-12 w-auto ">
-                    <span className={"text-2xl  border-2 rounded-l-3xl  px-4 transition hover:bg-gray-200" + (selectedTab==='answer' ? " bg-gray-200" : "")}
-                          onClick={() => {
-                        setSelectedTab('answer')
-                    }}>Answers</span>  <span className={"text-2xl px-4 transition hover:bg-gray-200 border-2 rounded-r-3xl border-l-4"  + (selectedTab==='question' ? " bg-gray-200" : "")} onClick={() => {
-                    setSelectedTab('question')
-                }}>Questions</span>
+                    <span
+                        className={"text-2xl  border-2 rounded-l-3xl  px-4 transition hover:bg-gray-200" + (selectedTab === 'answer' ? " bg-gray-200" : "")}
+                        onClick={() => {
+                            setSelectedTab('answer')
+                        }}>Answers</span> <span
+                    className={"text-2xl px-4 transition hover:bg-gray-200 border-2 rounded-r-3xl border-l-4" + (selectedTab === 'question' ? " bg-gray-200" : "")}
+                    onClick={() => {
+                        setSelectedTab('question')
+                    }}>Questions</span>
                 </div>
                 <div className="flex justify-center">
                     {selectedTab ? selectedTab === 'question' ?

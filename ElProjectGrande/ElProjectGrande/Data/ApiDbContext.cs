@@ -59,6 +59,9 @@ public class ApiDbContext : DbContext
             entity.Property(u => u.SessionToken)
                 .IsRequired();
 
+            entity.Property(u => u.Karma)
+                .IsRequired();
+
             entity.HasMany(u => u.Questions)
                 .WithOne(q => q.User)
                 .HasForeignKey(q => q.UserId)
@@ -68,9 +71,6 @@ public class ApiDbContext : DbContext
                 .WithOne(a => a.User)
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            entity.Property(u => u.Karma)
-                .IsRequired();
         });
 
         modelBuilder.Entity<Question>(entity =>
@@ -81,10 +81,11 @@ public class ApiDbContext : DbContext
 
             entity.Property(q => q.Title)
                 .IsRequired()
-                .HasMaxLength(200);
+                .HasColumnType("text");
 
             entity.Property(q => q.Content)
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("text");
 
             entity.Property(q => q.PostedAt)
                 .IsRequired();
@@ -106,7 +107,8 @@ public class ApiDbContext : DbContext
             entity.HasIndex(a => a.Id).IsUnique();
 
             entity.Property(a => a.Content)
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("text");
 
             entity.Property(a => a.PostedAt)
                 .IsRequired();
