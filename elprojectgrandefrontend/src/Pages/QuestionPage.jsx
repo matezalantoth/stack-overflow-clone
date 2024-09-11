@@ -123,59 +123,23 @@ export default function QuestionPage() {
     }
 
     const sendUpvote = async (id) => {
-        const res = await fetch('/api/Answers/' + id + '/upvote', {
+        await fetch('/api/Answers/' + id + '/upvote', {
             method: 'PATCH',
             headers: {
                 Authorization: cookies.user
             }
         })
-        await res.json();
     }
 
-
-    const handleUpvote = async (id) => {
-        try {
-            sendUpvote(id)
-        } catch (error) {
-            console.log(error);
-            showErrorToast("Something went wrong")
-            return;
-        }
-        setAnswers(answers.map(ans => {
-            if (ans.id === id) {
-                ans.votes++;
-            }
-            return ans;
-        }))
-    }
 
     const sendDownvote = async (id) => {
 
-        const res = await fetch('/api/Answers/' + id + '/downvote', {
+        await fetch('/api/Answers/' + id + '/downvote', {
             method: 'PATCH',
             headers: {
                 Authorization: cookies.user
             }
         })
-        await res.json();
-
-    }
-
-    const handleDownvote = async (id) => {
-        try {
-            sendDownvote(id);
-        } catch (e) {
-            console.log(e)
-            showErrorToast("Something went wrong")
-            return;
-        }
-        setAnswers(answers.map(ans => {
-            if (ans.id === answer.id) {
-                ans.votes--;
-            }
-            return ans;
-        }))
-
     }
 
     const checkIfUpvoted = (id) => {
@@ -185,53 +149,98 @@ export default function QuestionPage() {
         return user.downvotes.some(identifier => identifier === id);
     }
 
-    const handleUpvoting = (answer) => {
-        if (!checkIfUpvoted(answer.id)) {
-            handleUpvote(answer.id);
-            setUser({
-                ...user,
-                upvotes: [...user.upvotes, answer.id],
-                downvotes: user.downvotes.filter(ide => ide.id !== answer.id)
-            })
-            return;
-        }
-        sendUpvote(answer.id);
-        setAnswers(answers.map(ans => {
-            console.log(ans.id === answer.id)
-            if (ans.id === answer.id) {
-                ans.votes -= 1;
-
+    const handleUpvoting = async (answer) => {
+        if (checkIfUpvoted(answer.id)) {
+            try {
+                await sendUpvote(answer.id);
+            } catch (e) {
+                console.log(e);
+                showErrorToast("Something went wrong");
+                return;
             }
-            return ans;
-        }));
-        setUser({
-            ...user,
-            upvotes: user.upvotes.filter(answerId => answerId !== answer.id)
-        });
-    }
 
-    const handleDownvoting = (answer) => {
-        if (!checkIfDownvoted(answer.id)) {
-            handleDownvote(answer.id);
-            setUser({
-                ...user,
-                downvotes: [...user.downvotes, answer.id],
-                upvotes: user.upvotes.filter(ans => ans.id !== answer.id)
-            });
-            return;
-        }
-        sendDownvote(answer.id);
-        setAnswers(answers.map(ans => {
-            if (ans.id === answer.id) {
-                ans.votes++;
+            setAnswers(prevAnswers =>
+                prevAnswers.map(ans =>
+                    ans.id === answer.id ? {...ans, votes: ans.votes - 1} : ans
+                )
+            );
+
+            setUser(prevUser => ({
+                ...prevUser,
+                upvotes: prevUser.upvotes.filter(answerId => answerId !== answer.id)
+            }));
+        } else {
+            try {
+                await sendUpvote(answer.id);
+            } catch (error) {
+                console.log(error);
+                showErrorToast("Something went wrong");
+                return;
             }
-            return ans;
-        }))
-        setUser({
-            ...user,
-            downvotes: user.downvotes.filter(ans => ans.id !== answer.id)
-        });
-    }
+
+            setAnswers(prevAnswers =>
+                prevAnswers.map(ans =>
+                    ans.id === answer.id ? {
+                        ...ans,
+                        votes: checkIfDownvoted(answer.id) ? ans.votes + 2 : ans.votes + 1
+                    } : ans
+                )
+            );
+
+            setUser(prevUser => ({
+                ...prevUser,
+                upvotes: [...prevUser.upvotes, answer.id],
+                downvotes: prevUser.downvotes.filter(ide => ide !== answer.id)
+            }));
+        }
+    };
+
+    const handleDownvoting = async (answer) => {
+        if (checkIfDownvoted(answer.id)) {
+            try {
+                await sendDownvote(answer.id);
+            } catch (e) {
+                console.log(e);
+                showErrorToast("Something went wrong");
+                return;
+            }
+
+            setAnswers(prevAnswers =>
+                prevAnswers.map(ans =>
+                    ans.id === answer.id ? {...ans, votes: ans.votes + 1} : ans
+                )
+            );
+
+            setUser(prevUser => ({
+                ...prevUser,
+                downvotes: prevUser.downvotes.filter(ansId => ansId !== answer.id)
+            }));
+        } else {
+            try {
+                await sendDownvote(answer.id);
+            } catch (e) {
+                console.log(e);
+                showErrorToast("Something went wrong");
+                return;
+            }
+
+            setAnswers(prevAnswers =>
+                prevAnswers.map(ans =>
+                    ans.id === answer.id ? {
+                        ...ans,
+                        votes: checkIfUpvoted(answer.id) ? ans.votes - 2 : ans.votes - 1
+                    } : ans
+                )
+            );
+
+            setUser(prevUser => ({
+                ...prevUser,
+                downvotes: [...prevUser.downvotes, answer.id],
+                upvotes: prevUser.upvotes.filter(ansId => ansId !== answer.id)
+            }));
+        }
+    };
+
 
     return questionData && answers && user ? (
         <>
@@ -246,6 +255,7 @@ export default function QuestionPage() {
             </div>
             {
                 answers.map(answer => {
+                    console.log(answer.votes);
                     return (
                         <div
                             className="w-3/4 min-h-40 mt-12 p-6 bg-white rounded-lg shadow-md block m-auto">
@@ -266,7 +276,7 @@ export default function QuestionPage() {
                                         onClick={() => {
                                             handleDownvoting(answer);
                                         }}
-                                        className={"text-center text-3xl text-gray-400 hover:text-black transition block cursor-pointer " + (checkIfDownvoted(answer.id) ? '' : 'text-gray-400')}>
+                                        className={"text-center text-3xl hover:text-black transition block cursor-pointer " + (checkIfDownvoted(answer.id) ? '' : 'text-gray-400')}>
                                         <FontAwesomeIcon icon={faArrowDown}/>
                                     </div>
                                     {user.userName === questionData.username && !questionData.hasAccepted ? <div
@@ -275,7 +285,7 @@ export default function QuestionPage() {
                                             handleAccept(answer.id)
                                         }} icon={faCheck}/>
                                     </div> : <></>}
-                                    {questionData.hasAccepted ? <div
+                                    {questionData.hasAccepted && answer.accepted ? <div
                                         className="text-center text-3xl text-green-500 transition block">
                                         <FontAwesomeIcon icon={faCheck}/>
                                     </div> : <></>}

@@ -162,20 +162,15 @@ public class AnswersController(
                 return NotFound("This user or answer could not be found");
             }
 
-            if (user.Id != answer.UserId)
-            {
-                return Forbid();
-            }
-            
             var answerUser = answer.User;
-            
+
             if (user.Upvotes.Contains(answer.Id))
             {
                 var unVote = -1;
                 userRepository.RemoveUpvote(user, answer.Id);
                 answerRepository.VoteAnswer(answer, unVote);
                 userRepository.UpdateKarma(answerUser, unVote);
-                
+
                 return Ok("Unvoted answer");
             }
 
@@ -189,6 +184,7 @@ public class AnswersController(
 
                 return Ok("Upvoted answer");
             }
+
             var vote = 1;
             answerRepository.VoteAnswer(answer, vote);
             userRepository.UpdateKarma(answerUser, vote);
@@ -216,20 +212,15 @@ public class AnswersController(
                 return NotFound("This user or answer could not be found");
             }
 
-            if (user.Id != answer.UserId)
-            {
-                return Forbid();
-            }
-            
             var answerUser = answer.User;
-            
+
             if (user.Downvotes.Contains(answer.Id))
             {
                 var unVote = 1;
                 userRepository.RemoveDownvote(user, answer.Id);
                 answerRepository.VoteAnswer(answer, unVote);
                 userRepository.UpdateKarma(answerUser, unVote);
-                
+
                 return Ok("Unvoted answer");
             }
 
@@ -256,5 +247,4 @@ public class AnswersController(
             return StatusCode(500);
         }
     }
-    
 }
