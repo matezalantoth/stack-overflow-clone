@@ -9,7 +9,7 @@ public class AnswerFactory : IAnswerFactory
         return new Answer
         {
             Id = Guid.NewGuid(), Content = newAnswer.Content, PostedAt = newAnswer.PostedAt, User = user,
-            UserId = user.Id, Question = question, QuestionId = question.Id
+            UserId = user.Id, Question = question, QuestionId = question.Id, Votes = 0
         };
     }
 

@@ -17,4 +17,6 @@ public interface IAnswerRepository
     public Task<AnswerDTO> UpdateAnswer(Answer answer);
 
     public Task<AnswerDTO> AcceptAnswer(Answer answer);
+    
+    public void VoteAnswer(Answer answer, int vote);
 }

@@ -57,4 +57,10 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
         await dbContext.SaveChangesAsync();
         return answer.ToDTO();
     }
+
+    public void VoteAnswer(Answer answer, int vote)
+    {
+        answer.Votes += vote;
+        dbContext.Update(answer);
+    }
 }
