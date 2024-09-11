@@ -38,6 +38,13 @@ public class QuestionsController(
         }
     }
 
+    [HttpGet("trending")]
+    public ActionResult<IEnumerable<QuestionDTO>> GetTrendingQuestions()
+    {
+        return Ok(questionRepository.GetTrendingQuestions());
+    }
+
+
     [HttpPost]
     public async Task<ActionResult<QuestionDTO>> PostQuestion([FromBody] NewQuestion newQuestion,
         [FromHeader(Name = "Authorization")] Guid sessionToken)
@@ -57,7 +64,7 @@ public class QuestionsController(
 
             var karma = 5;
             userRepository.UpdateKarma(user, karma);
-            
+
             Console.WriteLine(user.UserName);
             var question = questionFactory.CreateQuestion(newQuestion, user);
             return Ok(questionRepository.CreateQuestion(question, user));
