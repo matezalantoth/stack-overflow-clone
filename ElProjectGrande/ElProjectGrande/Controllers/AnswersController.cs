@@ -181,7 +181,13 @@ public class AnswersController(
 
             if (user.Downvotes.Contains(answer.Id))
             {
+                var reVote = 2;
                 userRepository.RemoveDownvote(user, answer.Id);
+                answerRepository.VoteAnswer(answer, reVote);
+                userRepository.UpdateKarma(answerUser, reVote);
+                userRepository.Upvote(user, answer.Id);
+
+                return Ok("Upvoted answer");
             }
             var vote = 1;
             answerRepository.VoteAnswer(answer, vote);
@@ -229,7 +235,12 @@ public class AnswersController(
 
             if (user.Upvotes.Contains(answer.Id))
             {
+                var reVote = -2;
                 userRepository.RemoveUpvote(user, answer.Id);
+                answerRepository.VoteAnswer(answer, reVote);
+                userRepository.UpdateKarma(answerUser, reVote);
+                userRepository.Downvote(user, answer.Id);
+                return Ok("Downvoted answer");
             }
 
             var vote = -1;
