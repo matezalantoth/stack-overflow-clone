@@ -68,7 +68,11 @@ public class UserRepository(ApiDbContext context) : IUserRepository
     {
         return await context.Users
             .Include(u => u.Questions)
+            .ThenInclude(q => q.Answers)
+            .ThenInclude(a => a.User)
             .Include(u => u.Answers)
+            .ThenInclude(a => a.Question)
+            .ThenInclude(q => q.User)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 

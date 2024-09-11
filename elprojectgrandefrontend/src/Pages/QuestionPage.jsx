@@ -33,12 +33,12 @@ export default function QuestionPage() {
         }
         const fetchUser = async () => {
             try {
-                const res = await fetch('/api/Users', {
+                const res = await fetch('/api/Users/GetBySessionToken', {
                     headers: {'Authorization': cookies.user}
                 })
                 setUser(await res.json());
             } catch (e) {
-                console.log(error);
+                console.log(e);
                 showErrorToast("Something went wrong")
             }
         }
@@ -101,7 +101,7 @@ export default function QuestionPage() {
         return `${days} days ago`;
 
     };
-    
+
 
     return questionData && answers && user ? (
         <>

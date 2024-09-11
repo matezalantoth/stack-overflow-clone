@@ -13,8 +13,8 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ElProjectGrande")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8ac921a5abda858401a1b5278c253384c13d0715")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+01c6efe54eff91e9787b4b73a7bb3d0d938b1ac8")]
+[assembly: System.Reflection.AssemblyProductAttribute("ElProjectGrande")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ElProjectGrande")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
