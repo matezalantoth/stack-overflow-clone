@@ -166,10 +166,17 @@ public class AnswersController(
             {
                 return Forbid();
             }
-
+            
+            var answerUser = answer.User;
+            
             if (user.Upvotes.Contains(answer.Id))
             {
-                return BadRequest("You can't upvote the same answer twice");
+                var unVote = -1;
+                userRepository.RemoveUpvote(user, answer.Id);
+                answerRepository.VoteAnswer(answer, unVote);
+                userRepository.UpdateKarma(answerUser, unVote);
+                
+                return Ok("Unvoted answer");
             }
 
             if (user.Downvotes.Contains(answer.Id))
@@ -178,11 +185,10 @@ public class AnswersController(
             }
             var vote = 1;
             answerRepository.VoteAnswer(answer, vote);
-            var answerUser = answer.User;
             userRepository.UpdateKarma(answerUser, vote);
             userRepository.Upvote(user, answer.Id);
 
-            return NoContent();
+            return Ok("Upvoted answer");
         }
         catch (Exception e)
         {
@@ -209,9 +215,16 @@ public class AnswersController(
                 return Forbid();
             }
             
+            var answerUser = answer.User;
+            
             if (user.Downvotes.Contains(answer.Id))
             {
-                return BadRequest("You can't downvote the same answer twice");
+                var unVote = 1;
+                userRepository.RemoveDownvote(user, answer.Id);
+                answerRepository.VoteAnswer(answer, unVote);
+                userRepository.UpdateKarma(answerUser, unVote);
+                
+                return Ok("Unvoted answer");
             }
 
             if (user.Upvotes.Contains(answer.Id))
@@ -221,11 +234,10 @@ public class AnswersController(
 
             var vote = -1;
             answerRepository.VoteAnswer(answer, vote);
-            var answerUser = answer.User;
             userRepository.UpdateKarma(answerUser, vote);
             userRepository.Downvote(user, answer.Id);
 
-            return NoContent();
+            return Ok("Downvoted answer");
         }
         catch (Exception e)
         {
