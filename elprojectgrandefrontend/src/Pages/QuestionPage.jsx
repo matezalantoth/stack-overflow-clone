@@ -137,7 +137,6 @@ export default function QuestionPage() {
             </div>
             {
                 answers.map(answer => {
-                    console.log(questionData);
                     return (
                         <div
                             className="w-3/4 min-h-40 mt-12 p-6 bg-white rounded-lg shadow-md block m-auto">
