@@ -1,4 +1,6 @@
 using ElProjectGrande.Models;
+using ElProjectGrande.Models.UserModels;
+using ElProjectGrande.Models.UserModels.DTOs;
 
 namespace ElProjectGrande.Extensions;
 
@@ -6,7 +8,6 @@ public static class UserExtensions
 {
     public static UserDTO ToDTO(this User user)
     {
-
         var upvotes = new List<Guid>();
         var downvotes = new List<Guid>();
 

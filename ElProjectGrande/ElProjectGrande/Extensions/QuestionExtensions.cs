@@ -1,4 +1,6 @@
 using ElProjectGrande.Models;
+using ElProjectGrande.Models.QuestionModels;
+using ElProjectGrande.Models.QuestionModels.DTOs;
 
 namespace ElProjectGrande.Extensions;
 
