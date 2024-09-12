@@ -1,4 +1,7 @@
 using ElProjectGrande.Models;
+using ElProjectGrande.Models.AnswerModels;
+using ElProjectGrande.Models.QuestionModels;
+using ElProjectGrande.Models.UserModels;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -16,7 +19,6 @@ public class ApiDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__MySql");
-        Console.WriteLine($"Connection string: {connectionString}");
         if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") != "true")
         {
             connectionString = $"Server={Environment.GetEnvironmentVariable("LOCAL_SERVER_NAME")};" +
