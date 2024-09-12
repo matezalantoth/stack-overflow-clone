@@ -1,6 +1,6 @@
 using ElProjectGrande.Models;
 using ElProjectGrande.Models.UserModels;
-using ElProjectGrande.Models.UserModels.DTOs;
+using UserDTO = ElProjectGrande.Models.UserModels.DTOs.UserDTO;
 
 namespace ElProjectGrande.Extensions;
 

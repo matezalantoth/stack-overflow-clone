@@ -1,4 +1,5 @@
 using ElProjectGrande.Extensions;
+using ElProjectGrande.Models;
 using ElProjectGrande.Models.UserModels.DTOs;
 using ElProjectGrande.Services.UserServices.Factory;
 using ElProjectGrande.Services.UserServices.Repository;
