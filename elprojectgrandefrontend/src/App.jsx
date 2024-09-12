@@ -1,4 +1,4 @@
-import {StrictMode, useEffect} from 'react'
+import {StrictMode, useEffect, useState} from 'react'
 import './style.css'
 import {BrowserRouter, Routes, Route} from "react-router-dom"
 import {CookiesProvider, useCookies} from 'react-cookie';
@@ -20,17 +20,20 @@ import PublicUser from "./Pages/User/PublicUser.jsx";
 export default function App() 
 {
     const[cookies, setCookies] = useCookies(['user'])
+    const[searchQuestion, setsearchQuestion] = useState(null)
+    const[normalQuestion, setNormalQuestion] = useState(null)
     
     function setUserLoginCookies(user) {
         setCookies('user', user, {path: '/'})
     }
     return (
+        
         <StrictMode>
             <CookiesProvider>
                 <BrowserRouter>
-                    <Navbar cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>
+                    <Navbar setUserLoginCookies={setUserLoginCookies} setsearchQuestion={setsearchQuestion} normalQuestion={normalQuestion}  />
                     <Routes>
-                        <Route path="/" element={<WelcomePage cookies={cookies}/>} />
+                        <Route path="/" element={<WelcomePage searchQuestion={searchQuestion} normalQuestion={normalQuestion} setNormalQuestion={setNormalQuestion} setsearchQuestion={setsearchQuestion}/>} />
                         <Route path="/signup" element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/login" element={<LoginPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/askquestion" element={<AskQuestion cookies={cookies}/>}/>
