@@ -1,5 +1,9 @@
 /obj
 /bin
 /Migrations
-../.env
+
 ../.idea
+obj
+.env
+/.env
+../.env
