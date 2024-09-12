@@ -109,16 +109,16 @@ export default function QuestionPage() {
                 Authorization: cookies.user
             }
         });
+
         const data = await res.json();
-        if (data.question) {
-            setQuestionData({...questionData, hasAccepted: true});
-            const updatedAnswers = answers.map(ans => {
+        if (data.accepted) {
+            setAnswers((answers) => answers.map(ans => {
                 if (ans.id === data.id) {
                     return {...ans, accepted: true}
                 }
                 return ans;
-            })
-            setAnswers(updatedAnswers);
+            }));
+            setQuestionData((questionData) => ({...questionData, hasAccepted: true}));
         }
     }
 
@@ -255,7 +255,6 @@ export default function QuestionPage() {
             </div>
             {
                 answers.map(answer => {
-                    console.log(answer.votes);
                     return (
                         <div
                             className="w-3/4 min-h-40 mt-12 p-6 bg-white rounded-lg shadow-md block m-auto">

@@ -25,7 +25,7 @@ public class QuestionsController(
     {
         try
         {
-            var question = await questionRepository.GetQuestionByIdWithoutAnswers(id);
+            var question = await questionRepository.GetQuestionById(id);
             if (question == null)
             {
                 throw new ArgumentException();

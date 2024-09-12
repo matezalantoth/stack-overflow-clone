@@ -15,7 +15,11 @@ public class Question
 
     public bool HasAccepted()
     {
-        return Answers.Any(answer => answer.Accepted);
+        return Answers.Any(answer =>
+        {
+            Console.WriteLine(answer.Accepted);
+            return answer.Accepted;
+        });
     }
 
 

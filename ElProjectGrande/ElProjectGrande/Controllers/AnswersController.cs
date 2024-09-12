@@ -140,8 +140,7 @@ public class AnswersController(
             var answerUser = answer.User;
             var karma = 20;
             userRepository.UpdateKarma(answerUser, karma);
-            await answerRepository.AcceptAnswer(answer);
-            return Ok();
+            return Ok(await answerRepository.AcceptAnswer(answer));
         }
         catch (Exception e)
         {
