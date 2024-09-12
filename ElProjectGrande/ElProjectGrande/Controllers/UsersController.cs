@@ -1,6 +1,9 @@
 using ElProjectGrande.Extensions;
 using ElProjectGrande.Models;
-using ElProjectGrande.Services;
+using ElProjectGrande.Models.UserModels.DTOs;
+using ElProjectGrande.Services.UserServices.Factory;
+using ElProjectGrande.Services.UserServices.Repository;
+using ElProjectGrande.Services.UserServices.Verifier;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElProjectGrande.Controllers;
@@ -79,7 +82,6 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     public async Task<ActionResult<UserDTO>> GetUser([FromHeader(Name = "Authorization")] Guid sessionToken)
     {
         var user = await userRepository.GetUserBySessionToken(sessionToken);
-        Console.WriteLine(user);
         if (user == null)
         {
             throw new ArgumentException($"User of session token: {sessionToken} could not be found");

@@ -9,7 +9,7 @@
     ports:
       - "3306:3306"
     env_file:
-      - .env
+      - ./ElProjectGrande/.env
 
   db-setup-migrate:
     image: mcr.microsoft.com/dotnet/sdk:8.0
@@ -19,7 +19,7 @@
     volumes:
       - .:/app
     env_file:
-      - .env
+      - ./ElProjectGrande/.env
     environment:
       - ConnectionStrings__MySql=Server=${DOCKER_SERVER_NAME};Database=${DB_NAME};User=${DB_USERNAME};Password=${DB_USER_PASSWORD};Port=${DB_PORT};
 
@@ -34,6 +34,6 @@
     ports:
       - "8080:8080"
     env_file:
-      - .env
+      - ./ElProjectGrande/.env
     environment:
       - ConnectionStrings__MySql=Server=${DOCKER_SERVER_NAME};Database=${DB_NAME};User=${DB_USERNAME};Password=${DB_USER_PASSWORD};Port=${DB_PORT};

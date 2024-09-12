@@ -1,6 +1,8 @@
 using ElProjectGrande.Extensions;
-using ElProjectGrande.Models;
-using ElProjectGrande.Services;
+using ElProjectGrande.Models.QuestionModels.DTOs;
+using ElProjectGrande.Services.QuestionServices.Factory;
+using ElProjectGrande.Services.QuestionServices.Repository;
+using ElProjectGrande.Services.UserServices.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElProjectGrande.Controllers;
@@ -56,7 +58,7 @@ public class QuestionsController(
                 return Unauthorized("That session token is expired or invalid");
             }
 
-            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var user = await userRepository.GetUserBySessionTokenOnlyQuestions(sessionToken);
             if (user == null)
             {
                 throw new Exception("User could not be found");

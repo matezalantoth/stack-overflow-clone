@@ -1,10 +1,16 @@
 using ElProjectGrande.Data;
-using ElProjectGrande.Services;
+using ElProjectGrande.Services.AnswerServices.Factory;
+using ElProjectGrande.Services.AnswerServices.Repository;
+using ElProjectGrande.Services.QuestionServices.Factory;
+using ElProjectGrande.Services.QuestionServices.Repository;
+using ElProjectGrande.Services.UserServices.Factory;
+using ElProjectGrande.Services.UserServices.Repository;
+using ElProjectGrande.Services.UserServices.Verifier;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-DotNetEnv.Env.Load("../.env");
+DotNetEnv.Env.Load(".env");
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

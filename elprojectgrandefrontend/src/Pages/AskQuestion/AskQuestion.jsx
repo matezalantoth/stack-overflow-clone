@@ -83,7 +83,6 @@ export default function AskQuestion() {
                         onClick={(event) => {
                             event.preventDefault();
                             createQuestion(event).then((data) => {
-                                console.log(data);
                                 if (data.id) {
                                     showSuccessToast("Successfully posted question!");
                                     navigate('/question/' + data.id);

@@ -1,5 +1,8 @@
-using ElProjectGrande.Models;
-using ElProjectGrande.Services;
+using ElProjectGrande.Models.AnswerModels.DTOs;
+using ElProjectGrande.Services.AnswerServices.Factory;
+using ElProjectGrande.Services.AnswerServices.Repository;
+using ElProjectGrande.Services.QuestionServices.Repository;
+using ElProjectGrande.Services.UserServices.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElProjectGrande.Controllers;
@@ -13,12 +16,11 @@ public class AnswersController(
     IAnswerFactory answerFactory) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AnswerDTO>>> GetAllAnswersForQuestion(Guid questionId)
+    public async Task<ActionResult<IEnumerable<AnswersOfQuestionDTO>>> GetAllAnswersForQuestion(Guid questionId)
     {
         try
         {
-            var question = await questionRepository.GetQuestionById(questionId);
-            if (question == null)
+            if (!await questionRepository.CheckIfQuestionExists(questionId))
             {
                 throw new ArgumentException($"Question of id {questionId} could not be found");
             }
@@ -38,7 +40,7 @@ public class AnswersController(
     {
         try
         {
-            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var question = await questionRepository.GetQuestionById(questionId);
             if (user == null || question == null)
             {
@@ -46,14 +48,12 @@ public class AnswersController(
             }
 
             var answer = answerFactory.CreateAnswer(newAnswer, question, user);
-
-            var karma = 5;
-            userRepository.UpdateKarma(user, karma);
-
+            userRepository.UpdateKarma(user, 5);
             return Ok(await answerRepository.CreateAnswer(answer, user, question));
         }
         catch (Exception e)
         {
+            Console.WriteLine(e);
             return StatusCode(500);
         }
     }
@@ -63,7 +63,7 @@ public class AnswersController(
     {
         try
         {
-            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(answerId);
             if (user == null || answer == null)
             {
@@ -75,7 +75,7 @@ public class AnswersController(
                 return Forbid();
             }
 
-            answerRepository.DeleteAnswer(answer, user);
+            await answerRepository.DeleteAnswer(answer, user);
             return NoContent();
         }
         catch (Exception e)
@@ -86,12 +86,13 @@ public class AnswersController(
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<AnswerDTO>> UpdateAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+    public async Task<ActionResult<AnswersOfQuestionDTO>> UpdateAnswer(
+        [FromHeader(Name = "Authorization")] Guid sessionToken,
         Guid id, [FromBody] string newContent)
     {
         try
         {
-            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(id);
             if (user == null || answer == null)
             {
@@ -120,13 +121,13 @@ public class AnswersController(
         try
         {
             var answer = await answerRepository.GetAnswerById(answerId);
-            var user = await userRepository.GetUserBySessionToken(sessionToken);
-            if (answer == null || user == null)
+            var userId = await userRepository.GetUserIdBySessionToken(sessionToken);
+            if (answer == null || userId == null)
             {
                 return NotFound("this answer or user could not be found");
             }
 
-            if (answer.Question.UserId != user.Id)
+            if (answer.Question.UserId != userId)
             {
                 return Forbid();
             }
@@ -139,7 +140,6 @@ public class AnswersController(
             var answerUser = answer.User;
             var karma = 20;
             userRepository.UpdateKarma(answerUser, karma);
-
             return Ok(await answerRepository.AcceptAnswer(answer));
         }
         catch (Exception e)
@@ -155,7 +155,7 @@ public class AnswersController(
     {
         try
         {
-            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(id);
             if (user == null || answer == null)
             {
@@ -205,7 +205,7 @@ public class AnswersController(
     {
         try
         {
-            var user = await userRepository.GetUserBySessionToken(sessionToken);
+            var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(id);
             if (user == null || answer == null)
             {
