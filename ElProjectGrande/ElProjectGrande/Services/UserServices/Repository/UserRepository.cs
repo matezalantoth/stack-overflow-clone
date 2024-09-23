@@ -1,15 +1,21 @@
 using ElProjectGrande.Data;
 using ElProjectGrande.Models.UserModels;
+using ElProjectGrande.Services.AuthenticationServices.TokenService;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElProjectGrande.Services.UserServices.Repository;
 
-public class UserRepository(ApiDbContext context) : IUserRepository
+public class UserRepository(UserManager<IdentityUser> userManager, ApiDbContext context, ITokenService tokenService)
+    : IUserRepository
 {
-    public void CreateUser(User user)
+    public async Task CreateUser(User user, string password)
     {
-        context.Users.Add(user);
-        context.SaveChanges();
+        var result = await userManager.CreateAsync(user, password);
+        if (result != IdentityResult.Success)
+        {
+            throw new Exception(result.ToString());
+        }
     }
 
     public async ValueTask<User?> GetUserByEmail(string email)
@@ -29,24 +35,21 @@ public class UserRepository(ApiDbContext context) : IUserRepository
         return context.Users.AnyAsync(u => u.Email == email || u.UserName == username);
     }
 
-    public Guid GetNewSessionToken()
+    public async Task<string> LoginUser(string email, string password)
     {
-        return Guid.NewGuid();
+        var managedUser = await userManager.FindByEmailAsync(email);
+        if (managedUser == null) throw new Exception("Invalid credentials");
+        var isPasswordValid = await userManager.CheckPasswordAsync(managedUser, password);
+        if (!isPasswordValid) throw new Exception("Invalid credentials");
+        return tokenService.CreateToken(managedUser);
     }
 
-    public Guid LoginUser(User user)
-    {
-        user.SessionToken = GetNewSessionToken();
-        context.SaveChanges();
-        return user.SessionToken;
-    }
-
-    public bool IsUserLoggedIn(Guid sessionToken)
+    public bool IsUserLoggedIn(string sessionToken)
     {
         return context.Users.FirstOrDefault(u => u.SessionToken == sessionToken) != null;
     }
 
-    public void LogoutUser(Guid sessionToken)
+    public void LogoutUser(string sessionToken)
     {
         var user = context.Users.FirstOrDefault(u => u.SessionToken == sessionToken);
         if (user == null)
@@ -54,12 +57,12 @@ public class UserRepository(ApiDbContext context) : IUserRepository
             throw new ArgumentException("This session token could not be found");
         }
 
-        user.SessionToken = Guid.Empty;
+        user.SessionToken = String.Empty;
         context.Users.Update(user);
         context.SaveChanges();
     }
 
-    public async ValueTask<User?> GetUserBySessionToken(Guid sessionToken)
+    public async ValueTask<User?> GetUserBySessionToken(string sessionToken)
     {
         return await context.Users
             .Include(u => u.Questions)
@@ -117,23 +120,17 @@ public class UserRepository(ApiDbContext context) : IUserRepository
             .ThenInclude(q => q.User).FirstOrDefaultAsync(u => u.UserName == username);
     }
 
-    public async ValueTask<User?> GetUserBySessionTokenOnlyAnswers(Guid sessionToken)
+    public async ValueTask<User?> GetUserBySessionTokenOnlyAnswers(string sessionToken)
     {
         return await context.Users
             .Include(u => u.Answers)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
-    public async ValueTask<User?> GetUserBySessionTokenOnlyQuestions(Guid sessionToken)
+    public async ValueTask<User?> GetUserBySessionTokenOnlyQuestions(string sessionToken)
     {
         return await context.Users
             .Include(u => u.Questions)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
-    }
-
-    public async ValueTask<Guid?> GetUserIdBySessionToken(Guid sessionToken)
-    {
-        return (await context.Users
-            .FirstOrDefaultAsync(u => u.SessionToken == sessionToken))?.Id;
     }
 }

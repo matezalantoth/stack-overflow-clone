@@ -4,19 +4,19 @@ namespace ElProjectGrande.Services.UserServices.Repository;
 
 public interface IUserRepository
 {
-    public void CreateUser(User user);
+    public Task CreateUser(User user, string password);
 
     public ValueTask<User?> GetUserByEmail(string email);
 
     public Task<bool> AreCredentialsTaken(string email, string username);
 
-    public Guid LoginUser(User user);
+    public Task<string> LoginUser(string email, string password);
 
-    public bool IsUserLoggedIn(Guid sessionToken);
+    public bool IsUserLoggedIn(string sessionToken);
 
-    public void LogoutUser(Guid sessionToken);
+    public void LogoutUser(string sessionToken);
 
-    public ValueTask<User?> GetUserBySessionToken(Guid sessionToken);
+    public ValueTask<User?> GetUserBySessionToken(string sessionToken);
 
     public void UpdateKarma(User user, int karma);
 
@@ -30,9 +30,7 @@ public interface IUserRepository
 
     public ValueTask<User?> GetUserByUserName(string username);
 
-    public ValueTask<User?> GetUserBySessionTokenOnlyAnswers(Guid sessionToken);
+    public ValueTask<User?> GetUserBySessionTokenOnlyAnswers(string sessionToken);
 
-    public ValueTask<User?> GetUserBySessionTokenOnlyQuestions(Guid sessionToken);
-
-    public ValueTask<Guid?> GetUserIdBySessionToken(Guid sessionToken);
+    public ValueTask<User?> GetUserBySessionTokenOnlyQuestions(string sessionToken);
 }

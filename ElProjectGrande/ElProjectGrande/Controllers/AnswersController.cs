@@ -3,6 +3,7 @@ using ElProjectGrande.Services.AnswerServices.Factory;
 using ElProjectGrande.Services.AnswerServices.Repository;
 using ElProjectGrande.Services.QuestionServices.Repository;
 using ElProjectGrande.Services.UserServices.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElProjectGrande.Controllers;
@@ -33,9 +34,9 @@ public class AnswersController(
         }
     }
 
-    [HttpPost]
+    [HttpPost, Authorize]
     public async Task<ActionResult<AnswerDTO>> PostNewAnswerToQuestion(
-        [FromHeader(Name = "Authorization")] Guid sessionToken,
+        [FromHeader(Name = "Authorization")] string sessionToken,
         Guid questionId, [FromBody] NewAnswer newAnswer)
     {
         try
@@ -58,11 +59,18 @@ public class AnswersController(
         }
     }
 
-    [HttpDelete("{answerId}")]
-    public async Task<ActionResult> DeleteAnswer([FromHeader(Name = "Authorization")] Guid sessionToken, Guid answerId)
+    [HttpDelete("{answerId}"), Authorize]
+    public async Task<ActionResult> DeleteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
+        Guid answerId)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(answerId);
             if (user == null || answer == null)
@@ -85,13 +93,19 @@ public class AnswersController(
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id}"), Authorize]
     public async Task<ActionResult<AnswersOfQuestionDTO>> UpdateAnswer(
-        [FromHeader(Name = "Authorization")] Guid sessionToken,
+        [FromHeader(Name = "Authorization")] string sessionToken,
         Guid id, [FromBody] string newContent)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(id);
             if (user == null || answer == null)
@@ -114,15 +128,21 @@ public class AnswersController(
         }
     }
 
-    [HttpPost("/accept/{answerId}")]
-    public async Task<ActionResult<AnswerDTO>> AcceptAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+    [HttpPost("/accept/{answerId}"), Authorize]
+    public async Task<ActionResult<AnswerDTO>> AcceptAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid answerId)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var answer = await answerRepository.GetAnswerById(answerId);
-            var userId = await userRepository.GetUserIdBySessionToken(sessionToken);
-            if (answer == null || userId == null)
+            var userId = (await userRepository.GetUserBySessionToken(sessionToken))?.Id;
+            if (answer == null || userId == String.Empty)
             {
                 return NotFound("this answer or user could not be found");
             }
@@ -149,12 +169,18 @@ public class AnswersController(
         }
     }
 
-    [HttpPatch("{id}/upvote")]
-    public async Task<ActionResult> UpVoteAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+    [HttpPatch("{id}/upvote"), Authorize]
+    public async Task<ActionResult> UpVoteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid id)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(id);
             if (user == null || answer == null)
@@ -199,12 +225,18 @@ public class AnswersController(
         }
     }
 
-    [HttpPatch("{id}/downvote")]
-    public async Task<ActionResult> DownVoteAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+    [HttpPatch("{id}/downvote"), Authorize]
+    public async Task<ActionResult> DownVoteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid id)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(id);
             if (user == null || answer == null)
