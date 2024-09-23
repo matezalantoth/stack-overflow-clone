@@ -127,4 +127,21 @@ public class QuestionsController(
             return NotFound(e.Message);
         }
     }
+    
+    
+    [HttpGet("getQuestionsTen")]
+    
+    public ActionResult <MainPageQuestionDTO> GetTenQuestions(int startIndex)
+    {
+        var questions = questionRepository.GetTenQuestion(startIndex).ToList();
+        startIndex += 10;
+
+       
+
+        return Ok(new MainPageQuestionDTO
+        {
+            Questions = questions,
+            Index = startIndex
+        });
+    }
 }
