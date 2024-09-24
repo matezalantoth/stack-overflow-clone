@@ -10,7 +10,7 @@ public class Answer
     public Question Question { get; set; }
     public int Votes { get; set; }
     public User User { get; set; }
-    public Guid UserId { get; set; }
+    public string UserId { get; set; }
     public Guid QuestionId { get; set; }
     public DateTime PostedAt { get; set; }
     public bool Accepted { get; set; } = false;

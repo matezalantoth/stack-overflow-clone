@@ -1,3 +1,4 @@
+using ElProjectGrande.Controllers;
 using ElProjectGrande.Data;
 using ElProjectGrande.Extensions;
 using ElProjectGrande.Models;
@@ -88,4 +89,14 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
             .Take(5)
             .Select(q => q.ToDTO());
     }
+
+    public IEnumerable<QuestionDTO> GetTenQuestion(int startIndex)
+    {
+        return context.Questions
+            .Include(q => q.Answers)
+            .Include(q => q.User)
+            .Skip(startIndex).Take(startIndex + 10).Select(q => q.ToDTO());
+    }
+
+    
 }

@@ -18,7 +18,7 @@ export default function ProfilePage() {
                 const res = await fetch(`/api/Users/GetBySessionToken`,
                     {
                         headers: {
-                            'Authorization': cookies.user
+                            'Authorization': "Bearer " + cookies.user
                         }
 
                     });

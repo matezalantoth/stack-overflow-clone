@@ -3,6 +3,7 @@ using ElProjectGrande.Services.AnswerServices.Factory;
 using ElProjectGrande.Services.AnswerServices.Repository;
 using ElProjectGrande.Services.QuestionServices.Repository;
 using ElProjectGrande.Services.UserServices.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElProjectGrande.Controllers;
@@ -33,22 +34,25 @@ public class AnswersController(
         }
     }
 
-    [HttpPost]
+    [HttpPost, Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<AnswerDTO>> PostNewAnswerToQuestion(
-        [FromHeader(Name = "Authorization")] Guid sessionToken,
+        [FromHeader(Name = "Authorization")] string sessionToken,
         Guid questionId, [FromBody] NewAnswer newAnswer)
     {
         try
         {
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var question = await questionRepository.GetQuestionById(questionId);
+            Console.WriteLine(user);
+            Console.WriteLine(question);
             if (user == null || question == null)
             {
                 return NotFound("This user or question could not be found");
             }
 
             var answer = answerFactory.CreateAnswer(newAnswer, question, user);
-            userRepository.UpdateKarma(user, 5);
+            await userRepository.UpdateKarma(user, 5);
             return Ok(await answerRepository.CreateAnswer(answer, user, question));
         }
         catch (Exception e)
@@ -58,11 +62,18 @@ public class AnswersController(
         }
     }
 
-    [HttpDelete("{answerId}")]
-    public async Task<ActionResult> DeleteAnswer([FromHeader(Name = "Authorization")] Guid sessionToken, Guid answerId)
+    [HttpDelete("{answerId}"), Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult> DeleteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
+        Guid answerId)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(answerId);
             if (user == null || answer == null)
@@ -85,13 +96,19 @@ public class AnswersController(
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id}"), Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<AnswersOfQuestionDTO>> UpdateAnswer(
-        [FromHeader(Name = "Authorization")] Guid sessionToken,
+        [FromHeader(Name = "Authorization")] string sessionToken,
         Guid id, [FromBody] string newContent)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(id);
             if (user == null || answer == null)
@@ -114,15 +131,21 @@ public class AnswersController(
         }
     }
 
-    [HttpPost("/accept/{answerId}")]
-    public async Task<ActionResult<AnswerDTO>> AcceptAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+    [HttpPost("/accept/{answerId}"), Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult<AnswerDTO>> AcceptAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid answerId)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var answer = await answerRepository.GetAnswerById(answerId);
-            var userId = await userRepository.GetUserIdBySessionToken(sessionToken);
-            if (answer == null || userId == null)
+            var userId = (await userRepository.GetUserBySessionToken(sessionToken))?.Id;
+            if (answer == null || userId == String.Empty)
             {
                 return NotFound("this answer or user could not be found");
             }
@@ -139,7 +162,7 @@ public class AnswersController(
 
             var answerUser = answer.User;
             var karma = 20;
-            userRepository.UpdateKarma(answerUser, karma);
+            await userRepository.UpdateKarma(answerUser, karma);
             return Ok(await answerRepository.AcceptAnswer(answer));
         }
         catch (Exception e)
@@ -149,12 +172,19 @@ public class AnswersController(
         }
     }
 
-    [HttpPatch("{id}/upvote")]
-    public async Task<ActionResult> UpVoteAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+    [HttpPatch("{id}/upvote"), Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult> UpVoteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid id)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken))
+            {
+                return Unauthorized();
+            }
+
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(id);
             if (user == null || answer == null)
@@ -167,9 +197,9 @@ public class AnswersController(
             if (user.Upvotes.Contains(answer.Id))
             {
                 var unVote = -1;
-                userRepository.RemoveUpvote(user, answer.Id);
+                await userRepository.RemoveUpvote(user, answer.Id);
                 answerRepository.VoteAnswer(answer, unVote);
-                userRepository.UpdateKarma(answerUser, unVote);
+                await userRepository.UpdateKarma(answerUser, unVote);
 
                 return Ok("Unvoted answer");
             }
@@ -177,18 +207,18 @@ public class AnswersController(
             if (user.Downvotes.Contains(answer.Id))
             {
                 var reVote = 2;
-                userRepository.RemoveDownvote(user, answer.Id);
+                await userRepository.RemoveDownvote(user, answer.Id);
                 answerRepository.VoteAnswer(answer, reVote);
-                userRepository.UpdateKarma(answerUser, reVote);
-                userRepository.Upvote(user, answer.Id);
+                await userRepository.UpdateKarma(answerUser, reVote);
+                await userRepository.Upvote(user, answer.Id);
 
                 return Ok("Upvoted answer");
             }
 
             var vote = 1;
             answerRepository.VoteAnswer(answer, vote);
-            userRepository.UpdateKarma(answerUser, vote);
-            userRepository.Upvote(user, answer.Id);
+            await userRepository.UpdateKarma(answerUser, vote);
+            await userRepository.Upvote(user, answer.Id);
 
             return Ok("Upvoted answer");
         }
@@ -199,12 +229,18 @@ public class AnswersController(
         }
     }
 
-    [HttpPatch("{id}/downvote")]
-    public async Task<ActionResult> DownVoteAnswer([FromHeader(Name = "Authorization")] Guid sessionToken,
+    [HttpPatch("{id}/downvote"), Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult> DownVoteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid id)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var answer = await answerRepository.GetAnswerById(id);
             if (user == null || answer == null)
@@ -217,9 +253,9 @@ public class AnswersController(
             if (user.Downvotes.Contains(answer.Id))
             {
                 var unVote = 1;
-                userRepository.RemoveDownvote(user, answer.Id);
+                await userRepository.RemoveDownvote(user, answer.Id);
                 answerRepository.VoteAnswer(answer, unVote);
-                userRepository.UpdateKarma(answerUser, unVote);
+                await userRepository.UpdateKarma(answerUser, unVote);
 
                 return Ok("Unvoted answer");
             }
@@ -227,17 +263,17 @@ public class AnswersController(
             if (user.Upvotes.Contains(answer.Id))
             {
                 var reVote = -2;
-                userRepository.RemoveUpvote(user, answer.Id);
+                await userRepository.RemoveUpvote(user, answer.Id);
                 answerRepository.VoteAnswer(answer, reVote);
-                userRepository.UpdateKarma(answerUser, reVote);
-                userRepository.Downvote(user, answer.Id);
+                await userRepository.UpdateKarma(answerUser, reVote);
+                await userRepository.Downvote(user, answer.Id);
                 return Ok("Downvoted answer");
             }
 
             var vote = -1;
             answerRepository.VoteAnswer(answer, vote);
-            userRepository.UpdateKarma(answerUser, vote);
-            userRepository.Downvote(user, answer.Id);
+            await userRepository.UpdateKarma(answerUser, vote);
+            await userRepository.Downvote(user, answer.Id);
 
             return Ok("Downvoted answer");
         }

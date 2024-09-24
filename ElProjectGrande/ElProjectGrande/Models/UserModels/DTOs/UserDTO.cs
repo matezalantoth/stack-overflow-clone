@@ -13,5 +13,5 @@ public class UserDTO
     public int Karma { get; set; }
     public List<AnswerDTO> Answers { get; set; }
     public List<QuestionDTO> Questions { get; set; }
-    public Guid SessionToken { get; set; }
+    public string SessionToken { get; set; }
 }

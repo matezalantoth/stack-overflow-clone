@@ -35,5 +35,8 @@
       - "8080:8080"
     env_file:
       - ./ElProjectGrande/.env
+    volumes:
+      - ".:/app"
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__MySql=Server=${DOCKER_SERVER_NAME};Database=${DB_NAME};User=${DB_USERNAME};Password=${DB_USER_PASSWORD};Port=${DB_PORT};

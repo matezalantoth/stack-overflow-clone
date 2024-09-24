@@ -1,16 +1,18 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using ElProjectGrande.Extensions;
 using ElProjectGrande.Models;
 using ElProjectGrande.Models.UserModels.DTOs;
 using ElProjectGrande.Services.UserServices.Factory;
 using ElProjectGrande.Services.UserServices.Repository;
-using ElProjectGrande.Services.UserServices.Verifier;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElProjectGrande.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UsersController(IUserRepository userRepository, IUserFactory userFactory, IUserVerifier userVerifier)
+public class UsersController(IUserRepository userRepository, IUserFactory userFactory)
     : ControllerBase
 {
     [HttpPost("signup")]
@@ -18,14 +20,20 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     {
         try
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             if (await userRepository.AreCredentialsTaken(newUser.Email, newUser.UserName))
             {
                 return BadRequest("Some of your credentials are invalid");
             }
 
             var user = userFactory.CreateUser(newUser);
-            userRepository.CreateUser(user);
-            return Ok(user.SessionToken);
+            await userRepository.CreateUser(user, newUser.Password, "User");
+            user.SessionToken = await userRepository.LoginUser(newUser.Email, newUser.Password);
+            return Ok(user);
         }
         catch (Exception e)
         {
@@ -35,41 +43,43 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<Guid>> Login([FromBody] LoginCredentials loginCredentials)
+    public async Task<ActionResult<string>> Login([FromBody] LoginCredentials loginCredentials)
     {
         try
         {
-            var user = await userRepository.GetUserByEmail(loginCredentials.Email);
-            if (user == null || !userVerifier.VerifyPassword(loginCredentials.Password, user.Password, user.Salt))
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Some of your credentials are incorrect");
+                return BadRequest(ModelState);
             }
 
-            return Ok(userRepository.LoginUser(user));
+            var token = await userRepository.LoginUser(loginCredentials.Email, loginCredentials.Password);
+            return Content($"\"{token}\"", "application/json");
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return StatusCode(500);
+            return BadRequest(e.Message);
         }
     }
 
-    [HttpPost("logout")]
-    public ActionResult LogoutUser([FromHeader(Name = "Authorization")] Guid sessionToken)
+    [HttpPost("logout"), Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult> LogoutUser([FromHeader(Name = "Authorization")] string sessionToken)
     {
         try
         {
-            if (sessionToken == Guid.Empty)
+            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
             {
-                throw new ArgumentException("This session token does not exist");
+                return Unauthorized();
             }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
 
             if (!userRepository.IsUserLoggedIn(sessionToken))
             {
                 return NotFound("This user could not be found");
             }
 
-            userRepository.LogoutUser(sessionToken);
+            await userRepository.LogoutUser(sessionToken);
             return Ok();
         }
         catch (Exception e)
@@ -78,9 +88,15 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         }
     }
 
-    [HttpGet("GetBySessionToken")]
-    public async Task<ActionResult<UserDTO>> GetUser([FromHeader(Name = "Authorization")] Guid sessionToken)
+    [HttpGet("GetBySessionToken"), Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult<UserDTO>> GetUser([FromHeader(Name = "Authorization")] string sessionToken)
     {
+        if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+        {
+            return Unauthorized();
+        }
+
+        sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
         var user = await userRepository.GetUserBySessionToken(sessionToken);
         if (user == null)
         {

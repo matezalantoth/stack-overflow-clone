@@ -32,7 +32,7 @@ export default function AskQuestion() {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Authorization': cookies.user
+                'Authorization': "Bearer " + cookies.user
             },
             body: JSON.stringify({
                 ...question,

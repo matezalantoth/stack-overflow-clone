@@ -22,4 +22,6 @@ public interface IQuestionRepository
     public QuestionDTO UpdateQuestion(Question question);
 
     public IEnumerable<QuestionDTO> GetTrendingQuestions();
+
+    public IEnumerable<QuestionDTO> GetTenQuestion(int startIndex);
 }
