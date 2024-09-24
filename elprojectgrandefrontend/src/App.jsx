@@ -20,8 +20,8 @@ import PublicUser from "./Pages/User/PublicUser.jsx";
 export default function App() 
 {
     const[cookies, setCookies] = useCookies(['user'])
-    const[searchQuestion, setsearchQuestion] = useState(null)
-    const[normalQuestion, setNormalQuestion] = useState(null)
+    const[searchQuestion, setsearchQuestion] = useState([])
+    const[normalQuestion, setNormalQuestion] = useState([])
     
     function setUserLoginCookies(user) {
         setCookies('user', user, {path: '/'})

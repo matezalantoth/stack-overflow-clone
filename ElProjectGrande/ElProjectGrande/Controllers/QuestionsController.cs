@@ -14,11 +14,7 @@ public class QuestionsController(
     IUserRepository userRepository,
     IQuestionFactory questionFactory) : ControllerBase
 {
-    [HttpGet]
-    public IEnumerable<QuestionDTO> GetQuestions()
-    {
-        return questionRepository.GetQuestions();
-    }
+    
 
     [HttpGet("{id}")]
     public async Task<ActionResult<QuestionDTO>> GetQuestionById(Guid id)
@@ -129,9 +125,9 @@ public class QuestionsController(
     }
     
     
-    [HttpGet("getQuestionsTen")]
+    [HttpGet]
     
-    public ActionResult <MainPageQuestionDTO> GetTenQuestions(int startIndex)
+    public ActionResult <MainPageQuestionDTO> GetQuestions(int startIndex)
     {
         var questions = questionRepository.GetTenQuestion(startIndex).ToList();
         startIndex += 10;
