@@ -3,38 +3,60 @@ import {Component, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useCookies} from "react-cookie";
 import TrendingQuestions from "../../components/TrendingQuestions/TrendingQuestions.jsx";
+import IndexQuestion from "../../components/IndexQuestion/IndexQuestion.jsx";
 
 
 export default function WelcomePage({searchQuestion, normalQuestion, setNormalQuestion, setsearchQuestion } ) {
    
     const navigate = useNavigate();
     const [cookies] = useCookies(['user']);
+    const[startIndex, setStartIndex] = useState(0);
+    const[allQuestions, setAllQuestions] = useState(false)
 
-    useEffect(() => {
-        const fetchQuestions = async () => {
-            try{
-                const res = await fetch("/api/Questions",
+
+    const fetchQuestions = async () => {
+        try{
+            if (!allQuestions) {
+                const res = await fetch(`/api/Questions?startIndex=${startIndex}`,
                     {
-                        headers : {
+                        headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
                         }
 
                     });
                 const data = await res.json();
-                setNormalQuestion(data);
-                setsearchQuestion(data)
-            } catch (error){
-                console.log(error);
+                console.log(data)
+                if (data.questions.length === 0)
+                {
+                    console.log("asdasdasd")
+                    setAllQuestions(() => true)
+                    return
+                }
+                setNormalQuestion(() => [...normalQuestion, ...data.questions]);
+                setsearchQuestion(() => [...searchQuestion, ...data.questions])
+                setStartIndex(() => data.index)
+                
             }
-        };
+        } catch (error){
+            console.log(error);
+        }
+    };
+    
+    
+    
+    
+    useEffect(() => {
+       
         fetchQuestions();
     }, []);
+    console.log(searchQuestion)
     return searchQuestion ? (
             <div className="container flex justify-center items-center relative w-auto mx-auto">
                 
         <div className="welcomePage text-center w-120 flex justify-center items-center flex-col mt-4">
             {searchQuestion.map((question) => {
+                console.log(question)
                 return (<div
                     className='relative h-20 text-black border-b-2 border-l-2 rounded hover:bg-gray-100 transition w-120 overflow-hidden'
 
@@ -52,6 +74,7 @@ export default function WelcomePage({searchQuestion, normalQuestion, setNormalQu
                 </p>
                 <TrendingQuestions />
             </div>
+                <IndexQuestion fetchMore={fetchQuestions}/>
                
             </div>
         ) :
