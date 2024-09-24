@@ -98,13 +98,6 @@ public class ApiDbContext(DbContextOptions<ApiDbContext> options)
                 .HasForeignKey(a => a.QuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
             
-            entity.HasMany(q => q.Tags)
-                .WithMany(t => t.Questions)
-                .UsingEntity(
-                    "QuestionTag",
-                    r => r.HasOne(typeof(Question)).WithMany().HasForeignKey("QuestionsId").HasPrincipalKey(nameof(Question.Id)),
-                    l => l.HasOne(typeof(Tag)).WithMany().HasForeignKey("TagsId").HasPrincipalKey(nameof(Tag.Id)),
-                    j => j.HasKey("QuestionsId", "TagsId"));
         });
 
         modelBuilder.Entity<Answer>(entity =>
@@ -146,12 +139,6 @@ public class ApiDbContext(DbContextOptions<ApiDbContext> options)
                 .IsRequired()
                 .HasMaxLength(20);
             
-            entity.HasMany(t => t.Questions)
-                .WithMany(q => q.Tags)
-                .UsingEntity("QuestionTag",
-                    r => r.HasOne(typeof(Question)).WithMany().HasForeignKey("QuestionsId").HasPrincipalKey(nameof(Question.Id)),
-                    l => l.HasOne(typeof(Tag)).WithMany().HasForeignKey("TagsId").HasPrincipalKey(nameof(Tag.Id)),
-                    j => j.HasKey("QuestionsId", "TagsId"));
         });
     }
 }

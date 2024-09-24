@@ -43,6 +43,8 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
 
     public QuestionDTO CreateQuestion(Question question, User user)
     {
+        var tags = context.Tags.Where(x => question.Tags.Select(t => t.TagName).Contains(x.TagName)).ToList();
+        question.Tags = tags;
         user.Questions.Add(question);
         context.Questions.Add(question);
         foreach (var tag in question.Tags)
