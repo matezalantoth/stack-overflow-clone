@@ -3,6 +3,7 @@ using ElProjectGrande.Data;
 using ElProjectGrande.Models.UserModels;
 using ElProjectGrande.Services.AnswerServices.Factory;
 using ElProjectGrande.Services.AnswerServices.Repository;
+using ElProjectGrande.Services.AuthenticationServices.AuthenticationSeeder;
 using ElProjectGrande.Services.AuthenticationServices.TokenService;
 using ElProjectGrande.Services.QuestionServices.Factory;
 using ElProjectGrande.Services.QuestionServices.Repository;
@@ -37,7 +38,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<ApiDbContext>(options => { options.UseMySQL(GetConnString()); });
 
-builder.Services.AddIdentityCore<IdentityUser>(options =>
+builder.Services.AddIdentityCore<User>(options =>
     {
         options.SignIn.RequireConfirmedAccount = false;
         options.User.RequireUniqueEmail = true;
@@ -47,6 +48,7 @@ builder.Services.AddIdentityCore<IdentityUser>(options =>
         options.Password.RequireUppercase = false;
         options.Password.RequireLowercase = false;
     })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApiDbContext>();
 
 builder.Services.AddSingleton<IUserFactory, UserFactory>();
@@ -56,10 +58,15 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+builder.Services.AddScoped<AuthenticationSeeder>();
 
 AddJwt();
 
 var app = builder.Build();
+
+using var scope = app.Services.CreateScope();
+var authenticationSeeder = scope.ServiceProvider.GetRequiredService<AuthenticationSeeder>();
+authenticationSeeder.SeedRoles();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

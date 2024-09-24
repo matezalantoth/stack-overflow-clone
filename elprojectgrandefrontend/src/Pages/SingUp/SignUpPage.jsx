@@ -4,7 +4,7 @@ import {Link, useNavigate} from 'react-router-dom';
 import {toast} from 'react-hot-toast';
 import {useCookies} from "react-cookie";
 
-export const SignupPage = ({ setUserLoginCookies}) => {
+export const SignupPage = ({setUserLoginCookies}) => {
     const [newUserData, setNewUserData] = useState({});
     const [submittable, setSubmittable] = useState(false);
     const navigate = useNavigate();
@@ -31,12 +31,11 @@ export const SignupPage = ({ setUserLoginCookies}) => {
             },
             body: JSON.stringify({
                 ...newUserData,
-                salt: 'aaaa',
                 registrationTime: new Date(Date.now()).toISOString()
             }),
         });
-        const data = await response.json();
-        return data;
+        return await response.json();
+        ;
     };
 
     useEffect(() => {
@@ -128,7 +127,7 @@ export const SignupPage = ({ setUserLoginCookies}) => {
                                     if (data.message) {
                                         showErrorToast(data.message);
                                     } else {
-                                        setUserLoginCookies(data);
+                                        setUserLoginCookies(data.sessionToken);
                                         navigate('/profile');
                                     }
                                 })

@@ -6,16 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ElProjectGrande.Services.UserServices.Repository;
 
-public class UserRepository(UserManager<IdentityUser> userManager, ApiDbContext context, ITokenService tokenService)
+public class UserRepository(UserManager<User> userManager, ApiDbContext context, ITokenService tokenService)
     : IUserRepository
 {
-    public async Task CreateUser(User user, string password)
+    public async Task CreateUser(User user, string password, string role)
     {
         var result = await userManager.CreateAsync(user, password);
         if (result != IdentityResult.Success)
         {
             throw new Exception(result.ToString());
         }
+
+        await userManager.AddToRoleAsync(user, "User");
     }
 
     public async ValueTask<User?> GetUserByEmail(string email)
@@ -41,7 +43,11 @@ public class UserRepository(UserManager<IdentityUser> userManager, ApiDbContext 
         if (managedUser == null) throw new Exception("Invalid credentials");
         var isPasswordValid = await userManager.CheckPasswordAsync(managedUser, password);
         if (!isPasswordValid) throw new Exception("Invalid credentials");
-        return tokenService.CreateToken(managedUser);
+        var roles = await userManager.GetRolesAsync(managedUser);
+        var token = tokenService.CreateToken(managedUser, roles[0] ?? "User");
+        managedUser.SessionToken = token;
+        await userManager.UpdateAsync(managedUser);
+        return token;
     }
 
     public bool IsUserLoggedIn(string sessionToken)
@@ -49,17 +55,17 @@ public class UserRepository(UserManager<IdentityUser> userManager, ApiDbContext 
         return context.Users.FirstOrDefault(u => u.SessionToken == sessionToken) != null;
     }
 
-    public void LogoutUser(string sessionToken)
+    public async Task LogoutUser(string sessionToken)
     {
-        var user = context.Users.FirstOrDefault(u => u.SessionToken == sessionToken);
-        if (user == null)
+        var user = await context.Users.FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
+        var managedUser = await userManager.FindByEmailAsync(user?.Email);
+        if (user == null || managedUser == null)
         {
             throw new ArgumentException("This session token could not be found");
         }
 
-        user.SessionToken = String.Empty;
-        context.Users.Update(user);
-        context.SaveChanges();
+        managedUser.SessionToken = String.Empty;
+        await userManager.UpdateAsync(managedUser);
     }
 
     public async ValueTask<User?> GetUserBySessionToken(string sessionToken)
@@ -74,39 +80,34 @@ public class UserRepository(UserManager<IdentityUser> userManager, ApiDbContext 
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
-    public void UpdateKarma(User user, int karma)
+    public async Task UpdateKarma(User user, int karma)
     {
         user.Karma += karma;
-        context.Users.Update(user);
-        context.SaveChanges();
+        await userManager.UpdateAsync(user);
     }
 
-    public void Upvote(User user, Guid answerGuid)
+    public async Task Upvote(User user, Guid answerGuid)
     {
         user.Upvotes.Add(answerGuid);
-        context.Users.Update(user);
-        context.SaveChanges();
+        await userManager.UpdateAsync(user);
     }
 
-    public void Downvote(User user, Guid answerGuid)
+    public async Task Downvote(User user, Guid answerGuid)
     {
         user.Downvotes.Add(answerGuid);
-        context.Users.Update(user);
-        context.SaveChanges();
+        await userManager.UpdateAsync(user);
     }
 
-    public void RemoveUpvote(User user, Guid answerGuid)
+    public async Task RemoveUpvote(User user, Guid answerGuid)
     {
         user.Upvotes.Remove(answerGuid);
-        context.Users.Update(user);
-        context.SaveChanges();
+        await userManager.UpdateAsync(user);
     }
 
-    public void RemoveDownvote(User user, Guid answerGuid)
+    public async Task RemoveDownvote(User user, Guid answerGuid)
     {
         user.Downvotes.Remove(answerGuid);
-        context.Users.Update(user);
-        context.SaveChanges();
+        await userManager.UpdateAsync(user);
     }
 
     public async ValueTask<User?> GetUserByUserName(string username)

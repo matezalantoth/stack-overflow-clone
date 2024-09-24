@@ -48,18 +48,19 @@ public class QuestionsController(
     }
 
 
-    [HttpPost, Authorize]
-    public async Task<ActionResult<QuestionDTO>> PostQuestion([FromBody] NewQuestion newQuestion,
-        [FromHeader(Name = "Authorization")] string sessionToken)
+    [HttpPost, Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult<QuestionDTO>> PostQuestion([FromBody] NewQuestion newQuestion)
     {
         try
         {
-            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            var sessionToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            if (string.IsNullOrEmpty(sessionToken))
             {
                 return Unauthorized();
             }
 
-            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
+            Console.WriteLine(userRepository.IsUserLoggedIn(sessionToken));
+
             if (!userRepository.IsUserLoggedIn(sessionToken) || sessionToken == String.Empty)
             {
                 return Unauthorized("That session token is expired or invalid");
@@ -72,7 +73,7 @@ public class QuestionsController(
             }
 
             var karma = 5;
-            userRepository.UpdateKarma(user, karma);
+            await userRepository.UpdateKarma(user, karma);
 
             Console.WriteLine(user.UserName);
             var question = questionFactory.CreateQuestion(newQuestion, user);
@@ -84,7 +85,7 @@ public class QuestionsController(
         }
     }
 
-    [HttpDelete("{id}"), Authorize]
+    [HttpDelete("{id}"), Authorize(Roles = "Admin, User")]
     public async Task<ActionResult> DeleteQuestion([FromHeader(Name = "Authorization")] string sessionToken, Guid id)
     {
         try
@@ -115,7 +116,7 @@ public class QuestionsController(
         }
     }
 
-    [HttpPut("{id}"), Authorize]
+    [HttpPut("{id}"), Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<QuestionDTO>> UpdateQuestion(
         [FromHeader(Name = "Authorization")] string sessionToken,
         [FromBody] UpdatedQuestion updatedQuestion, Guid id)

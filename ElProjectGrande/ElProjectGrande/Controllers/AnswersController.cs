@@ -34,22 +34,25 @@ public class AnswersController(
         }
     }
 
-    [HttpPost, Authorize]
+    [HttpPost, Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<AnswerDTO>> PostNewAnswerToQuestion(
         [FromHeader(Name = "Authorization")] string sessionToken,
         Guid questionId, [FromBody] NewAnswer newAnswer)
     {
         try
         {
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var question = await questionRepository.GetQuestionById(questionId);
+            Console.WriteLine(user);
+            Console.WriteLine(question);
             if (user == null || question == null)
             {
                 return NotFound("This user or question could not be found");
             }
 
             var answer = answerFactory.CreateAnswer(newAnswer, question, user);
-            userRepository.UpdateKarma(user, 5);
+            await userRepository.UpdateKarma(user, 5);
             return Ok(await answerRepository.CreateAnswer(answer, user, question));
         }
         catch (Exception e)
@@ -59,13 +62,13 @@ public class AnswersController(
         }
     }
 
-    [HttpDelete("{answerId}"), Authorize]
+    [HttpDelete("{answerId}"), Authorize(Roles = "Admin, User")]
     public async Task<ActionResult> DeleteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid answerId)
     {
         try
         {
-            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            if (string.IsNullOrEmpty(sessionToken))
             {
                 return Unauthorized();
             }
@@ -93,14 +96,14 @@ public class AnswersController(
         }
     }
 
-    [HttpPut("{id}"), Authorize]
+    [HttpPut("{id}"), Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<AnswersOfQuestionDTO>> UpdateAnswer(
         [FromHeader(Name = "Authorization")] string sessionToken,
         Guid id, [FromBody] string newContent)
     {
         try
         {
-            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            if (string.IsNullOrEmpty(sessionToken))
             {
                 return Unauthorized();
             }
@@ -128,13 +131,13 @@ public class AnswersController(
         }
     }
 
-    [HttpPost("/accept/{answerId}"), Authorize]
+    [HttpPost("/accept/{answerId}"), Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<AnswerDTO>> AcceptAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid answerId)
     {
         try
         {
-            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            if (string.IsNullOrEmpty(sessionToken))
             {
                 return Unauthorized();
             }
@@ -159,7 +162,7 @@ public class AnswersController(
 
             var answerUser = answer.User;
             var karma = 20;
-            userRepository.UpdateKarma(answerUser, karma);
+            await userRepository.UpdateKarma(answerUser, karma);
             return Ok(await answerRepository.AcceptAnswer(answer));
         }
         catch (Exception e)
@@ -169,16 +172,17 @@ public class AnswersController(
         }
     }
 
-    [HttpPatch("{id}/upvote"), Authorize]
+    [HttpPatch("{id}/upvote"), Authorize(Roles = "Admin, User")]
     public async Task<ActionResult> UpVoteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid id)
     {
         try
         {
-            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            if (string.IsNullOrEmpty(sessionToken))
             {
                 return Unauthorized();
             }
+
 
             sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
@@ -193,9 +197,9 @@ public class AnswersController(
             if (user.Upvotes.Contains(answer.Id))
             {
                 var unVote = -1;
-                userRepository.RemoveUpvote(user, answer.Id);
+                await userRepository.RemoveUpvote(user, answer.Id);
                 answerRepository.VoteAnswer(answer, unVote);
-                userRepository.UpdateKarma(answerUser, unVote);
+                await userRepository.UpdateKarma(answerUser, unVote);
 
                 return Ok("Unvoted answer");
             }
@@ -203,18 +207,18 @@ public class AnswersController(
             if (user.Downvotes.Contains(answer.Id))
             {
                 var reVote = 2;
-                userRepository.RemoveDownvote(user, answer.Id);
+                await userRepository.RemoveDownvote(user, answer.Id);
                 answerRepository.VoteAnswer(answer, reVote);
-                userRepository.UpdateKarma(answerUser, reVote);
-                userRepository.Upvote(user, answer.Id);
+                await userRepository.UpdateKarma(answerUser, reVote);
+                await userRepository.Upvote(user, answer.Id);
 
                 return Ok("Upvoted answer");
             }
 
             var vote = 1;
             answerRepository.VoteAnswer(answer, vote);
-            userRepository.UpdateKarma(answerUser, vote);
-            userRepository.Upvote(user, answer.Id);
+            await userRepository.UpdateKarma(answerUser, vote);
+            await userRepository.Upvote(user, answer.Id);
 
             return Ok("Upvoted answer");
         }
@@ -225,13 +229,13 @@ public class AnswersController(
         }
     }
 
-    [HttpPatch("{id}/downvote"), Authorize]
+    [HttpPatch("{id}/downvote"), Authorize(Roles = "Admin, User")]
     public async Task<ActionResult> DownVoteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid id)
     {
         try
         {
-            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            if (string.IsNullOrEmpty(sessionToken))
             {
                 return Unauthorized();
             }
@@ -249,9 +253,9 @@ public class AnswersController(
             if (user.Downvotes.Contains(answer.Id))
             {
                 var unVote = 1;
-                userRepository.RemoveDownvote(user, answer.Id);
+                await userRepository.RemoveDownvote(user, answer.Id);
                 answerRepository.VoteAnswer(answer, unVote);
-                userRepository.UpdateKarma(answerUser, unVote);
+                await userRepository.UpdateKarma(answerUser, unVote);
 
                 return Ok("Unvoted answer");
             }
@@ -259,17 +263,17 @@ public class AnswersController(
             if (user.Upvotes.Contains(answer.Id))
             {
                 var reVote = -2;
-                userRepository.RemoveUpvote(user, answer.Id);
+                await userRepository.RemoveUpvote(user, answer.Id);
                 answerRepository.VoteAnswer(answer, reVote);
-                userRepository.UpdateKarma(answerUser, reVote);
-                userRepository.Downvote(user, answer.Id);
+                await userRepository.UpdateKarma(answerUser, reVote);
+                await userRepository.Downvote(user, answer.Id);
                 return Ok("Downvoted answer");
             }
 
             var vote = -1;
             answerRepository.VoteAnswer(answer, vote);
-            userRepository.UpdateKarma(answerUser, vote);
-            userRepository.Downvote(user, answer.Id);
+            await userRepository.UpdateKarma(answerUser, vote);
+            await userRepository.Downvote(user, answer.Id);
 
             return Ok("Downvoted answer");
         }

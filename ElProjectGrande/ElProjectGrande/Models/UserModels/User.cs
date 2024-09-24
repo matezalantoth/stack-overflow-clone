@@ -12,7 +12,7 @@ public class User : IdentityUser
     public DateTime DoB { get; set; }
     public List<Guid> Upvotes { get; set; } = [];
     public List<Guid> Downvotes { get; set; } = [];
-    public int Karma { get; set; }
+    public int Karma { get; set; } = 0;
     public List<Question> Questions { get; init; } = [];
     public List<Answer> Answers { get; init; } = [];
     public string SessionToken { get; set; } = string.Empty;

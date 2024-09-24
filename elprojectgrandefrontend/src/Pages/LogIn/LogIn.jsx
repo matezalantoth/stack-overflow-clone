@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
-import  {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import {toast} from 'react-hot-toast';
 import {useCookies} from "react-cookie";
 
-export const LoginPage = ({ setUserLoginCookies } ) => {
+export const LoginPage = ({setUserLoginCookies}) => {
     const navigate = useNavigate();
     const [userDetails, setUserDetails] = useState({
         email: null,
@@ -15,8 +15,9 @@ export const LoginPage = ({ setUserLoginCookies } ) => {
     const showErrorToast = (message) => toast.error(message);
     const showSuccessToast = (message) => toast.success(message);
     useEffect(() => {
-            if (cookies.user) {
-                navigate('/profile')}
+        if (cookies.user) {
+            navigate('/profile')
+        }
     }, [cookies])
 
     const handleLogin = async () => {
@@ -80,8 +81,9 @@ export const LoginPage = ({ setUserLoginCookies } ) => {
                                 ) {
                                     try {
                                         const data = await handleLogin();
-                                            setUserLoginCookies(data);
-                                            showSuccessToast('Successfully signed in!');
+                                        console.log(data);
+                                        setUserLoginCookies(data);
+                                        showSuccessToast('Successfully signed in!');
 
                                     } catch (e) {
                                         console.error(e);

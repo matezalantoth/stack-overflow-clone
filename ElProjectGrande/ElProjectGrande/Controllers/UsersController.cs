@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using ElProjectGrande.Extensions;
 using ElProjectGrande.Models;
 using ElProjectGrande.Models.UserModels.DTOs;
@@ -29,9 +31,9 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
             }
 
             var user = userFactory.CreateUser(newUser);
-            await userRepository.CreateUser(user, newUser.Password);
+            await userRepository.CreateUser(user, newUser.Password, "User");
             user.SessionToken = await userRepository.LoginUser(newUser.Email, newUser.Password);
-            return Ok(user.SessionToken);
+            return Ok(user);
         }
         catch (Exception e)
         {
@@ -50,8 +52,8 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
                 return BadRequest(ModelState);
             }
 
-            var response = await userRepository.LoginUser(loginCredentials.Email, loginCredentials.Password);
-            return Ok(response);
+            var token = await userRepository.LoginUser(loginCredentials.Email, loginCredentials.Password);
+            return Content($"\"{token}\"", "application/json");
         }
         catch (Exception e)
         {
@@ -60,8 +62,8 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         }
     }
 
-    [HttpPost("logout"), Authorize]
-    public ActionResult LogoutUser([FromHeader(Name = "Authorization")] string sessionToken)
+    [HttpPost("logout"), Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult> LogoutUser([FromHeader(Name = "Authorization")] string sessionToken)
     {
         try
         {
@@ -77,7 +79,7 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
                 return NotFound("This user could not be found");
             }
 
-            userRepository.LogoutUser(sessionToken);
+            await userRepository.LogoutUser(sessionToken);
             return Ok();
         }
         catch (Exception e)
@@ -86,7 +88,7 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         }
     }
 
-    [HttpGet("GetBySessionToken"), Authorize]
+    [HttpGet("GetBySessionToken"), Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<UserDTO>> GetUser([FromHeader(Name = "Authorization")] string sessionToken)
     {
         if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))

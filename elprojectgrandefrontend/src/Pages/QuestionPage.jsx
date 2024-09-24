@@ -22,7 +22,7 @@ export default function QuestionPage() {
             try {
                 const res = await fetch('/api/Questions/' + questionId, {
                     headers: {
-                        'Authorization': cookies.user
+                        'Authorization': "Bearer " + cookies.user
                     }
                 });
                 const data = await res.json();
@@ -34,7 +34,7 @@ export default function QuestionPage() {
         const fetchUser = async () => {
             try {
                 const res = await fetch('/api/Users/GetBySessionToken', {
-                    headers: {'Authorization': cookies.user}
+                    headers: {'Authorization': "Bearer " + cookies.user}
                 })
                 setUser(await res.json());
             } catch (e) {
@@ -62,7 +62,7 @@ export default function QuestionPage() {
             const res = await fetch('/api/Answers?questionId=' + questionId, {
                 method: "POST",
                 headers: {
-                    'Authorization': cookies.user,
+                    'Authorization': "Bearer " + cookies.user,
                     'Content-type': 'application/json'
                 },
                 body: JSON.stringify({content: reply.content, postedAt: new Date(Date.now()).toISOString()}),
@@ -106,7 +106,7 @@ export default function QuestionPage() {
         const res = await fetch('/api/accept/' + id, {
             method: 'POST',
             headers: {
-                Authorization: cookies.user
+                Authorization: "Bearer " + cookies.user
             }
         });
 
@@ -126,7 +126,7 @@ export default function QuestionPage() {
         await fetch('/api/Answers/' + id + '/upvote', {
             method: 'PATCH',
             headers: {
-                Authorization: cookies.user
+                Authorization: "Bearer " + cookies.user
             }
         })
     }
@@ -137,7 +137,7 @@ export default function QuestionPage() {
         await fetch('/api/Answers/' + id + '/downvote', {
             method: 'PATCH',
             headers: {
-                Authorization: cookies.user
+                Authorization: "Bearer " + cookies.user
             }
         })
     }
