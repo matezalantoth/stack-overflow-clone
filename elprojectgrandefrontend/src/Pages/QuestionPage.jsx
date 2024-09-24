@@ -16,6 +16,9 @@ export default function QuestionPage() {
     const navigate = useNavigate();
     const showErrorToast = (message) => toast.error(message);
     const showSuccessToast = (message) => toast.success(message);
+    const [hasAccepted, setHasAccepted] = useState(false);
+    const [acceptedAnswer, setAcceptedAnswer] = useState(null);
+
 
     useEffect(() => {
         const fetchQuestion = async () => {
@@ -27,6 +30,7 @@ export default function QuestionPage() {
                 });
                 const data = await res.json();
                 setQuestionData(data);
+                setHasAccepted(data.hasAccepted);
             } catch (error) {
                 console.log(error);
             }
@@ -195,6 +199,12 @@ export default function QuestionPage() {
         }
     };
 
+    useEffect(() => {
+        if (answers !== null) {
+            setAcceptedAnswer(answers.filter(a => a.accepted)[0]);
+        }
+    }, [answers])
+
     const handleDownvoting = async (answer) => {
         if (checkIfDownvoted(answer.id)) {
             try {
@@ -241,73 +251,202 @@ export default function QuestionPage() {
         }
     };
 
-
     return questionData && answers && user ? (
         <>
-            <div className="w-3/4 mx-auto mt-12 p-6 bg-white rounded-lg shadow-md">
-                <span onClick={() => {
-                    navigate("/user/" + questionData.username)
-                }}
-                      className="text-xs text-gray-500 hover:underline cursor-pointer">{questionData.username}</span><span
-                className="text-xs text-gray-500 cursor-pointer"> | {formatTimeDifference(questionData.postedAt)}</span>
-                <h1 className="text-2xl font-bold text-blue-500 mb-4 break-words">{questionData.title}</h1>
-                <div className="text-black break-words">{questionData.content}</div>
-            </div>
-            {
-                answers.map(answer => {
-                    return (
-                        <div
-                            className="w-3/4 min-h-40 mt-12 p-6 bg-white rounded-lg shadow-md block m-auto">
-                            <div className="flex">
-                                <div className="w-1/12 border-r-2 justify-between">
-                                    <div
-                                        onClick={() => {
-                                            handleUpvoting(answer);
-                                        }}
-                                        className={'text-center text-3xl hover:text-black transition block cursor-pointer ' + (checkIfUpvoted(answer.id) ? '' : 'text-gray-400')}>
-                                        <FontAwesomeIcon icon={faArrowUp}/>
-                                    </div>
-                                    <div
-                                        className="text-center text-3xl transition block">
-                                        {answer.votes}
-                                    </div>
-                                    <div
-                                        onClick={() => {
-                                            handleDownvoting(answer);
-                                        }}
-                                        className={"text-center text-3xl hover:text-black transition block cursor-pointer " + (checkIfDownvoted(answer.id) ? '' : 'text-gray-400')}>
-                                        <FontAwesomeIcon icon={faArrowDown}/>
-                                    </div>
-                                    {user.userName === questionData.username && !questionData.hasAccepted ? <div
-                                        className="text-center text-3xl text-gray-400 hover:text-green-500 transition block cursor-pointer">
-                                        <FontAwesomeIcon onClick={() => {
-                                            handleAccept(answer.id)
-                                        }} icon={faCheck}/>
-                                    </div> : <></>}
-                                    {questionData.hasAccepted && answer.accepted ? <div
-                                        className="text-center text-3xl text-green-500 transition block">
-                                        <FontAwesomeIcon icon={faCheck}/>
-                                    </div> : <></>}
+            <div className="w-3/4 min-h-40 mx-auto mt-12 p-6 group [perspective:1000px]">
+                <div
+                    className={
+                        (hasAccepted
+                            ? "transition-all duration-1000 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]"
+                            : "") +
+                        " relative  m-2  shadow-lg"
+                    }
+                >
 
+                    <div
+                        className="animate-border rounded-md bg-white bg-gradient-to-r from-blue-400 to-green-700 bg-[length:400%_400%] p-1 [transform-style:preserve-3d] h-full w-full [backface-visibility:hidden]"
+                    >
+                        <div className="bg-white rounded-lg shadow-md">
+                            <div className="ml-4">
+                                <span
+                                    onClick={() => {
+                                        navigate("/user/" + questionData.username);
+                                    }}
+                                    className="text-xs text-gray-500 hover:underline cursor-pointer"
+                                >
+          {questionData.username}
+        </span>
+                                <span className="text-xs text-gray-500 cursor-pointer">
+          {" "}
+                                    | {formatTimeDifference(questionData.postedAt)}
+        </span>
+                                <h1 className="text-2xl font-bold text-blue-500 mb-4 break-words">
+                                    {questionData.title}
+                                </h1>
+                                <div className="text-black break-words">{questionData.content}</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    {hasAccepted && acceptedAnswer != null ? (
+                        <div
+                            className="absolute inset-0 h-fit w-full rounded-xl shadow-lg [transform:rotateY(180deg)] [backface-visibility:hidden]"
+                        >
+                            <div
+                                className="h-full w-full animate-border rounded-md bg-gradient-to-r from-blue-400 to-green-700 bg-[length:400%_400%] p-1">
+                                <div className="h-full">
+                                    <div
+                                        key={acceptedAnswer.id}
+                                        className="w-full min-h-40 p-6 bg-white rounded-lg shadow-md block m-auto"
+                                    >
+                                        <div className="flex bg-white">
+                                            {/* Voting Section */}
+                                            <div className="w-1/12 border-r-2 justify-between">
+                                                <div
+                                                    onClick={() => {
+                                                        handleUpvoting(acceptedAnswer);
+                                                    }}
+                                                    className={
+                                                        "text-center text-3xl hover:text-black transition block cursor-pointer " +
+                                                        (checkIfUpvoted(acceptedAnswer.id) ? "" : "text-gray-400")
+                                                    }
+                                                >
+                                                    <FontAwesomeIcon icon={faArrowUp}/>
+                                                </div>
+                                                <div className="text-center text-3xl transition block">
+                                                    {acceptedAnswer.votes}
+                                                </div>
+                                                <div
+                                                    onClick={() => {
+                                                        handleDownvoting(acceptedAnswer);
+                                                    }}
+                                                    className={
+                                                        "text-center text-3xl hover:text-black transition block cursor-pointer " +
+                                                        (checkIfDownvoted(acceptedAnswer.id)
+                                                            ? ""
+                                                            : "text-gray-400")
+                                                    }
+                                                >
+                                                    <FontAwesomeIcon icon={faArrowDown}/>
+                                                </div>
+
+                                                {user.userName === questionData.username &&
+                                                !questionData.hasAccepted ? (
+                                                    <div
+                                                        className="text-center text-3xl text-gray-400 hover:text-green-500 transition block cursor-pointer">
+                                                        <FontAwesomeIcon
+                                                            onClick={() => {
+                                                                handleAccept(acceptedAnswer.id);
+                                                            }}
+                                                            icon={faCheck}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <></>
+                                                )}
+                                                {questionData.hasAccepted && acceptedAnswer.accepted ? (
+                                                    <div
+                                                        className="text-center text-3xl text-green-500 transition block">
+                                                        <FontAwesomeIcon icon={faCheck}/>
+                                                    </div>
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </div>
+
+                                            {/* Accepted Answer Content */}
+                                            <div className="w-11/12 pl-6">
+                  <span
+                      onClick={() => {
+                          navigate("/user/" + acceptedAnswer.username);
+                      }}
+                      className="text-xs text-gray-500 hover:underline cursor-pointer"
+                  >
+                    {acceptedAnswer.username}
+                  </span>
+                                                <span className="text-xs text-gray-500 cursor-pointer">
+                    {" "}
+                                                    | {formatTimeDifference(acceptedAnswer.postedAt)}
+                  </span>
+                                                <div className="text-black break-words whitespace-normal">
+                                                    {acceptedAnswer.content}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="w-11/12 pl-6">
+                            </div>
+                        </div>
+                    ) : (
+                        <></>
+                    )}
+                </div>
+            </div>
+
+            <div>
+                {
+                    answers.map(answer => {
+                        if (answer.accepted) {
+                            return <></>
+                        }
+                        return (
+                            <div
+                                key={answer.id}
+                                className="w-3/4 min-h-40 mt-12 p-6 bg-white rounded-lg shadow-md block m-auto">
+                                <div className="flex">
+                                    <div className="w-1/12 border-r-2 justify-between">
+                                        <div
+                                            onClick={() => {
+                                                handleUpvoting(answer);
+                                            }}
+                                            className={'text-center text-3xl hover:text-black transition block cursor-pointer ' + (checkIfUpvoted(answer.id) ? '' : 'text-gray-400')}>
+                                            <FontAwesomeIcon icon={faArrowUp}/>
+                                        </div>
+                                        <div
+                                            className="text-center text-3xl transition block">
+                                            {answer.votes}
+                                        </div>
+                                        <div
+                                            onClick={() => {
+                                                handleDownvoting(answer);
+                                            }}
+                                            className={"text-center text-3xl hover:text-black transition block cursor-pointer " + (checkIfDownvoted(answer.id) ? '' : 'text-gray-400')}>
+                                            <FontAwesomeIcon icon={faArrowDown}/>
+                                        </div>
+                                        {user.userName === questionData.username && !questionData.hasAccepted ?
+                                            <div
+                                                className="text-center text-3xl text-gray-400 hover:text-green-500 transition block cursor-pointer">
+                                                <FontAwesomeIcon onClick={() => {
+                                                    handleAccept(answer.id)
+                                                }} icon={faCheck}/>
+                                            </div> : <></>}
+                                        {questionData.hasAccepted && answer.accepted ? <div
+                                            className="text-center text-3xl text-green-500 transition block">
+                                            <FontAwesomeIcon icon={faCheck}/>
+                                        </div> : <></>}
+
+                                    </div>
+                                    <div className="w-11/12 pl-6">
                                 <span
                                     onClick={() => {
                                         navigate("/user/" + answer.username)
                                     }}
                                     className="text-xs text-gray-500 hover:underline cursor-pointer">{answer.username}</span><span
-                                    className="text-xs text-gray-500 cursor-pointer"> | {formatTimeDifference(answer.postedAt)}</span>
-                                    <div className="text-black break-words whitespace-normal">
-                                        {answer.content}
+                                        className="text-xs text-gray-500 cursor-pointer"> | {formatTimeDifference(answer.postedAt)}</span>
+                                        <div className="text-black break-words whitespace-normal">
+                                            {answer.content}
+                                        </div>
+
                                     </div>
-
                                 </div>
-                            </div>
 
-                        </div>
-                    )
-                })
-            }
+                            </div>
+                        )
+                    })
+                }
+            </div>
             <div className="w-3/4 mx-auto p-4 bg-white shadow-lg rounded-lg mt-2">
                 <form>
                     <div className="mb-4">

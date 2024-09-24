@@ -43,6 +43,7 @@ export default function AskQuestion() {
         return await res.json();
     }
 
+
     return (
         <div className="flex flex-col items-center justify-center mt-24 p-4">
             <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6">
