@@ -3,6 +3,7 @@ using ElProjectGrande.Extensions;
 using ElProjectGrande.Models;
 using ElProjectGrande.Models.QuestionModels;
 using ElProjectGrande.Models.QuestionModels.DTOs;
+using ElProjectGrande.Models.TagModels;
 using ElProjectGrande.Models.UserModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
         return context.Questions
             .Include(q => q.User)
             .Include(q => q.Answers)
+            .Include(q => q.Tags)
             .FirstOrDefaultAsync(q => q.Id == id);
     }
 
@@ -34,6 +36,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
     {
         return context.Questions
             .Include(q => q.User)
+            .Include(q => q.Tags)
             .FirstOrDefaultAsync(q => q.Id == id);
     }
 
@@ -41,6 +44,10 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
     {
         user.Questions.Add(question);
         context.Questions.Add(question);
+        foreach (var tag in question.Tags)
+        {
+            tag.Questions.Add(question);
+        }
         context.SaveChanges();
         return new QuestionDTO
         {
@@ -52,6 +59,10 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
     public void DeleteQuestion(Question question, User user)
     {
         user.Questions.Remove(question);
+        foreach (var tag in question.Tags)
+        {
+            tag.Questions.Remove(question);
+        }
         context.Questions.Remove(question);
         context.SaveChanges();
     }

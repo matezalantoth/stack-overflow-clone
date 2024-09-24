@@ -1,6 +1,7 @@
 using ElProjectGrande.Models;
 using ElProjectGrande.Models.AnswerModels;
 using ElProjectGrande.Models.QuestionModels;
+using ElProjectGrande.Models.TagModels;
 using ElProjectGrande.Models.UserModels;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -15,6 +16,8 @@ public class ApiDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Answer> Answers { get; set; }
     public DbSet<Question> Questions { get; set; }
+    
+    public DbSet<Tag> Tags { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -125,6 +128,14 @@ public class ApiDbContext : DbContext
                 .WithOne(a => a.Question)
                 .HasForeignKey(a => a.QuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasMany(q => q.Tags)
+                .WithMany(t => t.Questions)
+                .UsingEntity(
+                    "QuestionTag",
+                    r => r.HasOne(typeof(Question)).WithMany().HasForeignKey("QuestionsId").HasPrincipalKey(nameof(Question.Id)),
+                    l => l.HasOne(typeof(Tag)).WithMany().HasForeignKey("TagsId").HasPrincipalKey(nameof(Tag.Id)),
+                    j => j.HasKey("QuestionsId", "TagsId"));
         });
 
         modelBuilder.Entity<Answer>(entity =>
@@ -154,6 +165,24 @@ public class ApiDbContext : DbContext
 
             entity.Property(a => a.Votes)
                 .IsRequired();
+        });
+
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+            
+            entity.HasIndex(t => t.Id).IsUnique();
+
+            entity.Property(t => t.TagName)
+                .IsRequired()
+                .HasMaxLength(20);
+            
+            entity.HasMany(t => t.Questions)
+                .WithMany(q => q.Tags)
+                .UsingEntity("QuestionTag",
+                    r => r.HasOne(typeof(Question)).WithMany().HasForeignKey("QuestionsId").HasPrincipalKey(nameof(Question.Id)),
+                    l => l.HasOne(typeof(Tag)).WithMany().HasForeignKey("TagsId").HasPrincipalKey(nameof(Tag.Id)),
+                    j => j.HasKey("QuestionsId", "TagsId"));
         });
     }
 }
