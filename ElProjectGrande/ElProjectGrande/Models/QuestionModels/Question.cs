@@ -11,7 +11,7 @@ public class Question
     public Guid Id { get; set; }
     public User User { get; set; }
     public DateTime PostedAt { get; set; }
-    public Guid UserId { get; set; }
+    public string UserId { get; set; }
 
     public bool HasAccepted()
     {

@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useCookies } from "react-cookie";
+import {useEffect, useState} from "react";
+import {useLocation, useNavigate} from "react-router-dom";
+import {faSearch} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {useCookies} from "react-cookie";
 
-export default function Navbar({ setUserLoginCookies, setsearchQuestion, normalQuestion}) {
+export default function Navbar({setUserLoginCookies, setsearchQuestion, normalQuestion}) {
     const navigate = useNavigate();
     const location = useLocation();
     const [cookies] = useCookies(['user']);
@@ -17,7 +17,7 @@ export default function Navbar({ setUserLoginCookies, setsearchQuestion, normalQ
         await fetch("api/users/logout", {
             method: 'POST',
             headers: {
-                'Authorization': cookies.user
+                'Authorization': "Bearer " + cookies.user
             }
         });
         setUserLoginCookies(null);
@@ -33,19 +33,18 @@ export default function Navbar({ setUserLoginCookies, setsearchQuestion, normalQ
 
     useEffect(() => {
         if (searchTerm) {
-            
-            setFilteredQuestions( normalQuestion.filter((q) =>
+
+            setFilteredQuestions(normalQuestion.filter((q) =>
                 q.title.toLowerCase().includes(searchTerm.toLowerCase())));
-            setShowDropdown(true); 
+            setShowDropdown(true);
         } else {
             setFilteredQuestions([]);
-            setShowDropdown(false); 
+            setShowDropdown(false);
         }
     }, [searchTerm, normalQuestion]);
 
     useEffect(() => {
-        if (selectedQuestionId && !showDropdown)
-        {
+        if (selectedQuestionId && !showDropdown) {
             setSelectedQuestionId(() => null)
             setSearchTerm(() => null);
             navigate(`/question/${selectedQuestionId}`);
@@ -53,10 +52,9 @@ export default function Navbar({ setUserLoginCookies, setsearchQuestion, normalQ
             console.log(showDropdown)
         }
     }, [selectedQuestionId, showDropdown]);
-    
-    
 
-    return  (
+
+    return (
         <div className="flex w-full justify-between items-center px-4 py-2">
             <div className="flex items-center">
                 <button
@@ -85,7 +83,7 @@ export default function Navbar({ setUserLoginCookies, setsearchQuestion, normalQ
                             placeholder="Search..."
                         />
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <FontAwesomeIcon className="text-gray-400" icon={faSearch} />
+                            <FontAwesomeIcon className="text-gray-400" icon={faSearch}/>
                         </div>
                     </div>
                     {showDropdown && filteredQuestions.length > 0 && normalQuestion ? (
@@ -94,8 +92,8 @@ export default function Navbar({ setUserLoginCookies, setsearchQuestion, normalQ
                                 <li
                                     key={index}
                                     onClick={() => {
-                                        setShowDropdown( () => false);
-                                        setSearchTerm(() =>question.title);
+                                        setShowDropdown(() => false);
+                                        setSearchTerm(() => question.title);
                                         setSelectedQuestionId(() => question.id)
                                     }}
                                     className="px-4 py-2 hover:bg-blue-100 cursor-pointer text-gray-700"
@@ -104,7 +102,7 @@ export default function Navbar({ setUserLoginCookies, setsearchQuestion, normalQ
                                 </li>
                             ))}
                         </ul>
-                    ): <></>}
+                    ) : <></>}
                 </div>
             )}
 
@@ -135,5 +133,5 @@ export default function Navbar({ setUserLoginCookies, setsearchQuestion, normalQ
                 )}
             </div>
         </div>
-    ) 
+    )
 }

@@ -3,6 +3,7 @@ using ElProjectGrande.Models.QuestionModels.DTOs;
 using ElProjectGrande.Services.QuestionServices.Factory;
 using ElProjectGrande.Services.QuestionServices.Repository;
 using ElProjectGrande.Services.UserServices.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElProjectGrande.Controllers;
@@ -47,13 +48,20 @@ public class QuestionsController(
     }
 
 
-    [HttpPost]
-    public async Task<ActionResult<QuestionDTO>> PostQuestion([FromBody] NewQuestion newQuestion,
-        [FromHeader(Name = "Authorization")] Guid sessionToken)
+    [HttpPost, Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult<QuestionDTO>> PostQuestion([FromBody] NewQuestion newQuestion)
     {
         try
         {
-            if (!userRepository.IsUserLoggedIn(sessionToken) || sessionToken == Guid.Empty)
+            var sessionToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            if (string.IsNullOrEmpty(sessionToken))
+            {
+                return Unauthorized();
+            }
+
+            Console.WriteLine(userRepository.IsUserLoggedIn(sessionToken));
+
+            if (!userRepository.IsUserLoggedIn(sessionToken) || sessionToken == String.Empty)
             {
                 return Unauthorized("That session token is expired or invalid");
             }
@@ -65,7 +73,7 @@ public class QuestionsController(
             }
 
             var karma = 5;
-            userRepository.UpdateKarma(user, karma);
+            await userRepository.UpdateKarma(user, karma);
 
             Console.WriteLine(user.UserName);
             var question = questionFactory.CreateQuestion(newQuestion, user);
@@ -77,11 +85,17 @@ public class QuestionsController(
         }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteQuestion([FromHeader(Name = "Authorization")] Guid sessionToken, Guid id)
+    [HttpDelete("{id}"), Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult> DeleteQuestion([FromHeader(Name = "Authorization")] string sessionToken, Guid id)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var question = await questionRepository.GetQuestionById(id);
             if (question == null)
             {
@@ -102,12 +116,19 @@ public class QuestionsController(
         }
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult<QuestionDTO>> UpdateQuestion([FromHeader(Name = "Authorization")] Guid sessionToken,
+    [HttpPut("{id}"), Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult<QuestionDTO>> UpdateQuestion(
+        [FromHeader(Name = "Authorization")] string sessionToken,
         [FromBody] UpdatedQuestion updatedQuestion, Guid id)
     {
         try
         {
+            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
+            {
+                return Unauthorized();
+            }
+
+            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
             var question = await questionRepository.GetQuestionById(id);
             if (question == null)
             {

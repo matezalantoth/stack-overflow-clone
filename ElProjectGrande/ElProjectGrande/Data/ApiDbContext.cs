@@ -1,61 +1,30 @@
-using ElProjectGrande.Models;
 using ElProjectGrande.Models.AnswerModels;
 using ElProjectGrande.Models.QuestionModels;
 using ElProjectGrande.Models.UserModels;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.EntityFrameworkCore;
 
 namespace ElProjectGrande.Data;
 
-using Microsoft.EntityFrameworkCore;
-using System;
-
-public class ApiDbContext : DbContext
+public class ApiDbContext(DbContextOptions<ApiDbContext> options)
+    : IdentityDbContext<IdentityUser, IdentityRole, string>(options)
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Answer> Answers { get; set; }
     public DbSet<Question> Questions { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__MySql");
-        if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") != "true")
-        {
-            connectionString = $"Server={Environment.GetEnvironmentVariable("LOCAL_SERVER_NAME")};" +
-                               $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
-                               $"User={Environment.GetEnvironmentVariable("DB_USERNAME")};" +
-                               $"Password={Environment.GetEnvironmentVariable("DB_USER_PASSWORD")};" +
-                               $"Port={Environment.GetEnvironmentVariable("DB_PORT")};";
-        }
-
-        optionsBuilder.UseMySQL(connectionString);
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(u => u.Id);
-
-            entity.HasIndex(u => u.Id).IsUnique();
-
             entity.Property(u => u.Name)
                 .IsRequired()
                 .HasMaxLength(100);
-
-            entity.Property(u => u.UserName)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            entity.Property(u => u.Email)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            entity.Property(u => u.Password)
-                .IsRequired();
-
-            entity.Property(u => u.Salt)
-                .IsRequired();
 
             entity.Property(u => u.DoB)
                 .IsRequired();
