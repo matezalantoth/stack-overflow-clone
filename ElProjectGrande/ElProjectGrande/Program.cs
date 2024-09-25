@@ -24,8 +24,7 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 
-
-DotNetEnv.Env.Load("../.env");
+Env.Load(".env");
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 AddSwaggerGen();
@@ -42,7 +41,11 @@ builder.Services.AddCors(options =>
 });
 
 
-builder.Services.AddDbContext<ApiDbContext>(options => { options.UseMySQL(GetConnString()); });
+builder.Services.AddDbContext<ApiDbContext>(options =>
+{
+    Console.WriteLine(GetConnString());
+    options.UseMySQL(GetConnString());
+});
 
 builder.Services.AddIdentityCore<User>(options =>
     {
@@ -81,7 +84,7 @@ app.UseExceptionHandler(appBuilder =>
         await context.Response.WriteAsJsonAsync("Something went wrong.");
 
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-
+        Console.WriteLine(exceptionHandlerPathFeature?.Error.Message);
         if (exceptionHandlerPathFeature?.Error is UnauthorizedAccessException)
         {
             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
@@ -147,7 +150,6 @@ string GetConnString()
                            $"Port={Environment.GetEnvironmentVariable("DB_PORT")};";
 
     if (connectionString == null) throw new Exception("Could not find connection string");
-
     return connectionString;
 }
 
