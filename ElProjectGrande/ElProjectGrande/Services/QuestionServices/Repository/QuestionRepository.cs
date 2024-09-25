@@ -81,6 +81,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
     {
         var sevenDaysAgo = DateTime.Today.AddDays(-7);
         return context.Questions
+            .Include(q => q.Tags)
             .Include(q => q.Answers)
             .Include(q => q.User)
             .OrderByDescending(q => q.Answers.Count(ans => ans.PostedAt >= sevenDaysAgo))
