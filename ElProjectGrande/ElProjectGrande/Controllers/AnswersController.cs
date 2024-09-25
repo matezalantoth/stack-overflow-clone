@@ -91,7 +91,7 @@ public class AnswersController(
 
         await userRepository.CheckIfUserIsMutedOrBanned(user);
 
-        if (user.Id != answer.UserId) return Forbid();
+        if (user.Id != answer.UserId && !userRepository.IsUserAdmin(user)) return Forbid();
         await answerRepository.DeleteAnswer(answer, user);
         return NoContent();
     }
@@ -108,7 +108,7 @@ public class AnswersController(
         var answer = await answerRepository.GetAnswerById(id);
         if (user == null || answer == null) return NotFound("This user or answer could not be found");
 
-        if (user.Id != answer.UserId) return Forbid();
+        if (user.Id != answer.UserId && !userRepository.IsUserAdmin(user)) return Forbid();
 
         var newAnswer = answerFactory.UpdateAnswer(newContent, answer);
         return Ok(await answerRepository.UpdateAnswer(newAnswer));
@@ -123,9 +123,9 @@ public class AnswersController(
 
         var answer = await answerRepository.GetAnswerById(answerId);
         var userId = (await userRepository.GetUserBySessionToken(sessionToken))?.Id;
-        if (answer == null || userId == string.Empty) return NotFound("this answer or user could not be found");
+        if (answer == null || userId == null) return NotFound("this answer or user could not be found");
 
-        if (answer.Question.UserId != userId) return Forbid();
+        if (answer.Question.UserId != userId && !userRepository.IsUserAdmin(userId)) return Forbid();
 
         if (answer.Question.HasAccepted()) return BadRequest("This question already has an accepted answer");
 

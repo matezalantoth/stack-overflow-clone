@@ -22,4 +22,6 @@ public interface IAnswerRepository
     public void VoteAnswer(Answer answer, int vote);
 
     public IEnumerable<AnswerDTO> GetAnswersByContent(string contentSubstring);
+
+    public Task UnAcceptAnswer(Guid answerId);
 }

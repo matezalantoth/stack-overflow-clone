@@ -3,6 +3,7 @@ using ElProjectGrande.Models.AdminModels.DTOs;
 using ElProjectGrande.Models.AnswerModels.DTOs;
 using ElProjectGrande.Models.QuestionModels.DTOs;
 using ElProjectGrande.Models.UserModels.DTOs;
+using ElProjectGrande.Services.AnswerServices.Repository;
 using ElProjectGrande.Services.QuestionServices.Repository;
 using ElProjectGrande.Services.UserServices.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +13,10 @@ namespace ElProjectGrande.Controllers;
 
 [ApiController]
 [Microsoft.AspNetCore.Components.Route("[controller]")]
-public class AdminController(IUserRepository userRepository, IQuestionRepository questionRepository) : ControllerBase
+public class AdminController(
+    IUserRepository userRepository,
+    IQuestionRepository questionRepository,
+    IAnswerRepository answerRepository) : ControllerBase
 {
     [HttpPatch("Users/Ban/:userId")]
     [Authorize(Roles = "Admin")]
@@ -67,6 +71,14 @@ public class AdminController(IUserRepository userRepository, IQuestionRepository
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<AnswerDTO>> SearchAnswersByContentAsync(string content)
     {
-        return Ok(questionRepository.GetQuestionsByContent(content));
+        return Ok(answerRepository.GetAnswersByContent(content));
+    }
+
+    [HttpPatch("Answers/unAccept/:answerId")]
+    [Authorize(Roles = "Admin")]
+    public ActionResult UnAcceptAnswer(Guid answerId)
+    {
+        answerRepository.UnAcceptAnswer(answerId);
+        return Ok();
     }
 }
