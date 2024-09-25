@@ -1,3 +1,5 @@
+using ElProjectGrande.Models.TagModels.DTOs;
+
 namespace ElProjectGrande.Models.QuestionModels.DTOs;
 
 public class QuestionDTO
@@ -8,4 +10,5 @@ public class QuestionDTO
     public string Title { get; set; }
     public DateTime PostedAt { get; set; }
     public bool HasAccepted { get; set; }
+    public List<TagDTO> Tags { get; set; }
 }

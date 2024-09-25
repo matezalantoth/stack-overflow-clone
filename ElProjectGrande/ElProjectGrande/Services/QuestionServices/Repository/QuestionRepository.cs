@@ -21,6 +21,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
     {
         return context.Questions
             .Include(q => q.User)
+            .Include(q => q.Tags)
             .Select(q => q.ToDTO());
     }
 
