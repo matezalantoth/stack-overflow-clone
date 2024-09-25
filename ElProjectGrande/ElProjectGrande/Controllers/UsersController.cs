@@ -117,4 +117,5 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
 
         return Ok(user.ToDTO());
     }
+  
 }
