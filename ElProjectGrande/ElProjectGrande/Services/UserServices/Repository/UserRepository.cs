@@ -58,11 +58,16 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     {
         return await context.Users
             .Include(u => u.Questions)
+            .ThenInclude(q => q.Tags)
+            .Include(u => u.Questions)
             .ThenInclude(q => q.Answers)
             .ThenInclude(a => a.User)
             .Include(u => u.Answers)
             .ThenInclude(a => a.Question)
             .ThenInclude(q => q.User)
+            .Include(u => u.Answers)
+            .ThenInclude(a => a.Question)
+            .ThenInclude(q => q.Tags)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
@@ -99,12 +104,19 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     public async ValueTask<User?> GetUserByUserName(string username)
 
     {
-        return await context.Users.Include(u => u.Questions)
+        return await context.Users
+            .Include(u => u.Questions)
             .ThenInclude(q => q.Answers)
             .ThenInclude(a => a.User)
+            .Include(u => u.Questions)
+            .ThenInclude(q => q.Tags)
             .Include(u => u.Answers)
             .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.User).FirstOrDefaultAsync(u => u.UserName == username);
+            .ThenInclude(q => q.User)
+            .Include(u => u.Answers)
+            .ThenInclude(a => a.Question)
+            .ThenInclude(q => q.Tags)
+            .FirstOrDefaultAsync(u => u.UserName == username);
     }
 
     public async ValueTask<User?> GetUserBySessionTokenOnlyAnswers(string sessionToken)
@@ -118,6 +130,7 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     {
         return await context.Users
             .Include(u => u.Questions)
+            .ThenInclude(q => q.Tags)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
@@ -172,14 +185,6 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         return user;
     }
 
-    // var closestContents = Process
-    //     .ExtractSorted(contentSubstring, context.Questions.Select(q => q.Content).ToArray())
-    //     .Select(res => res.Value)
-    //     .Take(10);
-    // var questions = context.Questions.Include(q => q.User).Include(q => q.Answers);
-    //     return closestContents
-    //     .Select(content => questions.FirstOrDefault(q => q.Content == content))
-    // .Select(q => q?.ToDTO() ?? throw new NotFoundException("This question could not be found"));
 
     public IEnumerable<UserDTO> GetUsersWithSimilarUsernames(string usernameSubstring)
     {
