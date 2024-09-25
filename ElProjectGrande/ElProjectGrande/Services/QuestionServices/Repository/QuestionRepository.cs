@@ -1,10 +1,10 @@
-using ElProjectGrande.Controllers;
 using ElProjectGrande.Data;
+using ElProjectGrande.Exceptions;
 using ElProjectGrande.Extensions;
-using ElProjectGrande.Models;
 using ElProjectGrande.Models.QuestionModels;
 using ElProjectGrande.Models.QuestionModels.DTOs;
 using ElProjectGrande.Models.UserModels;
+using FuzzySharp;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElProjectGrande.Services.QuestionServices.Repository;
@@ -70,7 +70,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
 
     public IEnumerable<QuestionDTO> GetTrendingQuestions()
     {
-        DateTime sevenDaysAgo = DateTime.Today.AddDays(-7);
+        var sevenDaysAgo = DateTime.Today.AddDays(-7);
         return context.Questions
             .Include(q => q.Answers)
             .Include(q => q.User)
@@ -87,5 +87,28 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
             .Skip(startIndex).Take(startIndex + 10).Select(q => q.ToDTO());
     }
 
-    
+    public IEnumerable<QuestionDTO> GetQuestionsByTitle(string titleSubstring)
+    {
+        var closestTitles = Process.ExtractSorted(titleSubstring, context.Questions.Select(q => q.Title).ToArray())
+            .Select(res => res.Value)
+            .Take(10);
+
+        var questions = context.Questions.Include(q => q.User).Include(q => q.Answers);
+        return closestTitles
+            .Select(title =>
+                questions.FirstOrDefault(q => q.Title == title))
+            .Select(q => q?.ToDTO() ?? throw new NotFoundException("This question could not be found"));
+    }
+
+    public IEnumerable<QuestionDTO> GetQuestionsByContent(string contentSubstring)
+    {
+        var closestContents = Process
+            .ExtractSorted(contentSubstring, context.Questions.Select(q => q.Content).ToArray())
+            .Select(res => res.Value)
+            .Take(10);
+        var questions = context.Questions.Include(q => q.User).Include(q => q.Answers);
+        return closestContents
+            .Select(content => questions.FirstOrDefault(q => q.Content == content))
+            .Select(q => q?.ToDTO() ?? throw new NotFoundException("This question could not be found"));
+    }
 }

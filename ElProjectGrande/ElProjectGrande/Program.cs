@@ -1,5 +1,8 @@
+using System.Net;
 using System.Text;
+using DotNetEnv;
 using ElProjectGrande.Data;
+using ElProjectGrande.Exceptions;
 using ElProjectGrande.Models.UserModels;
 using ElProjectGrande.Services.AnswerServices.Factory;
 using ElProjectGrande.Services.AnswerServices.Repository;
@@ -10,16 +13,16 @@ using ElProjectGrande.Services.QuestionServices.Repository;
 using ElProjectGrande.Services.UserServices.Factory;
 using ElProjectGrande.Services.UserServices.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-DotNetEnv.Env.Load(".env");
+Env.Load(".env");
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 AddSwaggerGen();
@@ -64,6 +67,30 @@ AddJwt();
 
 var app = builder.Build();
 
+app.UseExceptionHandler(appBuilder =>
+{
+    appBuilder.Run(async context =>
+    {
+        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync("Something went wrong.");
+
+        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+
+        if (exceptionHandlerPathFeature?.Error is UnauthorizedAccessException)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+        }
+
+        if (exceptionHandlerPathFeature?.Error is NotFoundException)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+        }
+    });
+});
+
 using var scope = app.Services.CreateScope();
 var authenticationSeeder = scope.ServiceProvider.GetRequiredService<AuthenticationSeeder>();
 authenticationSeeder.SeedRoles();
@@ -99,7 +126,7 @@ void AddJwt()
                 IssuerSigningKey = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("ISSUING_KEY") ??
                                            throw new Exception("ISSUING_KEY not found"))
-                ),
+                )
             };
         });
 }
@@ -108,18 +135,13 @@ string GetConnString()
 {
     var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__MySql");
     if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") != "true")
-    {
         connectionString = $"Server={Environment.GetEnvironmentVariable("LOCAL_SERVER_NAME")};" +
                            $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
                            $"User={Environment.GetEnvironmentVariable("DB_USERNAME")};" +
                            $"Password={Environment.GetEnvironmentVariable("DB_USER_PASSWORD")};" +
                            $"Port={Environment.GetEnvironmentVariable("DB_PORT")};";
-    }
 
-    if (connectionString == null)
-    {
-        throw new Exception("Could not find connection string");
-    }
+    if (connectionString == null) throw new Exception("Could not find connection string");
 
     return connectionString;
 }

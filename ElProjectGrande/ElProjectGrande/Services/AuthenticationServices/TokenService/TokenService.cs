@@ -23,15 +23,25 @@ public class TokenService : ITokenService
         return tokenHandler.WriteToken(token);
     }
 
+    public string ValidateAndGetSessionToken(string sessionToken)
+    {
+        if (sessionToken == string.Empty || !sessionToken.StartsWith("Bearer "))
+            throw new UnauthorizedAccessException("Invalid session token");
+
+        return sessionToken["Bearer ".Length..].Trim();
+    }
+
     private JwtSecurityToken CreateJwtToken(List<Claim> claims, SigningCredentials credentials,
-        DateTime expiration) =>
-        new(
+        DateTime expiration)
+    {
+        return new JwtSecurityToken(
             "Grande",
             "Grande",
             claims,
             expires: expiration,
             signingCredentials: credentials
         );
+    }
 
     private List<Claim> CreateClaims(IdentityUser user, string? role)
     {
@@ -39,19 +49,16 @@ public class TokenService : ITokenService
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, "SessionToken"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat,
+                new(JwtRegisteredClaimNames.Sub, "SessionToken"),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(JwtRegisteredClaimNames.Iat,
                     EpochTime.GetIntDate(DateTime.UtcNow).ToString(CultureInfo.InvariantCulture),
                     ClaimValueTypes.Integer64),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Email, user.Email)
+                new(ClaimTypes.NameIdentifier, user.Id),
+                new(ClaimTypes.Name, user.UserName),
+                new(ClaimTypes.Email, user.Email)
             };
-            if (role != null)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+            if (role != null) claims.Add(new Claim(ClaimTypes.Role, role));
 
             return claims;
         }

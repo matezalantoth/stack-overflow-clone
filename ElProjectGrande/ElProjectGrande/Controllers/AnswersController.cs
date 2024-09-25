@@ -1,6 +1,7 @@
 using ElProjectGrande.Models.AnswerModels.DTOs;
 using ElProjectGrande.Services.AnswerServices.Factory;
 using ElProjectGrande.Services.AnswerServices.Repository;
+using ElProjectGrande.Services.AuthenticationServices.TokenService;
 using ElProjectGrande.Services.QuestionServices.Repository;
 using ElProjectGrande.Services.UserServices.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,8 @@ public class AnswersController(
     IAnswerRepository answerRepository,
     IUserRepository userRepository,
     IQuestionRepository questionRepository,
-    IAnswerFactory answerFactory) : ControllerBase
+    IAnswerFactory answerFactory,
+    ITokenService tokenService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AnswersOfQuestionDTO>>> GetAllAnswersForQuestion(Guid questionId)
@@ -22,9 +24,7 @@ public class AnswersController(
         try
         {
             if (!await questionRepository.CheckIfQuestionExists(questionId))
-            {
                 throw new ArgumentException($"Question of id {questionId} could not be found");
-            }
 
             return Ok(answerRepository.GetAllAnswersByQuestionId(questionId));
         }
@@ -34,21 +34,37 @@ public class AnswersController(
         }
     }
 
-    [HttpPost, Authorize(Roles = "Admin, User")]
+    [HttpPost]
+    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<AnswerDTO>> PostNewAnswerToQuestion(
         [FromHeader(Name = "Authorization")] string sessionToken,
         Guid questionId, [FromBody] NewAnswer newAnswer)
     {
         try
         {
-            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
+            try
+            {
+                sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return Unauthorized();
+            }
+
             var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
             var question = await questionRepository.GetQuestionById(questionId);
-            Console.WriteLine(user);
-            Console.WriteLine(question);
-            if (user == null || question == null)
+
+            if (user == null || question == null) return NotFound("This user or question could not be found");
+
+            try
             {
-                return NotFound("This user or question could not be found");
+                await userRepository.CheckIfUserIsMutedOrBanned(user);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return Unauthorized();
             }
 
             var answer = answerFactory.CreateAnswer(newAnswer, question, user);
@@ -62,225 +78,143 @@ public class AnswersController(
         }
     }
 
-    [HttpDelete("{answerId}"), Authorize(Roles = "Admin, User")]
+    [HttpDelete("{answerId}")]
+    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult> DeleteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid answerId)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(sessionToken))
-            {
-                return Unauthorized();
-            }
+        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
 
-            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
-            var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
-            var answer = await answerRepository.GetAnswerById(answerId);
-            if (user == null || answer == null)
-            {
-                return NotFound("This answer or user could not be found!");
-            }
+        var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
+        var answer = await answerRepository.GetAnswerById(answerId);
+        if (user == null || answer == null) return NotFound("This answer or user could not be found!");
 
-            if (user.Id != answer.UserId)
-            {
-                return Forbid();
-            }
+        await userRepository.CheckIfUserIsMutedOrBanned(user);
 
-            await answerRepository.DeleteAnswer(answer, user);
-            return NoContent();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return StatusCode(500);
-        }
+        if (user.Id != answer.UserId) return Forbid();
+        await answerRepository.DeleteAnswer(answer, user);
+        return NoContent();
     }
 
-    [HttpPut("{id}"), Authorize(Roles = "Admin, User")]
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<AnswersOfQuestionDTO>> UpdateAnswer(
         [FromHeader(Name = "Authorization")] string sessionToken,
         Guid id, [FromBody] string newContent)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(sessionToken))
-            {
-                return Unauthorized();
-            }
+        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
 
-            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
-            var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
-            var answer = await answerRepository.GetAnswerById(id);
-            if (user == null || answer == null)
-            {
-                return NotFound("This user or answer could not be found");
-            }
+        var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
+        var answer = await answerRepository.GetAnswerById(id);
+        if (user == null || answer == null) return NotFound("This user or answer could not be found");
 
-            if (user.Id != answer.UserId)
-            {
-                return Forbid();
-            }
+        if (user.Id != answer.UserId) return Forbid();
 
-            var newAnswer = answerFactory.UpdateAnswer(newContent, answer);
-            return Ok(await answerRepository.UpdateAnswer(newAnswer));
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return StatusCode(500);
-        }
+        var newAnswer = answerFactory.UpdateAnswer(newContent, answer);
+        return Ok(await answerRepository.UpdateAnswer(newAnswer));
     }
 
-    [HttpPost("/accept/{answerId}"), Authorize(Roles = "Admin, User")]
+    [HttpPost("/accept/{answerId}")]
+    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<AnswerDTO>> AcceptAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid answerId)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(sessionToken))
-            {
-                return Unauthorized();
-            }
+        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
 
-            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
-            var answer = await answerRepository.GetAnswerById(answerId);
-            var userId = (await userRepository.GetUserBySessionToken(sessionToken))?.Id;
-            if (answer == null || userId == String.Empty)
-            {
-                return NotFound("this answer or user could not be found");
-            }
+        var answer = await answerRepository.GetAnswerById(answerId);
+        var userId = (await userRepository.GetUserBySessionToken(sessionToken))?.Id;
+        if (answer == null || userId == string.Empty) return NotFound("this answer or user could not be found");
 
-            if (answer.Question.UserId != userId)
-            {
-                return Forbid();
-            }
+        if (answer.Question.UserId != userId) return Forbid();
 
-            if (answer.Question.HasAccepted())
-            {
-                return BadRequest("This question already has an accepted answer");
-            }
+        if (answer.Question.HasAccepted()) return BadRequest("This question already has an accepted answer");
 
-            var answerUser = answer.User;
-            var karma = 20;
-            await userRepository.UpdateKarma(answerUser, karma);
-            return Ok(await answerRepository.AcceptAnswer(answer));
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+        var answerUser = answer.User;
+        var karma = 20;
+        await userRepository.UpdateKarma(answerUser, karma);
+
+        return Ok(await answerRepository.AcceptAnswer(answer));
     }
 
-    [HttpPatch("{id}/upvote"), Authorize(Roles = "Admin, User")]
+    [HttpPatch("{id}/upvote")]
+    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult> UpVoteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid id)
     {
-        try
+        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
+        var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
+        var answer = await answerRepository.GetAnswerById(id);
+        if (user == null || answer == null) return NotFound("This user or answer could not be found");
+        await userRepository.CheckIfUserIsMutedOrBanned(user);
+        var answerUser = answer.User;
+
+        if (user.Upvotes.Contains(answer.Id))
         {
-            if (string.IsNullOrEmpty(sessionToken))
-            {
-                return Unauthorized();
-            }
+            var unVote = -1;
+            await userRepository.RemoveUpvote(user, answer.Id);
+            answerRepository.VoteAnswer(answer, unVote);
+            await userRepository.UpdateKarma(answerUser, unVote);
 
+            return Ok("Unvoted answer");
+        }
 
-            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
-            var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
-            var answer = await answerRepository.GetAnswerById(id);
-            if (user == null || answer == null)
-            {
-                return NotFound("This user or answer could not be found");
-            }
-
-            var answerUser = answer.User;
-
-            if (user.Upvotes.Contains(answer.Id))
-            {
-                var unVote = -1;
-                await userRepository.RemoveUpvote(user, answer.Id);
-                answerRepository.VoteAnswer(answer, unVote);
-                await userRepository.UpdateKarma(answerUser, unVote);
-
-                return Ok("Unvoted answer");
-            }
-
-            if (user.Downvotes.Contains(answer.Id))
-            {
-                var reVote = 2;
-                await userRepository.RemoveDownvote(user, answer.Id);
-                answerRepository.VoteAnswer(answer, reVote);
-                await userRepository.UpdateKarma(answerUser, reVote);
-                await userRepository.Upvote(user, answer.Id);
-
-                return Ok("Upvoted answer");
-            }
-
-            var vote = 1;
-            answerRepository.VoteAnswer(answer, vote);
-            await userRepository.UpdateKarma(answerUser, vote);
+        if (user.Downvotes.Contains(answer.Id))
+        {
+            var reVote = 2;
+            await userRepository.RemoveDownvote(user, answer.Id);
+            answerRepository.VoteAnswer(answer, reVote);
+            await userRepository.UpdateKarma(answerUser, reVote);
             await userRepository.Upvote(user, answer.Id);
 
             return Ok("Upvoted answer");
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return StatusCode(500);
-        }
+
+        var vote = 1;
+        answerRepository.VoteAnswer(answer, vote);
+        await userRepository.UpdateKarma(answerUser, vote);
+        await userRepository.Upvote(user, answer.Id);
+
+        return Ok("Upvoted answer");
     }
 
-    [HttpPatch("{id}/downvote"), Authorize(Roles = "Admin, User")]
+    [HttpPatch("{id}/downvote")]
+    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult> DownVoteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
         Guid id)
     {
-        try
+        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
+        var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
+        var answer = await answerRepository.GetAnswerById(id);
+        if (user == null || answer == null) return NotFound("This user or answer could not be found");
+        await userRepository.CheckIfUserIsMutedOrBanned(user);
+
+        var answerUser = answer.User;
+
+        if (user.Downvotes.Contains(answer.Id))
         {
-            if (string.IsNullOrEmpty(sessionToken))
-            {
-                return Unauthorized();
-            }
+            var unVote = 1;
+            await userRepository.RemoveDownvote(user, answer.Id);
+            answerRepository.VoteAnswer(answer, unVote);
+            await userRepository.UpdateKarma(answerUser, unVote);
 
-            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
-            var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken);
-            var answer = await answerRepository.GetAnswerById(id);
-            if (user == null || answer == null)
-            {
-                return NotFound("This user or answer could not be found");
-            }
+            return Ok("Unvoted answer");
+        }
 
-            var answerUser = answer.User;
-
-            if (user.Downvotes.Contains(answer.Id))
-            {
-                var unVote = 1;
-                await userRepository.RemoveDownvote(user, answer.Id);
-                answerRepository.VoteAnswer(answer, unVote);
-                await userRepository.UpdateKarma(answerUser, unVote);
-
-                return Ok("Unvoted answer");
-            }
-
-            if (user.Upvotes.Contains(answer.Id))
-            {
-                var reVote = -2;
-                await userRepository.RemoveUpvote(user, answer.Id);
-                answerRepository.VoteAnswer(answer, reVote);
-                await userRepository.UpdateKarma(answerUser, reVote);
-                await userRepository.Downvote(user, answer.Id);
-                return Ok("Downvoted answer");
-            }
-
-            var vote = -1;
-            answerRepository.VoteAnswer(answer, vote);
-            await userRepository.UpdateKarma(answerUser, vote);
+        if (user.Upvotes.Contains(answer.Id))
+        {
+            var reVote = -2;
+            await userRepository.RemoveUpvote(user, answer.Id);
+            answerRepository.VoteAnswer(answer, reVote);
+            await userRepository.UpdateKarma(answerUser, reVote);
             await userRepository.Downvote(user, answer.Id);
-
             return Ok("Downvoted answer");
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return StatusCode(500);
-        }
+
+        var vote = -1;
+        answerRepository.VoteAnswer(answer, vote);
+        await userRepository.UpdateKarma(answerUser, vote);
+        await userRepository.Downvote(user, answer.Id);
+
+        return Ok("Downvoted answer");
     }
 }
