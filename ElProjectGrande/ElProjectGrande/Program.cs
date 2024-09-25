@@ -10,6 +10,8 @@ using ElProjectGrande.Services.AuthenticationServices.AuthenticationSeeder;
 using ElProjectGrande.Services.AuthenticationServices.TokenService;
 using ElProjectGrande.Services.QuestionServices.Factory;
 using ElProjectGrande.Services.QuestionServices.Repository;
+using ElProjectGrande.Services.TagServices.Factory;
+using ElProjectGrande.Services.TagServices.Repository;
 using ElProjectGrande.Services.UserServices.Factory;
 using ElProjectGrande.Services.UserServices.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,7 +24,8 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 
-Env.Load(".env");
+
+DotNetEnv.Env.Load("../.env");
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 AddSwaggerGen();
@@ -57,10 +60,12 @@ builder.Services.AddIdentityCore<User>(options =>
 builder.Services.AddSingleton<IUserFactory, UserFactory>();
 builder.Services.AddSingleton<IQuestionFactory, QuestionFactory>();
 builder.Services.AddSingleton<IAnswerFactory, AnswerFactory>();
+builder.Services.AddSingleton<ITagFactory, TagFactory>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<AuthenticationSeeder>();
 
 AddJwt();
