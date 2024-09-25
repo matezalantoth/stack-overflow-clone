@@ -26,7 +26,8 @@ public static class UserExtensions
             UserName = user.UserName, Name = user.Name, SessionToken = user.SessionToken,
             Answers = user.Answers.Select(answer => answer.ToDTO()).ToList(),
             Email = user.Email, Questions = user.Questions.Select(question => question.ToDTO()).ToList(),
-            Karma = user.Karma, Upvotes = upvotes, Downvotes = downvotes
+            Karma = user.Karma, Upvotes = upvotes, Downvotes = downvotes, MutedFor = user.MutedFor, Muted = user.Muted,
+            Banned = user.Banned,
         };
     }
 }
