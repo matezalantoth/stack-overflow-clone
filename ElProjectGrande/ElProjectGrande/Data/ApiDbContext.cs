@@ -1,5 +1,6 @@
 using ElProjectGrande.Models.AnswerModels;
 using ElProjectGrande.Models.QuestionModels;
+using ElProjectGrande.Models.TagModels;
 using ElProjectGrande.Models.UserModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -15,6 +16,8 @@ public class ApiDbContext(DbContextOptions<ApiDbContext> options)
     public DbSet<User> Users { get; set; }
     public DbSet<Answer> Answers { get; set; }
     public DbSet<Question> Questions { get; set; }
+    
+    public DbSet<Tag> Tags { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

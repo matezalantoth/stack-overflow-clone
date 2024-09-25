@@ -12,7 +12,7 @@ public class QuestionFactory : IQuestionFactory
         return new Question
         {
             Title = newQuestion.Title, Content = newQuestion.Content, Id = Guid.NewGuid(), User = user,
-            UserId = user.Id, PostedAt = newQuestion.PostedAt, Answers = []
+            UserId = user.Id, PostedAt = newQuestion.PostedAt, Answers = [], Tags = newQuestion.Tags
         };
     }
 
