@@ -4,17 +4,13 @@ using ElProjectGrande.Models.AnswerModels;
 using ElProjectGrande.Models.AnswerModels.DTOs;
 using ElProjectGrande.Models.QuestionModels;
 using ElProjectGrande.Models.UserModels;
+using FuzzySharp;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElProjectGrande.Services.AnswerServices.Repository;
 
 public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
 {
-    public IEnumerable<AnswerDTO> GetAllAnswersFromQuestion(Question question)
-    {
-        return question.Answers.Select(a => a.ToDTO());
-    }
-
     public async Task<AnswerDTO> CreateAnswer(Answer answer, User user, Question question)
     {
         dbContext.Answers.Add(answer);
@@ -64,5 +60,19 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
     {
         answer.Votes += vote;
         dbContext.Update(answer);
+    }
+
+    public IEnumerable<AnswerDTO> GetAnswersByContent(string contentSubstring)
+    {
+        var bestResults = Process.ExtractSorted(contentSubstring, dbContext.Answers.Select(a => a.Content).ToArray())
+            .Take(10)
+            .Select(res => res.Value);
+
+        return dbContext.Answers.Where(a => bestResults.Contains(a.Content)).Select(a => a.ToDTO());
+    }
+
+    public IEnumerable<AnswerDTO> GetAllAnswersFromQuestion(Question question)
+    {
+        return question.Answers.Select(a => a.ToDTO());
     }
 }

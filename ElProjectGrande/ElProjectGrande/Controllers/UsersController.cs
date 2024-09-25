@@ -1,8 +1,7 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using ElProjectGrande.Exceptions;
 using ElProjectGrande.Extensions;
-using ElProjectGrande.Models;
 using ElProjectGrande.Models.UserModels.DTOs;
+using ElProjectGrande.Services.AuthenticationServices.TokenService;
 using ElProjectGrande.Services.UserServices.Factory;
 using ElProjectGrande.Services.UserServices.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -12,110 +11,61 @@ namespace ElProjectGrande.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UsersController(IUserRepository userRepository, IUserFactory userFactory)
+public class UsersController(IUserRepository userRepository, IUserFactory userFactory, ITokenService tokenService)
     : ControllerBase
 {
     [HttpPost("signup")]
     public async Task<ActionResult<Guid>> CreateUserAndLogin([FromBody] NewUser newUser)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (await userRepository.AreCredentialsTaken(newUser.Email, newUser.UserName))
-            {
-                return BadRequest("Some of your credentials are invalid");
-            }
+        if (await userRepository.AreCredentialsTaken(newUser.Email, newUser.UserName))
+            return BadRequest("Some of your credentials are invalid");
 
-            var user = userFactory.CreateUser(newUser);
-            await userRepository.CreateUser(user, newUser.Password, "User");
-            user.SessionToken = await userRepository.LoginUser(newUser.Email, newUser.Password);
-            return Ok(user);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            return BadRequest(e.Message);
-        }
+        var user = userFactory.CreateUser(newUser);
+        await userRepository.CreateUser(user, newUser.Password, "User");
+        user.SessionToken = await userRepository.LoginUser(newUser.Email, newUser.Password);
+        return Ok(user);
     }
 
     [HttpPost("login")]
     public async Task<ActionResult<string>> Login([FromBody] LoginCredentials loginCredentials)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var token = await userRepository.LoginUser(loginCredentials.Email, loginCredentials.Password);
-            return Content($"\"{token}\"", "application/json");
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            return BadRequest(e.Message);
-        }
+        var token = await userRepository.LoginUser(loginCredentials.Email, loginCredentials.Password);
+        return Content($"\"{token}\"", "application/json");
     }
 
-    [HttpPost("logout"), Authorize(Roles = "Admin, User")]
+
+    [HttpPost("logout")]
+    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult> LogoutUser([FromHeader(Name = "Authorization")] string sessionToken)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
-            {
-                return Unauthorized();
-            }
-
-            sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
-
-            if (!userRepository.IsUserLoggedIn(sessionToken))
-            {
-                return NotFound("This user could not be found");
-            }
-
-            await userRepository.LogoutUser(sessionToken);
-            return Ok();
-        }
-        catch (Exception e)
-        {
-            return NotFound(e.Message);
-        }
+        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
+        if (!userRepository.IsUserLoggedIn(sessionToken)) throw new NotFoundException("This user could not be found");
+        await userRepository.LogoutUser(sessionToken);
+        return Ok();
     }
 
-    [HttpGet("GetBySessionToken"), Authorize(Roles = "Admin, User")]
+    [HttpGet("GetBySessionToken")]
+    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<UserDTO>> GetUser([FromHeader(Name = "Authorization")] string sessionToken)
     {
-        if (string.IsNullOrEmpty(sessionToken) || !sessionToken.StartsWith("Bearer "))
-        {
-            return Unauthorized();
-        }
-
-        sessionToken = sessionToken.Substring("Bearer ".Length).Trim();
+        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
         var user = await userRepository.GetUserBySessionToken(sessionToken);
-        if (user == null)
-        {
-            throw new ArgumentException($"User of session token: {sessionToken} could not be found");
-        }
+        if (user == null) throw new NotFoundException($"User of session token: {sessionToken} could not be found");
 
         return Ok(user.ToDTO());
     }
 
     [HttpGet("/getUserByUserName")]
+    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<UserDTO>> GetUserByUserName(string userName)
     {
         var user = await userRepository.GetUserByUserName(userName);
-        if (user == null)
-        {
-            throw new ArgumentException($"User of username: {userName} could not be found");
-        }
+        if (user == null) throw new NotFoundException($"User of session token: {userName} could not be found");
 
         return Ok(user.ToDTO());
     }
-  
 }

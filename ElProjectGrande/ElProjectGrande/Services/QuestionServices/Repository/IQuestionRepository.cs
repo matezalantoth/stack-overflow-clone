@@ -1,4 +1,3 @@
-using ElProjectGrande.Models;
 using ElProjectGrande.Models.QuestionModels;
 using ElProjectGrande.Models.QuestionModels.DTOs;
 using ElProjectGrande.Models.TagModels;
@@ -24,4 +23,8 @@ public interface IQuestionRepository
     public IEnumerable<QuestionDTO> GetTrendingQuestions();
 
     public IEnumerable<QuestionDTO> GetTenQuestion(int startIndex);
+
+    public IEnumerable<QuestionDTO> GetQuestionsByTitle(string titleSubstring);
+
+    public IEnumerable<QuestionDTO> GetQuestionsByContent(string contentSubstring);
 }

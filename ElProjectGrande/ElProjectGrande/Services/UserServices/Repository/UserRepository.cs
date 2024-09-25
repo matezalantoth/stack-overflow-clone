@@ -1,6 +1,10 @@
 using ElProjectGrande.Data;
+using ElProjectGrande.Exceptions;
+using ElProjectGrande.Extensions;
 using ElProjectGrande.Models.UserModels;
+using ElProjectGrande.Models.UserModels.DTOs;
 using ElProjectGrande.Services.AuthenticationServices.TokenService;
+using FuzzySharp;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,24 +16,9 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     public async Task CreateUser(User user, string password, string role)
     {
         var result = await userManager.CreateAsync(user, password);
-        if (result != IdentityResult.Success)
-        {
-            throw new Exception(result.ToString());
-        }
+        if (result != IdentityResult.Success) throw new Exception(result.ToString());
 
         await userManager.AddToRoleAsync(user, "User");
-    }
-
-    public async ValueTask<User?> GetUserByEmail(string email)
-    {
-        return await context.Users
-            .Include(u => u.Questions)
-            .ThenInclude(q => q.Answers)
-            .ThenInclude(a => a.User)
-            .Include(u => u.Answers)
-            .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.User)
-            .FirstOrDefaultAsync(u => u.Email == email);
     }
 
     public Task<bool> AreCredentialsTaken(string email, string username)
@@ -59,12 +48,9 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     {
         var user = await context.Users.FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
         var managedUser = await userManager.FindByEmailAsync(user?.Email);
-        if (user == null || managedUser == null)
-        {
-            throw new ArgumentException("This session token could not be found");
-        }
+        if (user == null || managedUser == null) throw new ArgumentException("This session token could not be found");
 
-        managedUser.SessionToken = String.Empty;
+        managedUser.SessionToken = string.Empty;
         await userManager.UpdateAsync(managedUser);
     }
 
@@ -133,5 +119,82 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         return await context.Users
             .Include(u => u.Questions)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
+    }
+
+    public async ValueTask<User> BanUserById(string userId)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) throw new NotFoundException("This user could not be found");
+        user.Banned = true;
+        await userManager.UpdateAsync(user);
+        return user;
+    }
+
+    public async Task CheckIfUserIsMutedOrBanned(User user)
+    {
+        if (user.Muted)
+        {
+            var now = DateTime.Now;
+            var unMutedAt = now.AddMinutes(user.MutedFor);
+            if (unMutedAt < now) throw new UnauthorizedAccessException();
+
+            await UnMuteUserById(user.Id);
+        }
+
+        if (user.Banned) throw new UnauthorizedAccessException();
+    }
+
+    public async ValueTask<User> MuteUserById(string userId, int mutedFor)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) throw new NotFoundException("This user could not be found");
+        user.MutedFor += mutedFor;
+        user.Muted = true;
+        await userManager.UpdateAsync(user);
+        return user;
+    }
+
+    public async ValueTask<User> UnBanUserById(string userId)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) throw new NotFoundException("This user could not be found");
+        user.Banned = false;
+        await userManager.UpdateAsync(user);
+        return user;
+    }
+
+    public async ValueTask<User> UnMuteUserById(string userId)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ??
+                   throw new NotFoundException("User could not be found");
+        user.Muted = false;
+        await userManager.UpdateAsync(user);
+        return user;
+    }
+
+    // var closestContents = Process
+    //     .ExtractSorted(contentSubstring, context.Questions.Select(q => q.Content).ToArray())
+    //     .Select(res => res.Value)
+    //     .Take(10);
+    // var questions = context.Questions.Include(q => q.User).Include(q => q.Answers);
+    //     return closestContents
+    //     .Select(content => questions.FirstOrDefault(q => q.Content == content))
+    // .Select(q => q?.ToDTO() ?? throw new NotFoundException("This question could not be found"));
+
+    public IEnumerable<UserDTO> GetUsersWithSimilarUsernames(string usernameSubstring)
+    {
+        var bestResults = Process.ExtractSorted(usernameSubstring, context.Users.Select(u => u.UserName).ToArray())
+            .ToList()
+            .Select(res => res.Value)
+            .Take(10);
+        var users = context.Users.Include(u => u.Questions)
+            .ThenInclude(q => q.Answers)
+            .ThenInclude(a => a.User)
+            .Include(u => u.Answers)
+            .ThenInclude(a => a.Question)
+            .ThenInclude(q => q.User).ToList();
+        return bestResults
+            .Select(username => users.FirstOrDefault(u => u.UserName == username))
+            .Select(user => user?.ToDTO() ?? throw new NotFoundException("This user could not be found"));
     }
 }

@@ -1,4 +1,3 @@
-using ElProjectGrande.Models;
 using ElProjectGrande.Models.AnswerModels;
 using ElProjectGrande.Models.AnswerModels.DTOs;
 using ElProjectGrande.Models.QuestionModels;
@@ -21,4 +20,6 @@ public interface IAnswerRepository
     public Task<AnswersOfQuestionDTO> AcceptAnswer(Answer answer);
 
     public void VoteAnswer(Answer answer, int vote);
+
+    public IEnumerable<AnswerDTO> GetAnswersByContent(string contentSubstring);
 }

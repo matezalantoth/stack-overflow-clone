@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using ElProjectGrande.Models.AnswerModels;
 using ElProjectGrande.Models.QuestionModels;
 using Microsoft.AspNetCore.Identity;
@@ -16,4 +14,7 @@ public class User : IdentityUser
     public List<Question> Questions { get; init; } = [];
     public List<Answer> Answers { get; init; } = [];
     public string SessionToken { get; set; } = string.Empty;
+    public bool Muted { get; set; } = false;
+    public bool Banned { get; set; } = false;
+    public int MutedFor { get; set; } = 0;
 }
