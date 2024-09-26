@@ -12,69 +12,69 @@ using Microsoft.AspNetCore.Mvc;
 namespace ElProjectGrande.Controllers;
 
 [ApiController]
-[Microsoft.AspNetCore.Components.Route("[controller]")]
+[Route("[controller]")]
 public class AdminController(
     IUserRepository userRepository,
     IQuestionRepository questionRepository,
     IAnswerRepository answerRepository) : ControllerBase
 {
-    [HttpPatch("Users/Ban/:userId")]
+    [HttpPatch("Users/Ban/{userId}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDTO>> BanUserAsync(string userId)
     {
         return (await userRepository.BanUserById(userId)).ToDTO();
     }
 
-    [HttpPatch("Users/Mute/:userId")]
+    [HttpPatch("Users/Mute/{userId}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDTO>> MuteUserAsync(string userId, [FromBody] MuteRequest request)
     {
         return (await userRepository.MuteUserById(userId, request.Time)).ToDTO();
     }
 
-    [HttpPatch("Users/UnBan/:userId")]
+    [HttpPatch("Users/UnBan/{userId}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDTO>> UnBanUserAsync(string userId)
     {
         return (await userRepository.UnBanUserById(userId)).ToDTO();
     }
 
-    [HttpPatch("Users/UnMute/:userId")]
+    [HttpPatch("Users/UnMute/{userId}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDTO>> UnMuteUserAsync(string userId, [FromBody] MuteRequest request)
     {
         return (await userRepository.UnMuteUserById(userId)).ToDTO();
     }
 
-    [HttpGet("Users/SearchByUsername/:username")]
+    [HttpGet("Users/SearchByUsername/{username}")]
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<UserDTO>> SearchByUserNameAsync(string username)
     {
         return Ok(userRepository.GetUsersWithSimilarUsernames(username));
     }
 
-    [HttpGet("Questions/searchByTitle/:title")]
+    [HttpGet("Questions/searchByTitle/{title}")]
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<QuestionDTO>> SearchQuestionsByTitleAsync(string title)
     {
         return Ok(questionRepository.GetQuestionsByTitle(title));
     }
 
-    [HttpGet("Questions/searchByContent/:title")]
+    [HttpGet("Questions/searchByContent/{content}")]
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<QuestionDTO>> SearchQuestionsByContentAsync(string content)
     {
         return Ok(questionRepository.GetQuestionsByTitle(content));
     }
 
-    [HttpGet("Answers/searchByContent/:content")]
+    [HttpGet("Answers/searchByContent/{content}")]
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<AnswerDTO>> SearchAnswersByContentAsync(string content)
     {
         return Ok(answerRepository.GetAnswersByContent(content));
     }
 
-    [HttpPatch("Answers/unAccept/:answerId")]
+    [HttpPatch("Answers/unAccept/{answerId}")]
     [Authorize(Roles = "Admin")]
     public ActionResult UnAcceptAnswer(Guid answerId)
     {

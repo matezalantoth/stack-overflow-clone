@@ -104,7 +104,10 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
             .Select(res => res.Value)
             .Take(10);
 
-        var questions = context.Questions.Include(q => q.User).Include(q => q.Answers);
+        var questions = context.Questions
+            .Include(q => q.User)
+            .Include(q => q.Answers)
+            .Include(q => q.Tags);
         return closestTitles
             .Select(title =>
                 questions.FirstOrDefault(q => q.Title == title))
@@ -117,7 +120,10 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
             .ExtractSorted(contentSubstring, context.Questions.Select(q => q.Content).ToArray())
             .Select(res => res.Value)
             .Take(10);
-        var questions = context.Questions.Include(q => q.User).Include(q => q.Answers);
+        var questions = context.Questions
+            .Include(q => q.Tags)
+            .Include(q => q.User)
+            .Include(q => q.Answers);
         return closestContents
             .Select(content => questions.FirstOrDefault(q => q.Content == content))
             .Select(q => q?.ToDTO() ?? throw new NotFoundException("This question could not be found"));

@@ -63,7 +63,7 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
         dbContext.Update(answer);
     }
 
-    public IEnumerable<AnswerDTO> GetAnswersByContent(string contentSubstring)
+    public IEnumerable<AdminAnswerDTO> GetAnswersByContent(string contentSubstring)
     {
         var bestResults = Process.ExtractSorted(contentSubstring, dbContext.Answers.Select(a => a.Content).ToArray())
             .Select(res => res.Value)
@@ -71,7 +71,7 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
 
         var answers = dbContext.Answers.Include(a => a.User).Include(a => a.Question);
         return bestResults.Select(content => answers.FirstOrDefault(a => a.Content == content.ToString())).Select(a =>
-            a?.ToDTO() ?? throw new NotFoundException("This answer could not be found"));
+            a?.ToAdminDTO() ?? throw new NotFoundException("This answer could not be found"));
     }
 
     public async Task UnAcceptAnswer(Guid answerId)
