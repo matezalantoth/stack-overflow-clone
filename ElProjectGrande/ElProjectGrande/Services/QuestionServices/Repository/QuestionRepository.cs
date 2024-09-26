@@ -3,7 +3,6 @@ using ElProjectGrande.Exceptions;
 using ElProjectGrande.Extensions;
 using ElProjectGrande.Models.QuestionModels;
 using ElProjectGrande.Models.QuestionModels.DTOs;
-using ElProjectGrande.Models.TagModels;
 using ElProjectGrande.Models.UserModels;
 using FuzzySharp;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +20,9 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
     {
         return context.Questions
             .Include(q => q.User)
+            .Include(q => q.Answers)
             .Include(q => q.Tags)
+            .ThenInclude(t => t.Questions)
             .Select(q => q.ToDTO());
     }
 
@@ -48,10 +49,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
         question.Tags = tags;
         user.Questions.Add(question);
         context.Questions.Add(question);
-        foreach (var tag in question.Tags)
-        {
-            tag.Questions.Add(question);
-        }
+        foreach (var tag in question.Tags) tag.Questions.Add(question);
         context.SaveChanges();
         return new QuestionDTO
         {
@@ -63,10 +61,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
     public void DeleteQuestion(Question question, User user)
     {
         user.Questions.Remove(question);
-        foreach (var tag in question.Tags)
-        {
-            tag.Questions.Remove(question);
-        }
+        foreach (var tag in question.Tags) tag.Questions.Remove(question);
         context.Questions.Remove(question);
         context.SaveChanges();
     }
@@ -86,6 +81,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
     {
         var sevenDaysAgo = DateTime.Today.AddDays(-7);
         return context.Questions
+            .Include(q => q.Tags)
             .Include(q => q.Answers)
             .Include(q => q.User)
             .OrderByDescending(q => q.Answers.Count(ans => ans.PostedAt >= sevenDaysAgo))
@@ -98,6 +94,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
         return context.Questions
             .Include(q => q.Answers)
             .Include(q => q.User)
+            .Include(q => q.Tags)
             .Skip(startIndex).Take(startIndex + 10).Select(q => q.ToDTO());
     }
 

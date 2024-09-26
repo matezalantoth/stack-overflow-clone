@@ -58,11 +58,16 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     {
         return await context.Users
             .Include(u => u.Questions)
+            .ThenInclude(q => q.Tags)
+            .Include(u => u.Questions)
             .ThenInclude(q => q.Answers)
             .ThenInclude(a => a.User)
             .Include(u => u.Answers)
             .ThenInclude(a => a.Question)
             .ThenInclude(q => q.User)
+            .Include(u => u.Answers)
+            .ThenInclude(a => a.Question)
+            .ThenInclude(q => q.Tags)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
@@ -99,12 +104,19 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     public async ValueTask<User?> GetUserByUserName(string username)
 
     {
-        return await context.Users.Include(u => u.Questions)
+        return await context.Users
+            .Include(u => u.Questions)
             .ThenInclude(q => q.Answers)
             .ThenInclude(a => a.User)
+            .Include(u => u.Questions)
+            .ThenInclude(q => q.Tags)
             .Include(u => u.Answers)
             .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.User).FirstOrDefaultAsync(u => u.UserName == username);
+            .ThenInclude(q => q.User)
+            .Include(u => u.Answers)
+            .ThenInclude(a => a.Question)
+            .ThenInclude(q => q.Tags)
+            .FirstOrDefaultAsync(u => u.UserName == username);
     }
 
     public async ValueTask<User?> GetUserBySessionTokenOnlyAnswers(string sessionToken)
@@ -118,6 +130,7 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     {
         return await context.Users
             .Include(u => u.Questions)
+            .ThenInclude(q => q.Tags)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
@@ -171,7 +184,6 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         await userManager.UpdateAsync(user);
         return user;
     }
-
     public IEnumerable<UserDTO> GetUsersWithSimilarUsernames(string usernameSubstring)
     {
         var bestResults = Process.ExtractSorted(usernameSubstring, context.Users.Select(u => u.UserName).ToArray())
