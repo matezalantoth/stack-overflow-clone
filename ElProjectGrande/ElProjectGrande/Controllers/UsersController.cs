@@ -68,4 +68,15 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
 
         return Ok(user.ToDTO());
     }
+
+    [HttpGet("IsUserAdmin")]
+    [Authorize(Roles = "Admin, User")]
+    public async Task<ActionResult<bool>> IsUserAdmin([FromHeader(Name = "Authorization")] string sessionToken)
+    {
+        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
+        var user = await userRepository.GetUserBySessionToken(sessionToken) ??
+                   throw new NotFoundException("This user could not be found");
+
+        return Ok(userRepository.IsUserAdmin(user));
+    }
 }

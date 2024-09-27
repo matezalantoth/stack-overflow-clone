@@ -1,6 +1,6 @@
-import {StrictMode, useEffect, useState} from 'react'
+import {StrictMode, useState} from 'react'
 import './style.css'
-import {BrowserRouter, Routes, Route} from "react-router-dom"
+import {BrowserRouter, Route, Routes} from "react-router-dom"
 import {CookiesProvider, useCookies} from 'react-cookie';
 import {SignupPage} from "./Pages/SingUp/SignUpPage.jsx";
 import ProfilePage from "./Pages/User/ProfilePage.jsx";
@@ -15,31 +15,40 @@ import QuestionPage from "./Pages/QuestionPage.jsx";
 
 import AskQuestion from "./Pages/AskQuestion/AskQuestion.jsx";
 import PublicUser from "./Pages/User/PublicUser.jsx";
+import AdminPage from "./Pages/Admin/AdminPage.jsx";
 
 
-export default function App() 
-{
-    const[cookies, setCookies] = useCookies(['user'])
-    const[searchQuestion, setsearchQuestion] = useState([])
-    const[normalQuestion, setNormalQuestion] = useState([])
-    
+export default function App() {
+    const [cookies, setCookies] = useCookies(['user'])
+    const [searchQuestion, setsearchQuestion] = useState([])
+    const [normalQuestion, setNormalQuestion] = useState([])
+
     function setUserLoginCookies(user) {
         setCookies('user', user, {path: '/'})
     }
+
     return (
-        
+
         <StrictMode>
             <CookiesProvider>
                 <BrowserRouter>
-                    <Navbar setUserLoginCookies={setUserLoginCookies} setsearchQuestion={setsearchQuestion} normalQuestion={normalQuestion}  />
+                    <Navbar setUserLoginCookies={setUserLoginCookies} setsearchQuestion={setsearchQuestion}
+                            normalQuestion={normalQuestion}/>
                     <Routes>
-                        <Route path="/" element={<WelcomePage searchQuestion={searchQuestion} normalQuestion={normalQuestion} setNormalQuestion={setNormalQuestion} setsearchQuestion={setsearchQuestion}/>} />
-                        <Route path="/signup" element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
-                        <Route path="/login" element={<LoginPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path="/"
+                               element={<WelcomePage searchQuestion={searchQuestion} normalQuestion={normalQuestion}
+                                                     setNormalQuestion={setNormalQuestion}
+                                                     setsearchQuestion={setsearchQuestion}/>}/>
+                        <Route path="/signup"
+                               element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path="/login"
+                               element={<LoginPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/askquestion" element={<AskQuestion cookies={cookies}/>}/>
-                        <Route path="/profile" element={<ProfilePage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path="/profile"
+                               element={<ProfilePage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path='question/:questionId' element={<QuestionPage cookies={cookies}/>}/>
                         <Route path='/user/:userName' element={<PublicUser/>}/>
+                        <Route path='/admin' element={<AdminPage cookies={cookies}/>}/>
                     </Routes>
                     <Toaster/>
 

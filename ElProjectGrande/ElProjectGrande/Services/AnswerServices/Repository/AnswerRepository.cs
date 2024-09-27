@@ -1,4 +1,5 @@
 using ElProjectGrande.Data;
+using ElProjectGrande.Exceptions;
 using ElProjectGrande.Extensions;
 using ElProjectGrande.Models.AnswerModels;
 using ElProjectGrande.Models.AnswerModels.DTOs;
@@ -62,13 +63,24 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
         dbContext.Update(answer);
     }
 
-    public IEnumerable<AnswerDTO> GetAnswersByContent(string contentSubstring)
+    public IEnumerable<AdminAnswerDTO> GetAnswersByContent(string contentSubstring)
     {
         var bestResults = Process.ExtractSorted(contentSubstring, dbContext.Answers.Select(a => a.Content).ToArray())
-            .Take(10)
-            .Select(res => res.Value);
+            .Select(res => res.Value)
+            .Take(10);
 
-        return dbContext.Answers.Where(a => bestResults.Contains(a.Content)).Select(a => a.ToDTO());
+        var answers = dbContext.Answers.Include(a => a.User).Include(a => a.Question);
+        return bestResults.Select(content => answers.FirstOrDefault(a => a.Content == content.ToString())).Select(a =>
+            a?.ToAdminDTO() ?? throw new NotFoundException("This answer could not be found"));
+    }
+
+    public async Task UnAcceptAnswer(Guid answerId)
+    {
+        var answer = await dbContext.Answers.FirstOrDefaultAsync(a => a.Id == answerId) ??
+                     throw new NotFoundException("This answer could not be found");
+        answer.Accepted = false;
+        dbContext.Update(answer);
+        await dbContext.SaveChangesAsync();
     }
 
     public IEnumerable<AnswerDTO> GetAllAnswersFromQuestion(Question question)

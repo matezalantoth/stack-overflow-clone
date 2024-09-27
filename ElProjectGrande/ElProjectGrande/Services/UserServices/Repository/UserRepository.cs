@@ -185,21 +185,39 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         return user;
     }
 
-
     public IEnumerable<UserDTO> GetUsersWithSimilarUsernames(string usernameSubstring)
     {
         var bestResults = Process.ExtractSorted(usernameSubstring, context.Users.Select(u => u.UserName).ToArray())
             .ToList()
             .Select(res => res.Value)
             .Take(10);
-        var users = context.Users.Include(u => u.Questions)
+        var users = context.Users
+            .Include(u => u.Questions)
             .ThenInclude(q => q.Answers)
             .ThenInclude(a => a.User)
+            .Include(u => u.Questions)
+            .ThenInclude(q => q.Tags)
             .Include(u => u.Answers)
             .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.User).ToList();
+            .ThenInclude(q => q.User)
+            .Include(u => u.Answers)
+            .ThenInclude(a => a.Question)
+            .ThenInclude(q => q.Tags)
+            .ToList();
         return bestResults
             .Select(username => users.FirstOrDefault(u => u.UserName == username))
             .Select(user => user?.ToDTO() ?? throw new NotFoundException("This user could not be found"));
+    }
+
+    public bool IsUserAdmin(User user)
+    {
+        return userManager.IsInRoleAsync(user, "Admin").GetAwaiter().GetResult();
+    }
+
+    public bool IsUserAdmin(string userId)
+    {
+        return userManager.IsInRoleAsync(
+            context.Users.FirstOrDefault(u => u.Id == userId) ??
+            throw new NotFoundException("This user could not be found"), "Admin").GetAwaiter().GetResult();
     }
 }
