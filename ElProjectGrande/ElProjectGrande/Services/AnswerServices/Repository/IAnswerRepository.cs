@@ -23,5 +23,5 @@ public interface IAnswerRepository
 
     public IEnumerable<AdminAnswerDTO> GetAnswersByContent(string contentSubstring);
 
-    public Task UnAcceptAnswer(Guid answerId);
+    public Task<Answer> UnAcceptAnswer(Guid answerId);
 }

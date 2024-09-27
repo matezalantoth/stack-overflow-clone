@@ -41,7 +41,7 @@ public class AdminController(
 
     [HttpPatch("Users/UnMute/{userId}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<UserDTO>> UnMuteUserAsync(string userId, [FromBody] MuteRequest request)
+    public async Task<ActionResult<UserDTO>> UnMuteUserAsync(string userId)
     {
         return (await userRepository.UnMuteUserById(userId)).ToDTO();
     }
@@ -76,9 +76,8 @@ public class AdminController(
 
     [HttpPatch("Answers/unAccept/{answerId}")]
     [Authorize(Roles = "Admin")]
-    public ActionResult UnAcceptAnswer(Guid answerId)
+    public async Task<ActionResult<AnswerDTO>> UnAcceptAnswer(Guid answerId)
     {
-        answerRepository.UnAcceptAnswer(answerId);
-        return Ok();
+        return Ok(await answerRepository.UnAcceptAnswer(answerId));
     }
 }
