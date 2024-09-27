@@ -84,11 +84,10 @@ app.UseExceptionHandler(appBuilder =>
         await context.Response.WriteAsJsonAsync("Something went wrong.");
 
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-        Console.WriteLine(exceptionHandlerPathFeature?.Error.Message);
         if (exceptionHandlerPathFeature?.Error is UnauthorizedAccessException)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            await context.Response.WriteAsJsonAsync("You have been banned or muted");
         }
 
         if (exceptionHandlerPathFeature?.Error is NotFoundException)

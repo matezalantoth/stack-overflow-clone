@@ -74,13 +74,13 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
             a?.ToAdminDTO() ?? throw new NotFoundException("This answer could not be found"));
     }
 
-    public async Task UnAcceptAnswer(Guid answerId)
+    public async Task<Answer> UnAcceptAnswer(Guid answerId)
     {
         var answer = await dbContext.Answers.FirstOrDefaultAsync(a => a.Id == answerId) ??
                      throw new NotFoundException("This answer could not be found");
         answer.Accepted = false;
-        dbContext.Update(answer);
         await dbContext.SaveChangesAsync();
+        return answer;
     }
 
     public IEnumerable<AnswerDTO> GetAllAnswersFromQuestion(Question question)
