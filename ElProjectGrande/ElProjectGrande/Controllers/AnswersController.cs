@@ -48,7 +48,6 @@ public class AnswersController(
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
                 return Unauthorized();
             }
 
@@ -63,7 +62,6 @@ public class AnswersController(
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
                 return Unauthorized();
             }
 
@@ -73,7 +71,6 @@ public class AnswersController(
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             return StatusCode(500);
         }
     }
@@ -216,5 +213,14 @@ public class AnswersController(
         await userRepository.Downvote(user, answer.Id);
 
         return Ok("Downvoted answer");
+    }
+
+    [HttpGet("question/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<Guid>> GetQuestionOfAnswer(Guid id)
+    {
+        Console.WriteLine("Trying with:" + id);
+        var q = await answerRepository.GetQuestionOfAnswerByAnswerId(id);
+        return Ok(q.Id);
     }
 }

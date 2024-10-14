@@ -25,6 +25,7 @@ public class TokenService : ITokenService
 
     public string ValidateAndGetSessionToken(string sessionToken)
     {
+        Console.WriteLine(sessionToken);
         if (sessionToken == string.Empty || !sessionToken.StartsWith("Bearer "))
             throw new UnauthorizedAccessException("Invalid session token");
 

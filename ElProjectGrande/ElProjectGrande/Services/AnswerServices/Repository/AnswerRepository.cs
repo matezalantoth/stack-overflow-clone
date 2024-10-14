@@ -83,6 +83,12 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
         return answer;
     }
 
+    public async Task<Question> GetQuestionOfAnswerByAnswerId(Guid answerId)
+    {
+        return (await dbContext.Answers.Include(answer => answer.Question).FirstOrDefaultAsync(a => a.Id == answerId) ??
+                throw new NotFoundException("This answer could not be found")).Question;
+    }
+
     public IEnumerable<AnswerDTO> GetAllAnswersFromQuestion(Question question)
     {
         return question.Answers.Select(a => a.ToDTO());

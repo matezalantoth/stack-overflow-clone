@@ -80,15 +80,21 @@ public class QuestionsController(
         [FromHeader(Name = "Authorization")] string sessionToken,
         [FromBody] UpdatedQuestion updatedQuestion, Guid id)
     {
+        Console.WriteLine("----------------Checking user's session token-----------------------");
         sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
         var question = await questionRepository.GetQuestionById(id) ??
                        throw new NotFoundException($"Question of id {id} could not be found!");
         var user = await userRepository.GetUserBySessionTokenOnlyQuestions(sessionToken) ??
                    throw new NotFoundException("this user could not be found");
         await userRepository.CheckIfUserIsMutedOrBanned(user);
+        Console.WriteLine("----------------User is not muted----------------");
         if (question.User.Id != user.Id && !userRepository.IsUserAdmin(user))
+        {
+            Console.WriteLine("-----------User is neither the original poster or an admin------------");
             return Forbid("You do not have permission to update this question");
+        }
 
+        Console.WriteLine("----------------User is allowed to edit this----------------");
         var updated = questionFactory.CreateNewUpdatedQuestionFromUpdatesAndOriginal(updatedQuestion, question);
         return Ok(questionRepository.UpdateQuestion(updated));
     }
