@@ -34,8 +34,8 @@ jobs:
 
       # Step 4: Build the backend project in Debug mode
       - name: Build Backend Project
-        run: dotnet build ./ElProjectGrande/ElProjectGrande/ElProjectGrande.csproj --configuration Debug --no-restore
+        run: dotnet build ./ElProjectGrande/ElProjectGrande/ElProjectGrande.csproj --configuration Debug
 
       # Step 5: Run Tests from the test project
       - name: Run Tests
-        run: dotnet test ./ElProjectGrande/ElProjectGrandeTest/ElProjectGrandeTest.csproj --configuration Debug --no-build --verbosity normal
+        run: dotnet test ./ElProjectGrande/ElProjectGrandeTest/ElProjectGrandeTest.csproj --configuration Debug --verbosity normal
