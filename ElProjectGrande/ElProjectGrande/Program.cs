@@ -186,3 +186,6 @@ void AddSwaggerGen()
 }
 
 app.Run();
+public partial class Program
+{
+}
