@@ -4,6 +4,7 @@ import {useCookies} from "react-cookie";
 import {toast} from "react-hot-toast";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowDown, faArrowUp, faCheck} from "@fortawesome/free-solid-svg-icons";
+import ShareButton from "../components/ShareButton/ShareButton.jsx";
 
 export default function QuestionPage() {
     const [cookies] = useCookies(['user']);
@@ -284,6 +285,7 @@ export default function QuestionPage() {
                                     {questionData.title}
                                 </h1>
                                 <div className="text-black break-words">{questionData.content}</div>
+                                <ShareButton />
                             </div>
                         </div>
 
