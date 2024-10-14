@@ -20,7 +20,7 @@ export default function ShareButton() {
             <div className="absolute min-w-full p-4 mt-2 bg-white rounded shadow">
                 <CopyToClipboard text={url}>
                     <div>
-                        <textarea className="border h-5 w-3/4" readOnly={true} value={url} />
+                        <textarea className="border h-8 w-3/4 resize-none cursor-not-allowed rounded-md" readOnly={true} value={url} />
                         <button>Copy URL to the clipboard</button>
                     </div>
                 </CopyToClipboard>
