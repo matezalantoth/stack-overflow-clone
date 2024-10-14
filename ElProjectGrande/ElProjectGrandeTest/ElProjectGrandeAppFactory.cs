@@ -20,8 +20,10 @@ public class ElProjectGrandeAppFactory : WebApplicationFactory<Program>
 
             var sp = sc.BuildServiceProvider();
             using var scope = sp.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<DbContextOptions<ApiDbContext>>();
+            var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
 
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
         });
     }
 }
