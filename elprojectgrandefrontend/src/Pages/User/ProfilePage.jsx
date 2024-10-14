@@ -20,7 +20,6 @@ export default function ProfilePage() {
                         headers: {
                             'Authorization': "Bearer " + cookies.user
                         }
-
                     });
                 const data = await res.json();
                 setUser(data);

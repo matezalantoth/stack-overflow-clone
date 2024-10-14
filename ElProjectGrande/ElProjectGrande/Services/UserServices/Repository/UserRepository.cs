@@ -187,9 +187,9 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
 
     public IEnumerable<UserDTO> GetUsersWithSimilarUsernames(string usernameSubstring)
     {
-        var bestResults = Process.ExtractSorted(usernameSubstring, context.Users.Select(u => u.UserName).ToArray())
-            .ToList()
+        var bestResults = Process.ExtractSorted(usernameSubstring, context.Users.Select(u => u.UserName))
             .Select(res => res.Value)
+            .ToList()
             .Take(10);
         var users = context.Users
             .Include(u => u.Questions)

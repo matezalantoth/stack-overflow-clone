@@ -175,7 +175,6 @@ export default function AdminPage() {
 
                                         </div>
                                         <ResultInteractionComponent
-                                            className=""
                                             searchModel={searching}/>
                                     </li>
                                 </>;
