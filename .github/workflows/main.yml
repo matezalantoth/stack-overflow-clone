@@ -27,12 +27,12 @@ jobs:
 
       # Step 3: Restore dependencies for the solution
       - name: Restore Dependencies
-        run: dotnet restore ElProjectGrande/ElProjectGrande.sln
+        run: dotnet restore ElProjectGrande.sln
 
       # Step 4: Build the solution in Debug mode
       - name: Build Solution
-        run: dotnet build ElProjectGrande/ElProjectGrande.sln --configuration Debug --no-restore
+        run: dotnet build ElProjectGrande.sln --configuration Debug --no-restore
 
       # Step 5: Run Tests from the test project
       - name: Run Tests
-        run: dotnet test ElProjectGrande/ElProjectGrandeTest/ElProjectGrandeTest.csproj --configuration Debug --no-build --verbosity normal
+        run: dotnet test ElProjectGrandeTest/ElProjectGrandeTest.csproj --configuration Debug --no-build --verbosity normal
