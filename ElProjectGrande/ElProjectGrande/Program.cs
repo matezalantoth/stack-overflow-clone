@@ -43,7 +43,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<ApiDbContext>(options =>
 {
-    Console.WriteLine(GetConnString());
+
     options.UseMySQL(GetConnString());
 });
 

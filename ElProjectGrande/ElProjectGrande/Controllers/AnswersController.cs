@@ -48,7 +48,6 @@ public class AnswersController(
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
                 return Unauthorized();
             }
 
@@ -63,7 +62,6 @@ public class AnswersController(
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
                 return Unauthorized();
             }
 
@@ -73,7 +71,6 @@ public class AnswersController(
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             return StatusCode(500);
         }
     }
