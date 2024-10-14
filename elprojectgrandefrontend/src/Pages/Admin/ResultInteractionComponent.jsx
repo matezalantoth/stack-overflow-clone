@@ -37,5 +37,4 @@ export default function ResultInteractionComponent({searchModel}) {
                 </>
             )
     }
-    return <button></button>
 }

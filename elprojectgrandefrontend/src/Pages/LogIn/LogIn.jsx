@@ -81,7 +81,6 @@ export const LoginPage = ({setUserLoginCookies}) => {
                                 ) {
                                     try {
                                         const data = await handleLogin();
-                                        console.log(data);
                                         setUserLoginCookies(data);
                                         showSuccessToast('Successfully signed in!');
 
