@@ -21,12 +21,41 @@ export default function ResultInteractionComponent({searchModel, id}) {
         const data = await res.json()
     }
 
+    const deleteAnswer = async (id) => {
+        await fetch("/api/answers/" + id, {
+            method: "DELETE",
+            headers: {
+                "Authorization": "Bearer " + cookies.user
+            }
+        })
+    }
+
+    const getQuestionId = async () => {
+        const res = await fetch('/api/answers/question/' + id, {
+            method: 'GET',
+            headers: {
+                'Authorization': "Bearer " + cookies.user
+            }
+        })
+        const data = await res.json();
+        console.log(data);
+        return data;
+    }
+
+    const navToQuestionPage = async () => {
+        const qId = await getQuestionId();
+        console.log(qId);
+        navigate("/question/" + qId + "?state=ansEdit&id=" + id);
+    }
+
     console.log(id);
     switch (searchModel) {
         default:
             return (<>
-                <button className="m-2 text-blue-400" title="Edit"><FontAwesomeIcon icon={faFeather}/></button>
-                <button className="text-red-500" title="Delete"><FontAwesomeIcon icon={faX}/></button>
+                <button className="m-2 text-blue-400" title="Edit" onClick={() => navToQuestionPage()}><FontAwesomeIcon
+                    icon={faFeather}/></button>
+                <button className="text-red-500" onClick={() => deleteAnswer(id)} title="Delete"><FontAwesomeIcon
+                    icon={faX}/></button>
             </>)
         case 'Questions':
             return (<>

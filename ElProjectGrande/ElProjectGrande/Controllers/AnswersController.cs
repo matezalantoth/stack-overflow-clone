@@ -214,4 +214,13 @@ public class AnswersController(
 
         return Ok("Downvoted answer");
     }
+
+    [HttpGet("question/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<Guid>> GetQuestionOfAnswer(Guid id)
+    {
+        Console.WriteLine("Trying with:" + id);
+        var q = await answerRepository.GetQuestionOfAnswerByAnswerId(id);
+        return Ok(q.Id);
+    }
 }

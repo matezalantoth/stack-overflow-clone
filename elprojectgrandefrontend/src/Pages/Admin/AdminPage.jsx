@@ -117,7 +117,7 @@ export default function AdminPage() {
                 case "Answers":
                     setSearchResults(() => searchData.map(a => {
                         console.log(a);
-                        return {value: a.content, id: a.question.id}
+                        return {value: a.content, id: a.id}
                     }));
                     break;
             }

@@ -17,6 +17,7 @@ export default function QuestionPage() {
     const [submittable, setSubmittable] = useState(false);
     const [isAdmin, setIsAdmin] = useState(null);
     const [renderForm, setRenderForm] = useState(false);
+    const [editingAnswerId, setEditingAnswerId] = useState(null);
     const urlParams = new URLSearchParams(window.location.search);
     const state = urlParams.get('state');
     const showErrorToast = (message) => toast.error(message);
@@ -67,6 +68,9 @@ export default function QuestionPage() {
         if (isAdmin && state === "edit") {
             setRenderForm(true);
         }
+        if (isAdmin && state === "ansEdit") {
+            setEditingAnswerId(urlParams.get("id"));
+        }
     }, [isAdmin])
 
     useEffect(() => {
@@ -76,7 +80,7 @@ export default function QuestionPage() {
         }
         setSubmittable(false);
     }, [reply])
-
+    console.log(answers);
     return questionData && answers && user ? (
         <>
             <QuestionComponent question={questionData} setQuestion={setQuestionData} isAdmin={isAdmin} user={user}
@@ -88,7 +92,8 @@ export default function QuestionPage() {
                             <AnswerComponent key={answer.id} answer={answer} question={questionData} user={user}
                                              cookies={cookies}
                                              setAnswers={setAnswers}
-                                             setUser={setUser} setQuestionData={setQuestionData}/>
+                                             setUser={setUser} setQuestionData={setQuestionData} isAdmin={isAdmin}
+                                             editingAnswerId={editingAnswerId}/>
                         )
                     })
                 }
