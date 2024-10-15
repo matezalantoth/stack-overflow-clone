@@ -80,20 +80,26 @@ app.UseExceptionHandler(appBuilder =>
     appBuilder.Run(async context =>
     {
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        context.Response.ContentType = "application/json";
 
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-        await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature?.Error.Message ?? "Something went wrong.");
-        if (exceptionHandlerPathFeature?.Error is UnauthorizedAccessException)
+        switch (exceptionHandlerPathFeature?.Error)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-            await context.Response.WriteAsJsonAsync("You have been banned or muted");
-        }
-
-        if (exceptionHandlerPathFeature?.Error is NotFoundException)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+            case UnauthorizedAccessException:
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                break;
+            case NotFoundException:
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                break;
+            case BadRequestException:
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                break;
+            default:
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                await context.Response.WriteAsJsonAsync("Something went wrong.");
+                break;
         }
     });
 });

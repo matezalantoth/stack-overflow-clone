@@ -29,9 +29,9 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     public async Task<string> LoginUser(string email, string password)
     {
         var managedUser = await userManager.FindByEmailAsync(email);
-        if (managedUser == null) throw new Exception("Invalid credentials");
+        if (managedUser == null) throw new BadRequestException("Invalid credentials");
         var isPasswordValid = await userManager.CheckPasswordAsync(managedUser, password);
-        if (!isPasswordValid) throw new Exception("Invalid credentials");
+        if (!isPasswordValid) throw new BadRequestException("Invalid credentials");
         var roles = await userManager.GetRolesAsync(managedUser);
         var token = tokenService.CreateToken(managedUser, roles[0] ?? "User");
         managedUser.SessionToken = token;
