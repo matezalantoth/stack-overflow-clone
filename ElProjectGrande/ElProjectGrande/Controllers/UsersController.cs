@@ -15,7 +15,7 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     : ControllerBase
 {
     [HttpPost("signup")]
-    public async Task<ActionResult<Guid>> CreateUserAndLogin([FromBody] NewUser newUser)
+    public async Task<ActionResult<UserDTO>> CreateUserAndLogin([FromBody] NewUser newUser)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -25,7 +25,7 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         var user = userFactory.CreateUser(newUser);
         await userRepository.CreateUser(user, newUser.Password, "User");
         user.SessionToken = await userRepository.LoginUser(newUser.Email, newUser.Password);
-        return Ok(user);
+        return Ok(user.ToDTO());
     }
 
     [HttpPost("login")]
@@ -43,7 +43,6 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     public async Task<ActionResult> LogoutUser([FromHeader(Name = "Authorization")] string sessionToken)
     {
         sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-        if (!userRepository.IsUserLoggedIn(sessionToken)) throw new NotFoundException("This user could not be found");
         await userRepository.LogoutUser(sessionToken);
         return Ok();
     }
@@ -55,12 +54,11 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
         var user = await userRepository.GetUserBySessionToken(sessionToken);
         if (user == null) throw new NotFoundException($"User of session token: {sessionToken} could not be found");
-
         return Ok(user.ToDTO());
     }
 
+    //Getting user by username may need separate dto, shouldn't send email, will check frontend for dependencies
     [HttpGet("/getUserByUserName")]
-    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<UserDTO>> GetUserByUserName(string userName)
     {
         var user = await userRepository.GetUserByUserName(userName);
