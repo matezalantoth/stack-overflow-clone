@@ -11,8 +11,10 @@ public class ElProjectGrandeAppFactory : WebApplicationFactory<Program>
 {
     private readonly string _dbName = Guid.NewGuid().ToString();
 
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Testing");
         builder.ConfigureServices(sc =>
         {
             sc.RemoveAll(typeof(DbContextOptions<ApiDbContext>));

@@ -81,9 +81,9 @@ app.UseExceptionHandler(appBuilder =>
     {
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync("Something went wrong.");
 
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+        await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature?.Error.Message ?? "Something went wrong.");
         if (exceptionHandlerPathFeature?.Error is UnauthorizedAccessException)
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
@@ -119,6 +119,16 @@ app.MapControllers();
 
 void AddJwt()
 {
+    var issuingKey = "";
+    if (builder.Environment.IsEnvironment("Testing"))
+    {
+        issuingKey = "xR3!m9QpT4hK8jLa!Vw6D%Zc5N2fUrT3D";
+    }
+    else
+    {
+        issuingKey = Environment.GetEnvironmentVariable("ISSUING_KEY") ??
+            throw new Exception("ISSUING_KEY not found");
+    }
     builder.Services
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -133,8 +143,7 @@ void AddJwt()
                 ValidIssuer = "Grande",
                 ValidAudience = "Grande",
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("ISSUING_KEY") ??
-                                           throw new Exception("ISSUING_KEY not found"))
+                    Encoding.UTF8.GetBytes(issuingKey)
                 )
             };
         });
