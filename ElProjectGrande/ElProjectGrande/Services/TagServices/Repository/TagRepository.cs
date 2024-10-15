@@ -34,6 +34,7 @@ public class TagRepository(ApiDbContext context) : ITagRepository
         {
             Id = tag.Id,
             TagName = tag.TagName,
+            Description = tag.Description
         };
     }
 
