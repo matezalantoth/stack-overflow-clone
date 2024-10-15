@@ -134,9 +134,9 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
-    public async ValueTask<User> BanUserById(string userId)
+    public async ValueTask<User> BanUserByUsername(string username)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == username);
         if (user == null) throw new NotFoundException("This user could not be found");
         user.Banned = true;
         await userManager.UpdateAsync(user);
@@ -149,17 +149,17 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         {
             var now = DateTime.Now;
             var unMutedAt = now.AddMinutes(user.MutedFor);
-            if (unMutedAt < now) throw new UnauthorizedAccessException();
+            if (unMutedAt < now) throw new ForbiddenException();
 
-            await UnMuteUserById(user.Id);
+            await UnMuteUserByUsername(user.Id);
         }
 
-        if (user.Banned) throw new UnauthorizedAccessException();
+        if (user.Banned) throw new ForbiddenException();
     }
 
-    public async ValueTask<User> MuteUserById(string userId, int mutedFor)
+    public async ValueTask<User> MuteUserByUsername(string username, int mutedFor)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == username);
         if (user == null) throw new NotFoundException("This user could not be found");
         user.MutedFor += mutedFor;
         user.Muted = true;
@@ -167,18 +167,18 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         return user;
     }
 
-    public async ValueTask<User> UnBanUserById(string userId)
+    public async ValueTask<User> UnBanUserByUsername(string username)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == username);
         if (user == null) throw new NotFoundException("This user could not be found");
         user.Banned = false;
         await userManager.UpdateAsync(user);
         return user;
     }
 
-    public async ValueTask<User> UnMuteUserById(string userId)
+    public async ValueTask<User> UnMuteUserByUsername(string username)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ??
+        var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == username) ??
                    throw new NotFoundException("User could not be found");
         user.Muted = false;
         await userManager.UpdateAsync(user);

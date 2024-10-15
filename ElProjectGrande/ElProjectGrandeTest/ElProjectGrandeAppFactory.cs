@@ -18,14 +18,17 @@ public class ElProjectGrandeAppFactory : WebApplicationFactory<Program>
         builder.ConfigureServices(sc =>
         {
             sc.RemoveAll(typeof(DbContextOptions<ApiDbContext>));
-            sc.AddDbContext<ApiDbContext>(options => { options.UseInMemoryDatabase(_dbName); });
+            sc.AddDbContext<ApiDbContext>(options => {
+                options.UseInMemoryDatabase(_dbName);
+            });
 
             var sp = sc.BuildServiceProvider();
+
             using var scope = sp.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
-
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
         });
     }
+
 }

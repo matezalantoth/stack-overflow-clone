@@ -96,6 +96,10 @@ app.UseExceptionHandler(appBuilder =>
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
                 break;
+            case ForbiddenException:
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                break;
             default:
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 await context.Response.WriteAsJsonAsync("Something went wrong.");

@@ -7,7 +7,7 @@ public interface IUserRepository
 {
     public Task CreateUser(User user, string password, string role);
 
-    public ValueTask<User> UnMuteUserById(string userId);
+    public ValueTask<User> UnMuteUserByUsername(string username);
 
     public Task<bool> AreCredentialsTaken(string email, string username);
 
@@ -37,11 +37,11 @@ public interface IUserRepository
 
     public ValueTask<User?> GetUserBySessionTokenOnlyQuestions(string sessionToken);
 
-    public ValueTask<User> BanUserById(string userId);
+    public ValueTask<User> BanUserByUsername(string username);
 
-    public ValueTask<User> MuteUserById(string userId, int mutedFor);
+    public ValueTask<User> MuteUserByUsername(string username, int mutedFor);
 
-    public ValueTask<User> UnBanUserById(string userId);
+    public ValueTask<User> UnBanUserByUsername(string username);
 
     public IEnumerable<UserDTO> GetUsersWithSimilarUsernames(string usernameSubstring);
 
