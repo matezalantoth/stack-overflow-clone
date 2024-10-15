@@ -48,4 +48,6 @@ public interface IUserRepository
     public bool IsUserAdmin(User user);
 
     public bool IsUserAdmin(string userId);
+
+    public Task UpdateUser(User user, string? password);
 }

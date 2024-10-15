@@ -220,4 +220,19 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
             context.Users.FirstOrDefault(u => u.Id == userId) ??
             throw new NotFoundException("This user could not be found"), "Admin").GetAwaiter().GetResult();
     }
+
+    public async Task UpdateUser(User user, string? password)
+    {
+        if (password != null)
+        {
+            await userManager.RemovePasswordAsync(user);
+            await userManager.AddPasswordAsync(user, password);
+        }
+        var result = await userManager.UpdateAsync(user);
+      
+        if (!result.Succeeded)
+        {
+            throw new Exception("Failed to update user");
+        }
+    }
 }
