@@ -18,32 +18,32 @@ public class AdminController(
     IQuestionRepository questionRepository,
     IAnswerRepository answerRepository) : ControllerBase
 {
-    [HttpPatch("Users/Ban/{userId}")]
+    [HttpPatch("Users/Ban/{username}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<UserDTO>> BanUserAsync(string userId)
+    public async Task<ActionResult<UserDTO>> BanUserAsync(string username)
     {
-        return (await userRepository.BanUserById(userId)).ToDTO();
+        return (await userRepository.BanUserByUsername(username)).ToDTO();
     }
 
-    [HttpPatch("Users/Mute/{userId}")]
+    [HttpPatch("Users/Mute/{username}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<UserDTO>> MuteUserAsync(string userId, [FromBody] MuteRequest request)
+    public async Task<ActionResult<UserDTO>> MuteUserAsync(string username, [FromBody] MuteRequest request)
     {
-        return (await userRepository.MuteUserById(userId, request.Time)).ToDTO();
+        return (await userRepository.MuteUserByUsername(username, request.Time)).ToDTO();
     }
 
-    [HttpPatch("Users/UnBan/{userId}")]
+    [HttpPatch("Users/UnBan/{username}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<UserDTO>> UnBanUserAsync(string userId)
+    public async Task<ActionResult<UserDTO>> UnBanUserAsync(string username)
     {
-        return (await userRepository.UnBanUserById(userId)).ToDTO();
+        return (await userRepository.UnBanUserByUsername(username)).ToDTO();
     }
 
-    [HttpPatch("Users/UnMute/{userId}")]
+    [HttpPatch("Users/UnMute/{username}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<UserDTO>> UnMuteUserAsync(string userId)
+    public async Task<ActionResult<UserDTO>> UnMuteUserAsync(string username)
     {
-        return (await userRepository.UnMuteUserById(userId)).ToDTO();
+        return (await userRepository.UnMuteUserByUsername(username)).ToDTO();
     }
 
     [HttpGet("Users/SearchByUsername/{username}")]
