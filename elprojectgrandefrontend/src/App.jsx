@@ -16,12 +16,14 @@ import QuestionPage from "./Pages/QuestionPage.jsx";
 import AskQuestion from "./Pages/AskQuestion/AskQuestion.jsx";
 import PublicUser from "./Pages/User/PublicUser.jsx";
 import AdminPage from "./Pages/Admin/AdminPage.jsx";
+import TagsPage from "./Pages/TagsPage/TagsPage.jsx";
 
 
 export default function App() {
     const [cookies, setCookies] = useCookies(['user'])
     const [searchQuestion, setsearchQuestion] = useState([])
     const [normalQuestion, setNormalQuestion] = useState([])
+    const [tags, setTags] = useState([])
 
     function setUserLoginCookies(user) {
         setCookies('user', user, {path: '/'})
@@ -49,6 +51,7 @@ export default function App() {
                         <Route path='question/:questionId' element={<QuestionPage cookies={cookies}/>}/>
                         <Route path='/user/:userName' element={<PublicUser/>}/>
                         <Route path='/admin' element={<AdminPage cookies={cookies}/>}/>
+                        <Route path='/tags' element={<TagsPage cookies={cookies} tags={tags} setTags={setTags}/>}/>
                     </Routes>
                     <Toaster/>
 

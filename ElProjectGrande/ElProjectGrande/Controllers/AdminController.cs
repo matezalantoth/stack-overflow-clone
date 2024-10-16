@@ -2,9 +2,11 @@ using ElProjectGrande.Extensions;
 using ElProjectGrande.Models.AdminModels.DTOs;
 using ElProjectGrande.Models.AnswerModels.DTOs;
 using ElProjectGrande.Models.QuestionModels.DTOs;
+using ElProjectGrande.Models.TagModels.DTOs;
 using ElProjectGrande.Models.UserModels.DTOs;
 using ElProjectGrande.Services.AnswerServices.Repository;
 using ElProjectGrande.Services.QuestionServices.Repository;
+using ElProjectGrande.Services.TagServices.Repository;
 using ElProjectGrande.Services.UserServices.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +18,8 @@ namespace ElProjectGrande.Controllers;
 public class AdminController(
     IUserRepository userRepository,
     IQuestionRepository questionRepository,
-    IAnswerRepository answerRepository) : ControllerBase
+    IAnswerRepository answerRepository,
+    ITagRepository tagRepository) : ControllerBase
 {
     [HttpPatch("Users/Ban/{userId}")]
     [Authorize(Roles = "Admin")]
@@ -79,5 +82,19 @@ public class AdminController(
     public async Task<ActionResult<AnswerDTO>> UnAcceptAnswer(Guid answerId)
     {
         return Ok(await answerRepository.UnAcceptAnswer(answerId));
+    }
+
+    [HttpGet("Tags/searchByTagName/{tagName}")]
+    [Authorize(Roles = "Admin")]
+    public ActionResult<IEnumerable<TagDTO>> SearchByTagNameAsync(string tagName)
+    {
+        return Ok(tagRepository.GetTagsByName(tagName));
+    }
+
+    [HttpGet("Tags/searchByTagDescription/{tagDescription}")]
+    [Authorize(Roles = "Admin")]
+    public ActionResult<IEnumerable<TagDTO>> SearchByTagDescriptionAsync(string tagDescription)
+    {
+        return Ok(tagRepository.GetTagsByDescription(tagDescription));
     }
 }

@@ -70,6 +70,17 @@ export default function AdminPage() {
                 case "Answers":
                     url += "/answers/searchByContent/" + searchBar;
                     break;
+                case "Tags":
+                    url += "/tags";
+                    switch (searchingBy) {
+                        case "Name":
+                            url += "/searchByTagName/" + searchBar;
+                            break;
+                        case "Description":
+                            url += "/searchByTagDescription/" + searchBar;
+                            break;
+                    }
+                break;
             }
         } else {
             setSearchData(() => []);
@@ -111,6 +122,15 @@ export default function AdminPage() {
                 case "Answers":
                     setSearchResults(() => searchData.map(a => a.content));
                     break;
+                case "Tags":
+                    switch (searchingBy) {
+                        case "Name":
+                            setSearchResults(() => searchData.map(t => t.tagName));
+                            break;
+                        case "Description":
+                            setSearchResults(() => searchData.map(t => t.description));
+                            break;
+                    }
             }
         }
     }, [searchData]);
@@ -133,6 +153,7 @@ export default function AdminPage() {
                     <option>Users</option>
                     <option>Questions</option>
                     <option>Answers</option>
+                    <option>Tags</option>
                 </select>
                 {' '}
                 By
@@ -154,6 +175,9 @@ export default function AdminPage() {
                                 <option>Content</option>
                             </> : searching === 'Answers' ? <>
                                 <option>Content</option>
+                            </> : searching === 'Tags' ? <>
+                                <option>Name</option>
+                                <option>Description</option>
                             </> : <></>}
                 </select>
             </span>
