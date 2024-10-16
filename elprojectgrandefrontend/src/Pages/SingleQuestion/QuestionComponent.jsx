@@ -5,6 +5,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faFeather, faX} from "@fortawesome/free-solid-svg-icons";
 import {QuestionForm} from "./QuestionForm.jsx";
 import {useCookies} from "react-cookie";
+import ShareButton from "../../components/ShareButton/ShareButton.jsx";
 
 export default function QuestionComponent({
                                               question, setQuestion, isAdmin, user, renderForm, setRenderForm
@@ -61,6 +62,7 @@ export default function QuestionComponent({
                                     {question.title}
                                 </h1>
                                 <div className="text-black break-words">{question.content}</div>
+                                <ShareButton/>
                             </div>
                         </div>
 

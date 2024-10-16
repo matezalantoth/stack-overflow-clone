@@ -127,17 +127,20 @@ export default function AdminPage() {
                     break;
                 case "Answers":
                     setSearchResults(() => searchData.map(a => {
-                        console.log(a);
                         return {value: a.content, id: a.id}
                     }));
                     break;
                 case "Tags":
                     switch (searchingBy) {
                         case "Name":
-                            setSearchResults(() => searchData.map(t => t.tagName));
+                            setSearchResults(() => searchData.map(t => {
+                                return {value: t.tagName, id: t.id}
+                            }));
                             break;
                         case "Description":
-                            setSearchResults(() => searchData.map(t => t.description));
+                            setSearchResults(() => searchData.map(t => {
+                                return {value: t.description, id: t.id}
+                            }));
                             break;
                     }
             }

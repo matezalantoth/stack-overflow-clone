@@ -30,6 +30,15 @@ export default function ResultInteractionComponent({searchModel, id}) {
         })
     }
 
+    const deleteTag = async (id) => {
+        await fetch(`/api/tags/${id}`, {
+            method: 'DELETE',
+            headers: {
+                "Authorization": "Bearer " + cookies.user
+            }
+        })
+    }
+
     const getQuestionId = async () => {
         const res = await fetch('/api/answers/question/' + id, {
             method: 'GET',
@@ -65,6 +74,11 @@ export default function ResultInteractionComponent({searchModel, id}) {
                         icon={faFeather}/>
                 </button>
                 <button className="text-red-500" title="Delete" onClick={() => deleteQuestion(id)}><FontAwesomeIcon
+                    icon={faX}/></button>
+            </>)
+        case 'Tags':
+            return (<>
+                <button className="text-red-500" title="Delete" onClick={() => deleteTag(id)}><FontAwesomeIcon
                     icon={faX}/></button>
             </>)
         case 'Users':
