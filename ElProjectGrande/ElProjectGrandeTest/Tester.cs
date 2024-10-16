@@ -10,6 +10,7 @@ public abstract class Tester
     protected readonly UserControllerTestHelper UHelper;
     protected readonly QuestionControllerTestHelper QHelper;
     protected readonly AdminControllerTestHelper AHelper;
+    protected readonly AnswerControllerTestHelper AnsHelper;
 
     protected Tester(ITestOutputHelper outputHelper)
     {
@@ -19,5 +20,6 @@ public abstract class Tester
         UHelper = new UserControllerTestHelper(Client);
         QHelper = new QuestionControllerTestHelper(Client);
         AHelper = new AdminControllerTestHelper(Client);
+        AnsHelper = new AnswerControllerTestHelper(Client);
     }
 }
