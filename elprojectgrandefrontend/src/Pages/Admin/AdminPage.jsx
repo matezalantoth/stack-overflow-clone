@@ -107,20 +107,29 @@ export default function AdminPage() {
         if (searchData.length > 0 && showSearchBar) {
             switch (searching) {
                 case "Users":
-                    setSearchResults(() => searchData.map(u => u.userName));
+                    setSearchResults(() => searchData.map(u => {
+                        return {value: u.username, id: null}
+                    }));
                     break;
                 case "Questions":
                     switch (searchingBy) {
                         case "Title":
-                            setSearchResults(() => searchData.map(q => q.title));
+                            setSearchResults(() => searchData.map(q => {
+                                return {value: q.title, id: q.id}
+                            }));
                             break;
                         case "Content":
-                            setSearchResults(() => searchData.map(q => q.content));
+                            setSearchResults(() => searchData.map(q => {
+                                return {value: q.content, id: q.id}
+                            }));
                             break;
                     }
                     break;
                 case "Answers":
-                    setSearchResults(() => searchData.map(a => a.content));
+                    setSearchResults(() => searchData.map(a => {
+                        console.log(a);
+                        return {value: a.content, id: a.id}
+                    }));
                     break;
                 case "Tags":
                     switch (searchingBy) {
@@ -195,11 +204,11 @@ export default function AdminPage() {
                                     <li className="p-2 border-b-2 border-gray-200"
                                         key={i}>
                                         <div className="w-4/5 inline-block">
-                                            <div className="truncate">{u}</div>
+                                            <div className="truncate">{u.value}</div>
 
                                         </div>
                                         <ResultInteractionComponent
-                                            searchModel={searching}/>
+                                            searchModel={searching} id={u.id}/>
                                     </li>
                                 </>;
                             })}

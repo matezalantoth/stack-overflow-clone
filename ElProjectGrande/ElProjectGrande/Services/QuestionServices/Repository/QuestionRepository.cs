@@ -44,6 +44,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
     }
 
     public QuestionDTO CreateQuestion(NewQuestion newQuestion, User user)
+
     {
         var tags = context.Tags.Where(x => newQuestion.Tags.Select(t => t.TagName).Contains(x.TagName)).ToList();
          var question = new Question
@@ -54,7 +55,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
         user.Questions.Add(question);
         context.Questions.Add(question);
         foreach (var tag in question.Tags) tag.Questions.Add(question);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
         return new QuestionDTO
         {
             Title = question.Title, Content = question.Content, Username = question.User.UserName,

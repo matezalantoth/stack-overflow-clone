@@ -43,7 +43,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<ApiDbContext>(options =>
 {
-    Console.WriteLine(GetConnString());
+
     options.UseMySQL(GetConnString());
 });
 
@@ -80,20 +80,30 @@ app.UseExceptionHandler(appBuilder =>
     appBuilder.Run(async context =>
     {
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync("Something went wrong.");
 
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-        if (exceptionHandlerPathFeature?.Error is UnauthorizedAccessException)
+        switch (exceptionHandlerPathFeature?.Error)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-            await context.Response.WriteAsJsonAsync("You have been banned or muted");
-        }
-
-        if (exceptionHandlerPathFeature?.Error is NotFoundException)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+            case UnauthorizedAccessException:
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                break;
+            case NotFoundException:
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                break;
+            case BadRequestException:
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                break;
+            case ForbiddenException:
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                break;
+            default:
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                await context.Response.WriteAsJsonAsync("Something went wrong.");
+                break;
         }
     });
 });
@@ -119,6 +129,16 @@ app.MapControllers();
 
 void AddJwt()
 {
+    var issuingKey = "";
+    if (builder.Environment.IsEnvironment("Testing"))
+    {
+        issuingKey = "xR3!m9QpT4hK8jLa!Vw6D%Zc5N2fUrT3D";
+    }
+    else
+    {
+        issuingKey = Environment.GetEnvironmentVariable("ISSUING_KEY") ??
+            throw new Exception("ISSUING_KEY not found");
+    }
     builder.Services
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -133,8 +153,7 @@ void AddJwt()
                 ValidIssuer = "Grande",
                 ValidAudience = "Grande",
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("ISSUING_KEY") ??
-                                           throw new Exception("ISSUING_KEY not found"))
+                    Encoding.UTF8.GetBytes(issuingKey)
                 )
             };
         });
@@ -186,3 +205,6 @@ void AddSwaggerGen()
 }
 
 app.Run();
+public partial class Program
+{
+}

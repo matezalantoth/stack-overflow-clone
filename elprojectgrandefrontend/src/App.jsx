@@ -2,7 +2,7 @@ import {StrictMode, useState} from 'react'
 import './style.css'
 import {BrowserRouter, Route, Routes} from "react-router-dom"
 import {CookiesProvider, useCookies} from 'react-cookie';
-import {SignupPage} from "./Pages/SingUp/SignUpPage.jsx";
+import {SignupPage} from "./Pages/SignUp/SignUpPage.jsx";
 import ProfilePage from "./Pages/User/ProfilePage.jsx";
 
 
@@ -11,7 +11,7 @@ import Navbar from './components/navbar/Navbar'
 import {Toaster} from "react-hot-toast";
 import {LoginPage} from "./Pages/LogIn/LogIn.jsx";
 
-import QuestionPage from "./Pages/QuestionPage.jsx";
+import QuestionPage from "./Pages/SingleQuestion/QuestionPage.jsx";
 
 import AskQuestion from "./Pages/AskQuestion/AskQuestion.jsx";
 import PublicUser from "./Pages/User/PublicUser.jsx";
