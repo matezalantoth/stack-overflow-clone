@@ -4,7 +4,7 @@ using ElProjectGrande.Models.UserModels;
 using ElProjectGrande.Models.UserModels.DTOs;
 using Xunit.Abstractions;
 
-namespace ElProjectGrandeTest.AdminControllerIntegrationTest;
+namespace ElProjectGrandeTest.AdminControllerIntegrationTests;
 
 public class MuteUserTest(ITestOutputHelper outputHelper) : Tester(outputHelper)
 {

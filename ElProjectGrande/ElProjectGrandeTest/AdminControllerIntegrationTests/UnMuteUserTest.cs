@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using ElProjectGrande.Models.UserModels.DTOs;
 using Xunit.Abstractions;
 
-namespace ElProjectGrandeTest.AdminControllerIntegrationTest;
+namespace ElProjectGrandeTest.AdminControllerIntegrationTests;
 
 public class UnMuteUserTest(ITestOutputHelper outputHelper) : Tester(outputHelper)
 {
