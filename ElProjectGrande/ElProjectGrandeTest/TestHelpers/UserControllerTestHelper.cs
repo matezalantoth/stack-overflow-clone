@@ -49,4 +49,9 @@ public class UserControllerTestHelper(HttpClient client)
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return await client.SendAsync(requestMessage);
     }
+
+    public async Task<HttpResponseMessage> GetUserByUsername(string username)
+    {
+       return await client.GetAsync("/getUserByUserName?username=" + username);
+    }
 }
