@@ -235,4 +235,11 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
             throw new Exception("Failed to update user");
         }
     }
+
+    public async Task<bool>  VerifyUser(User user, string password)
+    {
+        return  await userManager.CheckPasswordAsync(user, password);
+        
+         
+    }
 }

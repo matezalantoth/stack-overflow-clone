@@ -16,7 +16,7 @@ import QuestionPage from "./Pages/QuestionPage.jsx";
 import AskQuestion from "./Pages/AskQuestion/AskQuestion.jsx";
 import PublicUser from "./Pages/User/PublicUser.jsx";
 import AdminPage from "./Pages/Admin/AdminPage.jsx";
-
+import UpdateProfile from "./Pages/User/UpdateProfile.jsx";
 
 export default function App() {
     const [cookies, setCookies] = useCookies(['user'])
@@ -49,6 +49,7 @@ export default function App() {
                         <Route path='question/:questionId' element={<QuestionPage cookies={cookies}/>}/>
                         <Route path='/user/:userName' element={<PublicUser/>}/>
                         <Route path='/admin' element={<AdminPage cookies={cookies}/>}/>
+                        <Route path='/EditPage' element={<UpdateProfile cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
                     </Routes>
                     <Toaster/>
 

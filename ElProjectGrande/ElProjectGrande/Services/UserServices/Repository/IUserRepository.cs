@@ -50,4 +50,6 @@ public interface IUserRepository
     public bool IsUserAdmin(string userId);
 
     public Task UpdateUser(User user, string? password);
+
+    public Task<bool> VerifyUser(User user, string password);
 }

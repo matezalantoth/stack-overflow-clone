@@ -75,28 +75,30 @@ AddJwt();
 
 var app = builder.Build();
 
-app.UseExceptionHandler(appBuilder =>
-{
-    appBuilder.Run(async context =>
-    {
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync("Something went wrong.");
-
-        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-        if (exceptionHandlerPathFeature?.Error is UnauthorizedAccessException)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-            await context.Response.WriteAsJsonAsync("You have been banned or muted");
-        }
-
-        if (exceptionHandlerPathFeature?.Error is NotFoundException)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
-        }
-    });
-});
+// app.UseExceptionHandler(appBuilder =>
+// {
+//     appBuilder.Run(async context =>
+//     {
+//         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+//         context.Response.ContentType = "application/json";
+//         await context.Response.WriteAsJsonAsync("Something went wrong.");
+//        
+//
+//         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+//         Console.WriteLine(exceptionHandlerPathFeature.Error.Message);
+//         if (exceptionHandlerPathFeature?.Error is UnauthorizedAccessException)
+//         {
+//             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+//             await context.Response.WriteAsJsonAsync("You have been banned or muted");
+//         }
+//
+//         if (exceptionHandlerPathFeature?.Error is NotFoundException)
+//         {
+//             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+//             await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+//         }
+//     });
+// });
 
 
 

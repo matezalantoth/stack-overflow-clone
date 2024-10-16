@@ -61,7 +61,7 @@ export default function ProfilePage() {
 
                         <button
                             className="mt-6 bg-blue-500 text-white py-2 px-6 rounded-lg shadow hover:bg-blue-600 transition duration-300 w-full"
-                            onClick={() => navigate('/editPage')}
+                            onClick={() => navigate('/EditPage')}
                         >
                             Edit Profile
                         </button>

@@ -1,5 +1,6 @@
 using ElProjectGrande.Exceptions;
 using ElProjectGrande.Extensions;
+using ElProjectGrande.Models;
 using ElProjectGrande.Models.UserModels;
 using ElProjectGrande.Models.UserModels.DTOs;
 using ElProjectGrande.Services.AuthenticationServices.TokenService;
@@ -103,5 +104,15 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         
         await userRepository.UpdateUser(user, string.IsNullOrEmpty(updateProfileRequest.Password)?null: updateProfileRequest.Password);
         return Ok("Profile updated successfully");
+    }
+
+    [HttpPost("VerifyUser")]
+    [Authorize(Roles = "User")]
+    public async Task<ActionResult<VerifyUserDTO>> VerifyUser([FromHeader(Name = "Authorization")] string sessionToken, [FromBody] string password)
+    {
+        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
+        var user = await userRepository.GetUserBySessionToken(sessionToken) ?? throw new NotFoundException();
+
+        return Ok( new VerifyUserDTO{Email = user.Email?? throw new Exception(), Verified = await userRepository.VerifyUser(user, password)});
     }
 }
