@@ -17,11 +17,8 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     [HttpPost("signup")]
     public async Task<ActionResult<UserDTO>> CreateUserAndLogin([FromBody] NewUser newUser)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        if (await userRepository.AreCredentialsTaken(newUser.Email, newUser.UserName))
-            return BadRequest("Some of your credentials are invalid");
-
+        if (!ModelState.IsValid) throw new Exception();
+        if (await userRepository.AreCredentialsTaken(newUser.Email, newUser.UserName)) throw new BadRequestException("Some of your credentials are invalid");
         var user = userFactory.CreateUser(newUser);
         await userRepository.CreateUser(user, newUser.Password, "User");
         user.SessionToken = await userRepository.LoginUser(newUser.Email, newUser.Password);
@@ -31,8 +28,7 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     [HttpPost("login")]
     public async Task<ActionResult<string>> Login([FromBody] LoginCredentials loginCredentials)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
+        if (!ModelState.IsValid) throw new Exception();
         var token = await userRepository.LoginUser(loginCredentials.Email, loginCredentials.Password);
         return Content($"\"{token}\"", "application/json");
     }

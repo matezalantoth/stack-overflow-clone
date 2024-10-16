@@ -11,6 +11,7 @@ public abstract class Tester
     protected readonly QuestionControllerTestHelper QHelper;
     protected readonly AdminControllerTestHelper AHelper;
     protected readonly AnswerControllerTestHelper AnsHelper;
+    protected readonly TagControllerTestHelper TagHelper;
 
     protected Tester(ITestOutputHelper outputHelper)
     {
@@ -21,5 +22,6 @@ public abstract class Tester
         QHelper = new QuestionControllerTestHelper(Client);
         AHelper = new AdminControllerTestHelper(Client);
         AnsHelper = new AnswerControllerTestHelper(Client);
+        TagHelper = new TagControllerTestHelper(Client);
     }
 }

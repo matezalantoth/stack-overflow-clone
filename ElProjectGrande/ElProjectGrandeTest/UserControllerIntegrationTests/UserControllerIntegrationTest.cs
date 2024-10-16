@@ -33,7 +33,7 @@ public class UserControllerIntegrationTest(ITestOutputHelper outputHelper) : Tes
         var newUser = new NewUser
             { Name = "admin", UserName = "admin", Email = "admin@admin.com", Password = "admin1234" };
         var res = await UHelper.Register(newUser.Name, newUser.UserName, newUser.Email, newUser.Password, "2004-09-06");
-        var resMessage = await res.Content.ReadAsStringAsync();
+        var resMessage = await res.Content.ReadFromJsonAsync<string>();
         Assert.Multiple(() =>
         {
             Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);

@@ -5,7 +5,7 @@ using ElProjectGrande.Models.UserModels.DTOs;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Xunit.Abstractions;
 
-namespace ElProjectGrandeTest.AdminControllerIntegrationTest;
+namespace ElProjectGrandeTest.AdminControllerIntegrationTests;
 
 public class BanUserTest(ITestOutputHelper outputHelper) : Tester(outputHelper)
 {

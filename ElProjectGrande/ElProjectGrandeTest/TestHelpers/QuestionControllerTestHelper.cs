@@ -35,4 +35,14 @@ public class QuestionControllerTestHelper(HttpClient client)
         requestMessage.Content = new StringContent(JsonSerializer.Serialize(question), Encoding.UTF8, "application/json");
         return await client.SendAsync(requestMessage);
     }
+
+    public async Task<HttpResponseMessage> GetQuestions(int startIndex)
+    {
+        return await client.GetAsync("/questions?startIndex=" + startIndex);
+    }
+
+    public async Task<HttpResponseMessage> GetTrendingQuestions()
+    {
+        return await client.GetAsync($"questions/trending");
+    }
 }
