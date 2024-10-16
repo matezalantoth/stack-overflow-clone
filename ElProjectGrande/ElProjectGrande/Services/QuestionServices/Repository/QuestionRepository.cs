@@ -43,10 +43,14 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
             .FirstOrDefaultAsync(q => q.Id == id);
     }
 
-    public QuestionDTO CreateQuestion(Question question, User user)
+    public QuestionDTO CreateQuestion(NewQuestion newQuestion, User user)
     {
-        var tags = context.Tags.Where(x => question.Tags.Select(t => t.TagName).Contains(x.TagName)).ToList();
-        question.Tags = tags;
+        var tags = context.Tags.Where(x => newQuestion.Tags.Select(t => t.TagName).Contains(x.TagName)).ToList();
+         var question = new Question
+        {
+            Title = newQuestion.Title, Content = newQuestion.Content, Id = Guid.NewGuid(), User = user,
+            UserId = user.Id, PostedAt = newQuestion.PostedAt, Answers = [], Tags = tags
+        };
         user.Questions.Add(question);
         context.Questions.Add(question);
         foreach (var tag in question.Tags) tag.Questions.Add(question);

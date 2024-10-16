@@ -50,9 +50,8 @@ public class QuestionsController(
 
         var karma = 5;
         await userRepository.UpdateKarma(user, karma);
-
-        var question = questionFactory.CreateQuestion(newQuestion, user);
-        return Ok(questionRepository.CreateQuestion(question, user));
+        
+        return Ok(questionRepository.CreateQuestion(newQuestion, user));
     }
 
     [HttpDelete("{id}")]
