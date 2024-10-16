@@ -1,11 +1,13 @@
 import {useEffect, useState} from "react";
 import {useCookies} from "react-cookie";
+import {useNavigate} from "react-router-dom";
 
 export default function UpdateProfile ({setUserLoginCookies})
 {
     const [userDetails, setUserDetails] = useState({ email: '', password: '' });
     const [statusMessage, setStatusMessage] = useState('');
     const [cookies] = useCookies(['user'])
+    const navigate = useNavigate();
     
     
     
@@ -80,14 +82,16 @@ export default function UpdateProfile ({setUserLoginCookies})
                 <button
                     onClick={async (event) => {
                        await handleUpdate(event)
+                        navigate('/profile')
                     }
                     }
                         
                     type='submit'
                     className='w-full text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-nonefont-medium rounded-lg text-sm px-5 py-2.5 text-center'
+                    
                         
                 >
-                    Login to your account
+                    Save changes
                 </button>
             </form>
         </div>
