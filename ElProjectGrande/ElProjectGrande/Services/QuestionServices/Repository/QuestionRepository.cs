@@ -55,7 +55,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
         user.Questions.Add(question);
         context.Questions.Add(question);
         foreach (var tag in question.Tags) tag.Questions.Add(question);
-        await context.SaveChangesAsync();
+        context.SaveChanges();
         return new QuestionDTO
         {
             Title = question.Title, Content = question.Content, Username = question.User.UserName,

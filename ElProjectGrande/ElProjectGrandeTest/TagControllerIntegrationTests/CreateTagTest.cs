@@ -16,7 +16,7 @@ public class CreateTagTest(ITestOutputHelper outputHelper) : Tester(outputHelper
         var token = await loginRes.Content.ReadFromJsonAsync<string>();
         Assert.NotNull(token);
 
-        var postRes = await TagHelper.PostTag(new NewTag{ TagName = "name"}, token);
+        var postRes = await TagHelper.PostTag(new NewTag{ TagName = "name", Description = "desc"}, token);
         postRes.EnsureSuccessStatusCode();
 
         var getRes = await TagHelper.GetAllTags();
