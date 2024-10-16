@@ -1,4 +1,4 @@
-import {StrictMode, useState} from 'react'
+import {StrictMode, useEffect, useState} from 'react'
 import './style.css'
 import {BrowserRouter, Route, Routes} from "react-router-dom"
 import {CookiesProvider, useCookies} from 'react-cookie';
@@ -6,7 +6,7 @@ import {SignupPage} from "./Pages/SignUp/SignUpPage.jsx";
 import ProfilePage from "./Pages/User/ProfilePage.jsx";
 
 
-import WelcomePage from './Pages/Welcome/WelcomePage'
+import WelcomePage from './Pages/WelcomePage/WelcomePage'
 import Navbar from './components/navbar/Navbar'
 import {Toaster} from "react-hot-toast";
 import {LoginPage} from "./Pages/LogIn/LogIn.jsx";
@@ -28,6 +28,20 @@ export default function App() {
     function setUserLoginCookies(user) {
         setCookies('user', user, {path: '/'})
     }
+
+    useEffect(() => {
+        const pingAuth = async () => {
+            const res = await fetch("/api/ping", {
+                headers: {
+                    "Authorization": "Bearer " + cookies.user
+                }
+            });
+            if (res.status !== 200) {
+                setUserLoginCookies(null);
+            }
+        }
+        pingAuth();
+    }, [])
 
     return (
 

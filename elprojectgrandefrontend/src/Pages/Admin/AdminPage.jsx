@@ -80,7 +80,7 @@ export default function AdminPage() {
                             url += "/searchByTagDescription/" + searchBar;
                             break;
                     }
-                break;
+                    break;
             }
         } else {
             setSearchData(() => []);
@@ -108,7 +108,7 @@ export default function AdminPage() {
             switch (searching) {
                 case "Users":
                     setSearchResults(() => searchData.map(u => {
-                        return {value: u.username, id: null}
+                        return {value: u, id: u}
                     }));
                     break;
                 case "Questions":

@@ -51,7 +51,7 @@ public class AdminController(
 
     [HttpGet("Users/SearchByUsername/{username}")]
     [Authorize(Roles = "Admin")]
-    public ActionResult<IEnumerable<UserDTO>> SearchByUserNameAsync(string username)
+    public ActionResult<IEnumerable<string>> SearchByUserNameAsync(string username)
     {
         return Ok(userRepository.GetUsersWithSimilarUsernames(username));
     }
@@ -67,7 +67,7 @@ public class AdminController(
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<QuestionDTO>> SearchQuestionsByContentAsync(string content)
     {
-        return Ok(questionRepository.GetQuestionsByTitle(content));
+        return Ok(questionRepository.GetQuestionsByContent(content));
     }
 
     [HttpGet("Answers/searchByContent/{content}")]

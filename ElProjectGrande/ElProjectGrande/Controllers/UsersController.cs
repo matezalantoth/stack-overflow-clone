@@ -73,4 +73,11 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
 
         return Ok(userRepository.IsUserAdmin(user));
     }
+
+    [HttpGet("/ping")]
+    [Authorize(Roles = "Admin, User")]
+    public ActionResult Ping()
+    {
+        return Ok();
+    }
 }

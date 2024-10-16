@@ -24,7 +24,8 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
     public IEnumerable<AnswersOfQuestionDTO> GetAllAnswersByQuestionId(Guid questionId)
     {
         return dbContext.Answers.Where(a => a.QuestionId == questionId)
-            .Include(a => a.User).Select(a => a.ToAnswerOfQuestionDTO());
+            .Include(a => a.User)
+            .Select(a => a.ToAnswerOfQuestionDTO());
     }
 
     public Task<Answer?> GetAnswerById(Guid id)
@@ -69,15 +70,24 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
             .Select(res => res.Value)
             .Take(10);
 
-        var answers = dbContext.Answers.Include(a => a.User).Include(a => a.Question);
-        return bestResults.Select(content => answers.FirstOrDefault(a => a.Content == content.ToString())).Select(a =>
+        var answers =
+            dbContext.Answers
+                .Include(a => a.User)
+                .Include(a => a.Question);
+        return bestResults
+            .Select(content =>
+                answers
+                    .FirstOrDefault(a =>
+                        a.Content == content.ToString()))
+            .Select(a =>
             a?.ToAdminDTO() ?? throw new NotFoundException("This answer could not be found"));
     }
 
     public async Task<Answer> UnAcceptAnswer(Guid answerId)
     {
-        var answer = await dbContext.Answers.FirstOrDefaultAsync(a => a.Id == answerId) ??
-                     throw new NotFoundException("This answer could not be found");
+        var answer =
+            await dbContext.Answers
+                .FirstOrDefaultAsync(a => a.Id == answerId) ?? throw new NotFoundException("This answer could not be found");
         answer.Accepted = false;
         await dbContext.SaveChangesAsync();
         return answer;
@@ -85,12 +95,10 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
 
     public async Task<Question> GetQuestionOfAnswerByAnswerId(Guid answerId)
     {
-        return (await dbContext.Answers.Include(answer => answer.Question).FirstOrDefaultAsync(a => a.Id == answerId) ??
+        return (
+            await dbContext.Answers
+                .Include(answer => answer.Question)
+                .FirstOrDefaultAsync(a => a.Id == answerId) ??
                 throw new NotFoundException("This answer could not be found")).Question;
-    }
-
-    public IEnumerable<AnswerDTO> GetAllAnswersFromQuestion(Question question)
-    {
-        return question.Answers.Select(a => a.ToDTO());
     }
 }
