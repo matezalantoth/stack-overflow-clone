@@ -14,7 +14,7 @@ public interface IQuestionRepository
 
     public Task<Question?> GetQuestionByIdWithoutAnswers(Guid id);
 
-    public Task<QuestionDTO> CreateQuestion(Question question, User user);
+    public QuestionDTO CreateQuestion(NewQuestion newQuestion, User user);
 
     public void DeleteQuestion(Question question, User user);
 
