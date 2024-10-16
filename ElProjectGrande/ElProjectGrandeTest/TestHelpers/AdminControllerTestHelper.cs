@@ -62,4 +62,11 @@ public class AdminControllerTestHelper(HttpClient client)
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return await client.SendAsync(requestMessage);
     }
+
+    public async Task<HttpResponseMessage> UnAcceptAnswer(Guid answerId, string token)
+    {
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Patch, "/admin/answers/unaccept/" + answerId);
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return await client.SendAsync(requestMessage);
+    }
 }
