@@ -70,9 +70,8 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
             .Select(res => res.Value)
             .Take(10);
 
-        var answers =
-            dbContext.Answers
-                .Include(a => a.User);
+        var answers = dbContext.Answers.Include(a => a.Question);
+
         return bestResults
             .Select(content =>
                 answers
