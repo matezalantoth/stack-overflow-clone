@@ -111,6 +111,7 @@ app.UseExceptionHandler(appBuilder =>
 
 
 
+
 using var scope = app.Services.CreateScope();
 var authenticationSeeder = scope.ServiceProvider.GetRequiredService<AuthenticationSeeder>();
 authenticationSeeder.SeedRoles();
