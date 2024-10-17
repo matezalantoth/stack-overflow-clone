@@ -74,4 +74,14 @@ public class TagRepository(ApiDbContext context) : ITagRepository
             .Select(description => tags.FirstOrDefault(t => t.Description == description))
             .Select(t => t?.ToDTO() ?? throw new NotFoundException("Tag not found"));
     }
+
+    public TagDTO UpdateTag(Tag tag)
+    {
+        context.Update(tag);
+        context.SaveChanges();
+        return new TagDTO
+        {
+            Id = tag.Id, TagName = tag.TagName, Description = tag.Description
+        };
+    }
 }

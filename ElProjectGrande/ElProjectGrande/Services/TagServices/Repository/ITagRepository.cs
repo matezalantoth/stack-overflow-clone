@@ -12,7 +12,9 @@ public interface ITagRepository
     public Task<Tag?> GetTagById(Guid id);
     
     public TagDTO CreateTag(Tag tag);
-
+    
+    public TagDTO UpdateTag(Tag tag);
+    
     public void DeleteTag(Tag tag);
 
     public IEnumerable<TagDTO> GetTagsByName(string nameSubstring);
