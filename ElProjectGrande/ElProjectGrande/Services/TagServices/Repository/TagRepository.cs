@@ -74,4 +74,28 @@ public class TagRepository(ApiDbContext context) : ITagRepository
             .Select(description => tags.FirstOrDefault(t => t.Description == description))
             .Select(t => t?.ToDTO() ?? throw new NotFoundException("Tag not found"));
     }
+
+    public IEnumerable<TagDTO> SearchTags(string searchTerm)
+    {
+        List<string> searchable = context.Tags.Select(t => t.TagName).ToList();
+        searchable.AddRange(context.Tags.Select(t => t.Description));
+        var closest = Process.ExtractSorted(searchTerm, searchable.ToArray())
+            .Select(res => res.Value)
+            .Take(10);
+
+        var tags = context.Tags
+            .Include(t => t.Questions);
+
+        return closest.Select(res => tags.FirstOrDefault(t => t.TagName == res || t.Description == res)).Select(t => t?.ToDTO() ?? throw new NotFoundException("Tag not found"));
+    }
+
+    public TagDTO UpdateTag(Tag tag)
+    {
+        context.Update(tag);
+        context.SaveChanges();
+        return new TagDTO
+        {
+            Id = tag.Id, TagName = tag.TagName, Description = tag.Description
+        };
+    }
 }

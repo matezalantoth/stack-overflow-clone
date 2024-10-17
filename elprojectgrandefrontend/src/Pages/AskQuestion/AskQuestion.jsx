@@ -1,16 +1,21 @@
 import {useNavigate} from "react-router-dom";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {toast} from "react-hot-toast";
 import {useCookies} from "react-cookie";
 import {CheckIfSessionExpired} from "../../CheckIfSessionExpired.jsx";
+import ResultInteractionComponent from "../Admin/ResultInteractionComponent.jsx";
 
 export default function AskQuestion({setUserLoginCookies}) {
     const [cookies] = useCookies(['user']);
     const navigate = useNavigate();
     const [question, setQuestion] = useState({});
+    const [searching, setSearching] = useState('Tags');
     const [submittable, setSubmittable] = useState(false);
     const showErrorToast = (message) => toast.error(message);
     const showSuccessToast = (message) => toast.success(message);
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchBar, setSearchBar] = useState(null);
+    const [searchData, setSearchData] = useState([]);
 
     useEffect(() => {
         if (
@@ -44,6 +49,7 @@ export default function AskQuestion({setUserLoginCookies}) {
         return await res.json();
     }
 
+
     const handleSubmit = (event) => {
         event.preventDefault();
         createQuestion(event).then((data) => {
@@ -57,6 +63,36 @@ export default function AskQuestion({setUserLoginCookies}) {
     }
 
     CheckIfSessionExpired(setUserLoginCookies);
+
+    useEffect(() => {
+        let url = "/api/Tags/search/"
+            if(searchBar){
+                url += searchBar;
+            } else {
+                setSearchData(() => []);
+                setSearchResults(() => []);
+            }
+
+        const fetchUrl = async () => {
+            const res = await fetch(url, {
+                headers: {
+                    'Authorization': "Bearer " + cookies.user
+                }
+            });
+            const data = await res.json();
+            setSearchData(() => data);
+        }
+        fetchUrl();
+    }, [searchBar]);
+
+    useEffect(() => {
+        if (searchData.length > 0) {
+            setSearchResults(() => searchData.map(t => {
+                return {value: t.tagName, id: t.id}
+            }));
+        }
+    }, [searchData]);
+
 
     return (
         <div className="flex flex-col items-center justify-center mt-24 p-4">
@@ -91,6 +127,33 @@ export default function AskQuestion({setUserLoginCookies}) {
                             placeholder="Provide more details about your question"
                             className="border border-gray-300 rounded-lg px-4 py-2 h-32 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         ></textarea>
+                    </div>
+
+                    <div className="flex flex-col">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Please enter any tags, max 5
+                        </label>
+                        <input
+                            onChange={(event) => setSearchBar(() => event.target.value === "" ? null : event.target.value)}
+                            placeholder='Search...'
+                            className="border border-gray-300 rounded-lg px-4 py-2 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        ></input>
+                        {searchResults.length > 0 ?
+                            <ul>
+                                {searchResults.map((u, i) => {
+                                    return <>
+                                        <li className="p-2 border-b-2 border-gray-200"
+                                            key={i}>
+                                            <div className="w-4/5 inline-block">
+                                                <div className="truncate">{u.value}</div>
+
+                                            </div>
+                                            <ResultInteractionComponent
+                                                searchModel={searching} id={u.id}/>
+                                        </li>
+                                    </>;
+                                })}
+                            </ul> : <></>}
                     </div>
 
                     <button

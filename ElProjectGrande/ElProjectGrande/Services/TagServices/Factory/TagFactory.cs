@@ -9,4 +9,11 @@ public class TagFactory : ITagFactory
     {
         return new Tag { TagName = newTag.TagName, Id = Guid.NewGuid(), Questions = [], Description = newTag.Description};
     }
+
+    public Tag CreateNewUpdatedTagFromUpdatesAndOriginal(UpdatedTag updatedTag, Tag tag)
+    {
+        tag.TagName = updatedTag.TagName;
+        tag.Description = updatedTag.Description;
+        return tag;
+    }
 }

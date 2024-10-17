@@ -1,10 +1,11 @@
 // eslint-disable-next-line no-unused-vars,react/prop-types
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
 import ResultInteractionComponent from "./ResultInteractionComponent.jsx";
 import {toast} from "react-hot-toast";
 import {CheckIfSessionExpired} from "../../CheckIfSessionExpired.jsx";
+import CreateTag from "./CreateTag.jsx";
 
 export default function AdminPage({setUserLoginCookies}) {
     const [cookies] = useCookies(['user']);
@@ -17,8 +18,9 @@ export default function AdminPage({setUserLoginCookies}) {
     const [searchData, setSearchData] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
     const showErrorToast = (message) => toast.error(message);
-
     CheckIfSessionExpired(setUserLoginCookies);
+    const [isOpen, setIsOpen] = React.useState(false);
+
 
     useEffect(() => {
         const fetchCheckIfAdmin = async () => {
@@ -135,22 +137,29 @@ export default function AdminPage({setUserLoginCookies}) {
                     break;
                 case "Answers":
                     setSearchResults(() => searchData.map(a => {
-                        console.log(a);
                         return {value: a.content, id: a.id}
                     }));
                     break;
                 case "Tags":
                     switch (searchingBy) {
                         case "Name":
-                            setSearchResults(() => searchData.map(t => t.tagName));
+                            setSearchResults(() => searchData.map(t => {
+                                return {value: t.tagName, id: t.id}
+                            }));
                             break;
                         case "Description":
-                            setSearchResults(() => searchData.map(t => t.description));
+                            setSearchResults(() => searchData.map(t => {
+                                return {value: t.description, id: t.id}
+                            }));
                             break;
                     }
             }
         }
     }, [searchData]);
+
+    const toggleOpen = () => {
+        setIsOpen(!isOpen);
+    };
 
 
     return adminCheck ? (
@@ -222,5 +231,16 @@ export default function AdminPage({setUserLoginCookies}) {
                             })}
                         </ul> : <></>}
                 </div> : <></>}
+            <div className="relative left-3/4">
+                <button
+                    className="mr-2 border-2 border-blue-600 h-10 text-blue-600 w-20 px-2 rounded text-sm"
+                    onClick={toggleOpen}
+                >
+                    Create Tag
+                </button>
+                {isOpen && (
+                    <CreateTag />
+                )}
+            </div>
         </div>) : <>404</>
 }

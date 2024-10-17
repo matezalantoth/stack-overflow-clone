@@ -20,6 +20,7 @@ import AdminPage from "./Pages/Admin/AdminPage.jsx";
 import UpdateProfile from "./Pages/User/UpdateProfile.jsx";
 
 import TagsPage from "./Pages/TagsPage/TagsPage.jsx";
+import TagPage from "./Pages/TagsPage/TagPage.jsx";
 
 
 export default function App() {
@@ -53,8 +54,6 @@ export default function App() {
                         <Route path="/profile" element={<ProfilePage setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path='/EditPage'
                                element={<UpdateProfile cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
-
-
                         <Route path='question/:questionId'
                                element={<QuestionPage setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path='/user/:userName'
@@ -62,7 +61,7 @@ export default function App() {
                         <Route path='/admin' element={<AdminPage setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path='/tags' element={<TagsPage tags={tags} setTags={setTags}
                                                                setUserLoginCookies={setUserLoginCookies}/>}/>
-
+                        <Route path='tag/:tagId' element={<TagPage cookies={cookies}/>}/>
                     </Routes>
                     <Toaster/>
 
