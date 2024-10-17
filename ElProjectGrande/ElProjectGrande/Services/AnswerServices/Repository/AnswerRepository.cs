@@ -21,11 +21,11 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
         return answer.ToDTO();
     }
 
-    public IEnumerable<AnswersOfQuestionDTO> GetAllAnswersByQuestionId(Guid questionId)
+    public IEnumerable<AnswerDTO> GetAllAnswersByQuestionId(Guid questionId)
     {
         return dbContext.Answers.Where(a => a.QuestionId == questionId)
             .Include(a => a.User)
-            .Select(a => a.ToAnswerOfQuestionDTO());
+            .Select(a => a.ToDTO());
     }
 
     public Task<Answer?> GetAnswerById(Guid id)
@@ -44,18 +44,18 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<AnswersOfQuestionDTO> UpdateAnswer(Answer answer)
+    public async Task<AnswerDTO> UpdateAnswer(Answer answer)
     {
         dbContext.Update(answer);
         await dbContext.SaveChangesAsync();
-        return answer.ToAnswerOfQuestionDTO();
+        return answer.ToDTO();
     }
 
-    public async Task<AnswersOfQuestionDTO> AcceptAnswer(Answer answer)
+    public async Task<AnswerDTO> AcceptAnswer(Answer answer)
     {
         answer.Accepted = true;
         await dbContext.SaveChangesAsync();
-        return answer.ToAnswerOfQuestionDTO();
+        return answer.ToDTO();
     }
 
     public void VoteAnswer(Answer answer, int vote)
@@ -72,8 +72,7 @@ public class AnswerRepository(ApiDbContext dbContext) : IAnswerRepository
 
         var answers =
             dbContext.Answers
-                .Include(a => a.User)
-                .Include(a => a.Question);
+                .Include(a => a.User);
         return bestResults
             .Select(content =>
                 answers

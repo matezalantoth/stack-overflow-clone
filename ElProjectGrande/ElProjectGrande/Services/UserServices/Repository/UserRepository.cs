@@ -33,7 +33,7 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         var isPasswordValid = await userManager.CheckPasswordAsync(managedUser, password);
         if (!isPasswordValid) throw new BadRequestException("Invalid credentials");
         var roles = await userManager.GetRolesAsync(managedUser);
-        var token = tokenService.CreateToken(managedUser, roles[0] ?? "User");
+        var token = tokenService.CreateToken(managedUser, roles[0]);
         managedUser.SessionToken = token;
         await userManager.UpdateAsync(managedUser);
         return token;
@@ -59,15 +59,7 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         return await context.Users
             .Include(u => u.Questions)
             .ThenInclude(q => q.Tags)
-            .Include(u => u.Questions)
-            .ThenInclude(q => q.Answers)
-            .ThenInclude(a => a.User)
             .Include(u => u.Answers)
-            .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.User)
-            .Include(u => u.Answers)
-            .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.Tags)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
@@ -140,21 +132,20 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         if (user.Muted)
         {
             var now = DateTime.Now;
-            var unMutedAt = now.AddMinutes(user.MutedFor);
-            if (unMutedAt < now) throw new ForbiddenException();
+            if (user.MutedUntil > now) throw new ForbiddenException("You are muted, please contact support");
 
-            await UnMuteUserByUsername(user.Id);
+            await UnMuteUserByUsername(user.UserName ?? throw new BadRequestException("Something went wrong!"));
         }
 
-        if (user.Banned) throw new ForbiddenException();
+        if (user.Banned) throw new ForbiddenException("You are banned, please contact support");
     }
 
     public async ValueTask<User> MuteUserByUsername(string username, int mutedFor)
     {
         var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == username);
         if (user == null) throw new NotFoundException("This user could not be found");
-        user.MutedFor += mutedFor;
         user.Muted = true;
+        user.MutedUntil = user.MutedUntil == null ? DateTime.Now.AddHours(mutedFor) : user.MutedUntil?.AddHours(mutedFor);
         await userManager.UpdateAsync(user);
         return user;
     }

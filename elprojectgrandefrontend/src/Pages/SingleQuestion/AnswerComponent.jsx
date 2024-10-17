@@ -29,14 +29,18 @@ export const AnswerComponent = ({
     const navigate = useNavigate();
     const [renderForm, setRenderForm] = useState(editingAnswerId === answer.id);
 
-    console.log(renderForm);
     const deleteAnswer = async (id) => {
-        await fetch("/api/answers/" + id, {
+        const res = await fetch("/api/answers/" + id, {
             method: "DELETE",
             headers: {
                 "Authorization": "Bearer " + cookies.user
             }
         })
+        const data = await res.json();
+        if (data.message) {
+            showErrorToast(data.message);
+            return;
+        }
         setAnswers(prevAnswers => prevAnswers.filter(answer => answer.id !== id));
     }
 
@@ -47,8 +51,8 @@ export const AnswerComponent = ({
             <div className="flex">
                 <div className="w-1/12 border-r-2 justify-between">
                     <div
-                        onClick={() => {
-                            handleUpvoting(answer, user, cookies, showErrorToast, setAnswers, setUser);
+                        onClick={async () => {
+                            await handleUpvoting(answer, user, cookies, showErrorToast, setAnswers, setUser);
                         }}
                         className={'text-center text-3xl hover:text-black transition block cursor-pointer ' + (checkIfUpvoted(answer.id, user) ? '' : 'text-gray-400')}>
                         <FontAwesomeIcon icon={faArrowUp}/>
@@ -58,8 +62,8 @@ export const AnswerComponent = ({
                         {answer.votes}
                     </div>
                     <div
-                        onClick={() => {
-                            handleDownvoting(answer, user, cookies, showErrorToast, setAnswers, setUser);
+                        onClick={async () => {
+                            await handleDownvoting(answer, user, cookies, showErrorToast, setAnswers, setUser);
                         }}
                         className={"text-center text-3xl hover:text-black transition block cursor-pointer " + (checkIfDownvoted(answer.id, user) ? '' : 'text-gray-400')}>
                         <FontAwesomeIcon icon={faArrowDown}/>
@@ -67,8 +71,8 @@ export const AnswerComponent = ({
                     {user.userName === question.username && !question.hasAccepted ?
                         <div
                             className="text-center text-3xl text-gray-400 hover:text-green-500 transition block cursor-pointer">
-                            <FontAwesomeIcon onClick={() => {
-                                handleAccept(answer.id, cookies, setAnswers, setQuestionData);
+                            <FontAwesomeIcon onClick={async () => {
+                                await handleAccept(answer.id, cookies, setAnswers, setQuestionData);
                             }} icon={faCheck}/>
                         </div> : <></>}
                     {question.hasAccepted && answer.accepted ? <div

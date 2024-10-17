@@ -3,8 +3,10 @@ import {useEffect, useState} from "react";
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
 import ResultInteractionComponent from "./ResultInteractionComponent.jsx";
+import {toast} from "react-hot-toast";
+import {CheckIfSessionExpired} from "../../CheckIfSessionExpired.jsx";
 
-export default function AdminPage() {
+export default function AdminPage({setUserLoginCookies}) {
     const [cookies] = useCookies(['user']);
     const navigate = useNavigate();
     const [adminCheck, setAdminCheck] = useState(false);
@@ -14,7 +16,9 @@ export default function AdminPage() {
     const [searchBar, setSearchBar] = useState(null);
     const [searchData, setSearchData] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
+    const showErrorToast = (message) => toast.error(message);
 
+    CheckIfSessionExpired(setUserLoginCookies);
 
     useEffect(() => {
         const fetchCheckIfAdmin = async () => {
@@ -97,6 +101,10 @@ export default function AdminPage() {
                     }
                 })
                 const data = await res.json();
+                if (data.message) {
+                    showErrorToast(data.message);
+                    return;
+                }
                 setSearchData(() => data);
             }
             fetchUrl();
@@ -208,7 +216,7 @@ export default function AdminPage() {
 
                                         </div>
                                         <ResultInteractionComponent
-                                            searchModel={searching} id={u.id}/>
+                                            searchModel={searching} id={u.id} setSearchResults={setSearchResults}/>
                                     </li>
                                 </>;
                             })}

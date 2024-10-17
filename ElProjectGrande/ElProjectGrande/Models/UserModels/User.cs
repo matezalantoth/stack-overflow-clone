@@ -16,5 +16,5 @@ public class User : IdentityUser
     public string SessionToken { get; set; } = string.Empty;
     public bool Muted { get; set; } = false;
     public bool Banned { get; set; } = false;
-    public int MutedFor { get; set; } = 0;
+    public DateTime? MutedUntil { get; set; }
 }

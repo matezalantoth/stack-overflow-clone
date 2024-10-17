@@ -9,10 +9,10 @@ export default function TrendingQuestions() {
 
     useEffect(() => {
         const fetchQuestions = async () => {
-            try{
+            try {
                 const res = await fetch("/api/Questions/trending",
                     {
-                        headers : {
+                        headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
                         }
@@ -20,13 +20,12 @@ export default function TrendingQuestions() {
                     });
                 const data = await res.json();
                 setQuestions(data);
-            } catch (error){
+            } catch (error) {
                 console.log(error);
             }
         };
         fetchQuestions();
     }, []);
-    console.log(questions)
 
     const formatTimeDifference = (postedAt) => {
         const now = new Date();
@@ -35,13 +34,13 @@ export default function TrendingQuestions() {
         const postedDate = new Date(tempPostedAt.getTime() + offset * 60000);
         let differenceInSeconds = Math.floor(((now - postedDate) / 1000));
         if (differenceInSeconds < 60) {
-            return `${differenceInSeconds} seconds ago`;
+            return `${differenceInSeconds} second${differenceInSeconds === 1 ? '' : 's'} ago`;
         } else if (differenceInSeconds < 3600) {
             const minutes = Math.floor(differenceInSeconds / 60);
-            return `${minutes} minutes ago`;
+            return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
         } else if (differenceInSeconds < 86400) {
             const hours = Math.floor(differenceInSeconds / 3600);
-            return `${hours} hours ago`;
+            return `${hours} hour${hours === 1 ? '' : 's'} ago`;
         }
         const days = Math.floor(differenceInSeconds / 86400);
         return `${days} days ago`;
@@ -51,11 +50,15 @@ export default function TrendingQuestions() {
     return questions ? (
             <div className="trending_questions">
                 {questions.map((question) => {
-                    return (<div className='relative h-15 text-black border-b-2 rounded hover:bg-gray-100 transition w-80 overflow-hidden'>
-                        <span className="text-xs text-gray-500 cursor-pointer">{formatTimeDifference(question.postedAt)}/</span>
-                        <span className="text-xs text-gray-500 hover:underline cursor-pointer">
-                            By: {question.username}
+                    return (<div
+                        key={question.id}
+                        className='relative h-15 pb-1 text-black border-b-2 rounded hover:bg-gray-100 transition w-80 overflow-hidden'>
+
+                        <span className="text-xs ml-2 text-gray-500 hover:underline cursor-pointer">
+                            {question.username}{' | '}
                         </span>
+                        <span
+                            className="text-xs text-gray-500 cursor-pointer">{formatTimeDifference(question.postedAt)}</span>
                         <h2 className='text-blue-700 cursor-pointer ml-2 break-words' onClick={() => {
                             navigate(`/question/${question.id}`);
                         }}>{question.title}</h2>

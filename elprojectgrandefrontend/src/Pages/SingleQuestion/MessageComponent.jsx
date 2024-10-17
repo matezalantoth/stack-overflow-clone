@@ -5,6 +5,8 @@ import {toast} from "react-hot-toast";
 export const MessageComponent = ({questionId, reply, submittable, cookies, setReply, setAnswers, setSubmittable}) => {
     const showErrorToast = (message) => toast.error(message);
     const showSuccessToast = (message) => toast.success(message);
+
+
     return (<div className="w-3/4 mx-auto p-4 bg-white shadow-lg rounded-lg mt-2">
         <form>
             <div className="mb-4">
@@ -25,12 +27,12 @@ export const MessageComponent = ({questionId, reply, submittable, cookies, setRe
                     onClick={async (event) => {
                         event.preventDefault();
                         const data = await postAnswer(questionId, cookies, reply, showErrorToast);
-                        if (!data.content) {
-                            showErrorToast("Something went wrong");
+                        if (data.message) {
+                            showErrorToast(data.message);
                             return;
                         }
                         showSuccessToast("Successfully posted answer!");
-                        fetchAnswers(questionId, setAnswers);
+                        await fetchAnswers(questionId, setAnswers);
                         setReply({content: ""});
                         setSubmittable(false);
                     }}

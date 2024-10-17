@@ -1,5 +1,7 @@
+/* eslint-disable react/prop-types */
 import {useCookies} from "react-cookie";
 import {useState} from "react";
+import {toast} from "react-hot-toast";
 
 export const AnswerForm = ({answer, setRenderForm, setAnswers}) => {
 
@@ -7,7 +9,7 @@ export const AnswerForm = ({answer, setRenderForm, setAnswers}) => {
     const [newContent, setNewContent] = useState(answer.content);
 
     const updateAnswer = async () => {
-        await fetch(`/api/answers/${answer.id}`, {
+        const res = await fetch(`/api/answers/${answer.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -15,7 +17,11 @@ export const AnswerForm = ({answer, setRenderForm, setAnswers}) => {
             },
             body: JSON.stringify(newContent)
         })
-
+        const data = await res.json();
+        if (data.message) {
+            toast.error(data.message);
+            return;
+        }
         setAnswers(prevAnswers => prevAnswers.map(a => {
             if (a.id === answer.id) {
                 a.content = newContent;
@@ -23,8 +29,6 @@ export const AnswerForm = ({answer, setRenderForm, setAnswers}) => {
             return a;
         }))
     }
-    console.log("rendering form")
-
     return (<div
         key={answer.id}
         className="w-3/4 min-h-40 mt-12 p-6 bg-white rounded-lg shadow-md block m-auto">

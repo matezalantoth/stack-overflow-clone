@@ -3,13 +3,22 @@ import {useEffect, useState} from "react";
 import TrendingQuestions from "../../components/TrendingQuestions/TrendingQuestions.jsx";
 import IndexQuestion from "../../components/IndexQuestion/IndexQuestion.jsx";
 import {QuestionsComponent} from "./QuestionsComponent.jsx";
+import {CheckIfSessionExpired} from "../../CheckIfSessionExpired.jsx";
+import {useCookies} from "react-cookie";
 
 
-export default function WelcomePage({searchQuestion, normalQuestion, setNormalQuestion, setsearchQuestion}) {
+export default function WelcomePage({
+                                        searchQuestion,
+                                        normalQuestion,
+                                        setNormalQuestion,
+                                        setsearchQuestion,
+                                        setUserLoginCookies,
+                                    }) {
 
     const [startIndex, setStartIndex] = useState(0);
     const [allQuestions, setAllQuestions] = useState(false)
     const [isDesktop, setDesktop] = useState(window.innerWidth > 1280);
+    const [cookies] = useCookies(['user']);
 
     const updateMedia = () => {
         setDesktop(window.innerWidth > 1280);
@@ -55,7 +64,10 @@ export default function WelcomePage({searchQuestion, normalQuestion, setNormalQu
         fetchQuestions();
     }, []);
 
-    console.log(searchQuestion)
+
+    CheckIfSessionExpired(setUserLoginCookies);
+
+
     return searchQuestion ? (
             <>
                 <div

@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import {useEffect, useState} from "react";
 import {useCookies} from "react-cookie";
+import {toast} from "react-hot-toast";
 
 export const QuestionForm = ({question, setQuestion, setRenderForm}) => {
     const [inputs, setInputs] = useState(null);
@@ -21,6 +22,10 @@ export const QuestionForm = ({question, setQuestion, setRenderForm}) => {
             }
         })
         const data = await res.json();
+        if (data.message) {
+            toast.error(data.message);
+            return;
+        }
         setQuestion(prevQuestion => (
             {...prevQuestion, title: inputs.title, content: inputs.content}
         ));

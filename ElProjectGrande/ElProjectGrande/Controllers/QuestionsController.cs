@@ -43,7 +43,7 @@ public class QuestionsController(
         if (!userRepository.IsUserLoggedIn(sessionToken))
             return Unauthorized("That session token is expired or invalid");
 
-        var user = await userRepository.GetUserBySessionTokenOnlyQuestions(sessionToken) ?? throw new Exception();
+        var user = await userRepository.GetUserBySessionTokenOnlyQuestions(sessionToken) ?? throw new NotFoundException("This user could not be found");
         await userRepository.CheckIfUserIsMutedOrBanned(user);
 
         var karma = 5;

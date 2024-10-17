@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using ElProjectGrande.Models.AnswerModels.DTOs;
+using ElProjectGrande.Models.ExceptionModels;
 using ElProjectGrande.Models.QuestionModels.DTOs;
 using ElProjectGrande.Models.UserModels.DTOs;
 using Xunit.Abstractions;
@@ -62,9 +63,11 @@ public class UpdateAnswerTest(ITestOutputHelper outputHelper) : Tester(outputHel
         Assert.NotNull(user);
 
         var updRes = await AnsHelper.UpdateAnswer(ans.Id, "testing", user.SessionToken);
+        var error = await updRes.Content.ReadFromJsonAsync<Error>();
+        Assert.NotNull(error);
         Assert.Equal(HttpStatusCode.Forbidden, updRes.StatusCode);
         Assert.Equal("You did not post this answer, you don't have permission to edit it",
-            await updRes.Content.ReadFromJsonAsync<string>());
+            error.Message);
     }
 
     [Fact]

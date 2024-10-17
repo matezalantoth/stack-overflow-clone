@@ -3,9 +3,10 @@ import QuestionsElement from "./QuestionsElement.jsx";
 import AnswersElement from "./AnswersElement.jsx";
 import {useCookies} from 'react-cookie';
 import {useNavigate} from 'react-router-dom';
+import {CheckIfSessionExpired} from "../../CheckIfSessionExpired.jsx";
 
 
-export default function ProfilePage() {
+export default function ProfilePage({setUserLoginCookies}) {
     const [user, setUser] = useState(null)
     const [selectedTab, setSelectedTab] = useState(null)
     const navigate = useNavigate();
@@ -36,6 +37,8 @@ export default function ProfilePage() {
         }
 
     }, [cookies])
+
+    CheckIfSessionExpired(setUserLoginCookies);
 
     return user ? (
             <div className="Users bg-gray-50 min-h-screen p-8">

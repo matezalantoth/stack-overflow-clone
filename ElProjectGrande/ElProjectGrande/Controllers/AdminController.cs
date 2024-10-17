@@ -21,6 +21,7 @@ public class AdminController(
     IAnswerRepository answerRepository,
     ITagRepository tagRepository) : ControllerBase
 {
+    //  admin/users/ban/:username
     [HttpPatch("Users/Ban/{username}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDTO>> BanUserAsync(string username)
@@ -28,13 +29,15 @@ public class AdminController(
         return (await userRepository.BanUserByUsername(username)).ToDTO();
     }
 
+    //  admin/users/mute/:username
     [HttpPatch("Users/Mute/{username}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDTO>> MuteUserAsync(string username, [FromBody] MuteRequest request)
     {
-        return (await userRepository.MuteUserByUsername(username, request.Time)).ToDTO();
+        return Ok((await userRepository.MuteUserByUsername(username, request.Time)).ToDTO());
     }
 
+    //  admin/users/unban/:username
     [HttpPatch("Users/UnBan/{username}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDTO>> UnBanUserAsync(string username)
@@ -42,6 +45,7 @@ public class AdminController(
         return (await userRepository.UnBanUserByUsername(username)).ToDTO();
     }
 
+    //  admin/users/unmute/:username
     [HttpPatch("Users/UnMute/{username}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDTO>> UnMuteUserAsync(string username)
@@ -49,6 +53,7 @@ public class AdminController(
         return (await userRepository.UnMuteUserByUsername(username)).ToDTO();
     }
 
+    //  admin/users/searchByUsername/:username
     [HttpGet("Users/SearchByUsername/{username}")]
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<string>> SearchByUserNameAsync(string username)
@@ -56,6 +61,7 @@ public class AdminController(
         return Ok(userRepository.GetUsersWithSimilarUsernames(username));
     }
 
+    //  admin/questions/searchByTitle/:title
     [HttpGet("Questions/searchByTitle/{title}")]
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<QuestionDTO>> SearchQuestionsByTitleAsync(string title)
@@ -63,6 +69,7 @@ public class AdminController(
         return Ok(questionRepository.GetQuestionsByTitle(title));
     }
 
+    //  admin/questions/searchByContent/:content
     [HttpGet("Questions/searchByContent/{content}")]
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<QuestionDTO>> SearchQuestionsByContentAsync(string content)
@@ -70,6 +77,7 @@ public class AdminController(
         return Ok(questionRepository.GetQuestionsByContent(content));
     }
 
+    //  admin/answers/searchByContent/:content
     [HttpGet("Answers/searchByContent/{content}")]
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<AnswerDTO>> SearchAnswersByContentAsync(string content)
@@ -77,6 +85,7 @@ public class AdminController(
         return Ok(answerRepository.GetAnswersByContent(content));
     }
 
+    //  admin/answers/unAccept/:answerId
     [HttpPatch("Answers/unAccept/{answerId}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<AnswerDTO>> UnAcceptAnswer(Guid answerId)
@@ -84,6 +93,7 @@ public class AdminController(
         return Ok(await answerRepository.UnAcceptAnswer(answerId));
     }
 
+    //  admin/tags/searchByTagName/:tagName
     [HttpGet("Tags/searchByTagName/{tagName}")]
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<TagDTO>> SearchByTagNameAsync(string tagName)
@@ -91,6 +101,7 @@ public class AdminController(
         return Ok(tagRepository.GetTagsByName(tagName));
     }
 
+    //  admin/tags/searchByTagDescription/:tagDescription
     [HttpGet("Tags/searchByTagDescription/{tagDescription}")]
     [Authorize(Roles = "Admin")]
     public ActionResult<IEnumerable<TagDTO>> SearchByTagDescriptionAsync(string tagDescription)

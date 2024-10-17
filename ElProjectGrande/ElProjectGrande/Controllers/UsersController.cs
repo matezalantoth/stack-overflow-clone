@@ -53,14 +53,14 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         return Ok(user.ToDTO());
     }
 
-    //Getting user by username may need separate dto, shouldn't send email, will check frontend for dependencies
     [HttpGet("/getUserByUserName")]
     public async Task<ActionResult<UserDTO>> GetUserByUserName(string userName)
     {
         var user = await userRepository.GetUserByUserName(userName);
+
         if (user == null) throw new NotFoundException($"User of session token: {userName} could not be found");
 
-        return Ok(user.ToDTO());
+        return Ok(user.ToPublicDTO());
     }
 
     [HttpGet("IsUserAdmin")]

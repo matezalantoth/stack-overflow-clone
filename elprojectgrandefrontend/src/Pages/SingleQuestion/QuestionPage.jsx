@@ -6,8 +6,9 @@ import QuestionComponent from "./QuestionComponent.jsx";
 import {AnswerComponent} from "./AnswerComponent.jsx";
 import {MessageComponent} from "./MessageComponent.jsx";
 import {fetchAnswers} from "./QuestionPageServiceProvider.jsx";
+import {CheckIfSessionExpired} from "../../CheckIfSessionExpired.jsx";
 
-export default function QuestionPage() {
+export default function QuestionPage({setUserLoginCookies}) {
     const [cookies] = useCookies(['user']);
     const {questionId} = useParams();
     const [questionData, setQuestionData] = useState(null);
@@ -30,6 +31,10 @@ export default function QuestionPage() {
                     }
                 });
                 const data = await res.json();
+                if (data.message) {
+                    showErrorToast(data.message);
+                    return;
+                }
                 setQuestionData(() => data);
             } catch (error) {
                 console.log(error);
@@ -40,7 +45,12 @@ export default function QuestionPage() {
                 const res = await fetch('/api/Users/GetBySessionToken', {
                     headers: {'Authorization': "Bearer " + cookies.user}
                 })
-                setUser(await res.json());
+                const data = await res.json();
+                if (data.message) {
+                    showErrorToast(data.message);
+                    return;
+                }
+                setUser(data);
             } catch (e) {
                 console.log(e);
                 showErrorToast("Something went wrong")
@@ -53,6 +63,10 @@ export default function QuestionPage() {
             })
 
             const data = await res.json();
+            if (data.message) {
+                showErrorToast(data.message);
+                return;
+            }
             setIsAdmin(data);
         }
         checkIfAdmin();
@@ -80,7 +94,9 @@ export default function QuestionPage() {
         }
         setSubmittable(false);
     }, [reply])
-    console.log(answers);
+
+    CheckIfSessionExpired(setUserLoginCookies);
+
     return questionData && answers && user ? (
         <>
             <QuestionComponent question={questionData} setQuestion={setQuestionData} isAdmin={isAdmin} user={user}

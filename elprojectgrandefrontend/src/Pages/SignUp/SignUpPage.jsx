@@ -10,7 +10,14 @@ export const SignupPage = ({setUserLoginCookies}) => {
     const navigate = useNavigate();
     const showSuccessToast = (data) => toast.success(data.message);
     const showErrorToast = (data) => toast.error(data.message);
-    const [cookies] = useCookies(['user']);
+    const [cookies] = useCookies(['user'])
+
+    useEffect(() => {
+        if (cookies.user) {
+            navigate('/profile');
+        }
+    }, [cookies])
+
     useEffect(() => {
         if (
             newUserData.Name &&
@@ -23,7 +30,7 @@ export const SignupPage = ({setUserLoginCookies}) => {
         }
     }, [newUserData]);
 
-    const handleSignup = async () => {
+    const handleSignupRequest = async () => {
         const response = await fetch('/api/Users/signup', {
             method: 'POST',
             headers: {
@@ -35,14 +42,31 @@ export const SignupPage = ({setUserLoginCookies}) => {
             }),
         });
         return await response.json();
-        ;
+
     };
 
-    useEffect(() => {
-        if (cookies.user) {
-            navigate('/profile');
+    const handleSignup = (event) => {
+        event.preventDefault();
+        if (
+            newUserData.password.match(/([a-z?'!0-9])/gi).join('') ===
+            newUserData.password
+        ) {
+            handleSignupRequest(event).then((data) => {
+                if (data.message) {
+                    showErrorToast(data.message);
+                } else {
+                    showSuccessToast("Successfully created account!")
+                    setUserLoginCookies(data.sessionToken);
+                    navigate('/profile');
+                }
+            })
+        } else {
+            showErrorToast({
+                message: 'Your credentials are invalid',
+            });
         }
-    }, [cookies])
+
+    }
 
 
     return (
@@ -117,27 +141,7 @@ export const SignupPage = ({setUserLoginCookies}) => {
                         />
                     </div>
                     <button
-                        onClick={(event) => {
-                            event.preventDefault();
-                            if (
-                                newUserData.password.match(/([a-z?'!0-9])/gi).join('') ===
-                                newUserData.password
-                            ) {
-                                handleSignup(event).then((data) => {
-                                    if (data.message) {
-                                        showErrorToast(data.message);
-                                    } else {
-                                        setUserLoginCookies(data.sessionToken);
-                                        navigate('/profile');
-                                    }
-                                })
-                            } else {
-                                showErrorToast({
-                                    message: 'Your password or email is invalid',
-                                });
-                            }
-
-                        }}
+                        onClick={handleSignup}
                         className='w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center cursor-pointer'
                         disabled={!submittable}
                     >

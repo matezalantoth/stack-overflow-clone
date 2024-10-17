@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using ElProjectGrande.Models.ExceptionModels;
 using ElProjectGrande.Models.UserModels.DTOs;
 using Xunit.Abstractions;
 
@@ -33,11 +34,12 @@ public class UserControllerIntegrationTest(ITestOutputHelper outputHelper) : Tes
         var newUser = new NewUser
             { Name = "admin", UserName = "admin", Email = "admin@admin.com", Password = "admin1234" };
         var res = await UHelper.Register(newUser.Name, newUser.UserName, newUser.Email, newUser.Password, "2004-09-06");
-        var resMessage = await res.Content.ReadFromJsonAsync<string>();
+        var error = await res.Content.ReadFromJsonAsync<Error>();
         Assert.Multiple(() =>
         {
+            Assert.NotNull(error);
             Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
-            Assert.Equal("Some of your credentials are invalid", resMessage);
+            Assert.Equal("Some of your credentials are invalid", error.Message);
         });
     }
 
@@ -59,11 +61,12 @@ public class UserControllerIntegrationTest(ITestOutputHelper outputHelper) : Tes
     public async Task LoginAdminWithBadCredentialsReturnsBadRequest()
     {
         var response = await UHelper.Login("admin@admin.com", "admin1234");
-        var resMessage = await response.Content.ReadFromJsonAsync<string>();
+        var error = await response.Content.ReadFromJsonAsync<Error>();
        Assert.Multiple(() =>
        {
+           Assert.NotNull(error);
            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-           Assert.Equal("Invalid credentials", resMessage);
+           Assert.Equal("Invalid credentials", error.Message);
        });
     }
 

@@ -1,4 +1,4 @@
-import {StrictMode, useEffect, useState} from 'react'
+import {StrictMode, useState} from 'react'
 import './style.css'
 import {BrowserRouter, Route, Routes} from "react-router-dom"
 import {CookiesProvider, useCookies} from 'react-cookie';
@@ -29,20 +29,6 @@ export default function App() {
         setCookies('user', user, {path: '/'})
     }
 
-    useEffect(() => {
-        const pingAuth = async () => {
-            const res = await fetch("/api/ping", {
-                headers: {
-                    "Authorization": "Bearer " + cookies.user
-                }
-            });
-            if (res.status !== 200) {
-                setUserLoginCookies(null);
-            }
-        }
-        pingAuth();
-    }, [])
-
     return (
 
         <StrictMode>
@@ -54,18 +40,22 @@ export default function App() {
                         <Route path="/"
                                element={<WelcomePage searchQuestion={searchQuestion} normalQuestion={normalQuestion}
                                                      setNormalQuestion={setNormalQuestion}
-                                                     setsearchQuestion={setsearchQuestion}/>}/>
+                                                     setsearchQuestion={setsearchQuestion}
+                                                     setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/signup"
-                               element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
+                               element={<SignupPage setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/login"
-                               element={<LoginPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
-                        <Route path="/askquestion" element={<AskQuestion cookies={cookies}/>}/>
+                               element={<LoginPage setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path="/askquestion" element={<AskQuestion setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/profile"
-                               element={<ProfilePage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
-                        <Route path='question/:questionId' element={<QuestionPage cookies={cookies}/>}/>
-                        <Route path='/user/:userName' element={<PublicUser/>}/>
-                        <Route path='/admin' element={<AdminPage cookies={cookies}/>}/>
-                        <Route path='/tags' element={<TagsPage cookies={cookies} tags={tags} setTags={setTags}/>}/>
+                               element={<ProfilePage setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path='question/:questionId'
+                               element={<QuestionPage setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path='/user/:userName'
+                               element={<PublicUser setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path='/admin' element={<AdminPage setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path='/tags' element={<TagsPage tags={tags} setTags={setTags}
+                                                               setUserLoginCookies={setUserLoginCookies}/>}/>
                     </Routes>
                     <Toaster/>
 

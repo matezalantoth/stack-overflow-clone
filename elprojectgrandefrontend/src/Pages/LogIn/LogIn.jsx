@@ -11,16 +11,16 @@ export const LoginPage = ({setUserLoginCookies}) => {
         password: null,
     });
     const [cookies] = useCookies(['user']);
-
     const showErrorToast = (message) => toast.error(message);
     const showSuccessToast = (message) => toast.success(message);
+
     useEffect(() => {
         if (cookies.user) {
             navigate('/profile')
         }
     }, [cookies])
 
-    const handleLogin = async () => {
+    const handleLoginRequest = async () => {
         const response = await fetch('/api/Users/login', {
             method: 'POST',
             headers: {
@@ -30,6 +30,44 @@ export const LoginPage = ({setUserLoginCookies}) => {
         });
         return await response.json();
     };
+
+    const handleLogin = async (event) => {
+        event.preventDefault();
+
+        if (
+            userDetails.password.match(/([a-z?'!0-9])/gi).join('') ===
+            userDetails.password
+        ) {
+            try {
+                const data = await handleLoginRequest();
+                console.log(data);
+                if (data.message) {
+                    showErrorToast(data.message);
+                    return;
+                }
+                setUserLoginCookies(data);
+                showSuccessToast('Successfully signed in!');
+
+            } catch (e) {
+                console.error(e);
+                showErrorToast("Some of your details are invalid");
+            }
+
+        } else {
+            showErrorToast('That email or password is invalid');
+        }
+    }
+
+    const handlePasswordChange = (event) => {
+        setUserDetails({
+            ...userDetails,
+            password: event.target.value,
+        });
+    }
+
+    const handleEmailChange = (event) => {
+        setUserDetails({...userDetails, email: event.target.value});
+    }
 
     return (
         <>
@@ -45,9 +83,7 @@ export const LoginPage = ({setUserLoginCookies}) => {
                                 Your email
                             </label>
                             <input
-                                onChange={(event) => {
-                                    setUserDetails({...userDetails, email: event.target.value});
-                                }}
+                                onChange={handleEmailChange}
                                 type='email'
                                 className='bg-gray-50 border border-gray-300  text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 text-white'
                                 placeholder='name@company.com'
@@ -59,12 +95,7 @@ export const LoginPage = ({setUserLoginCookies}) => {
                                 Your password
                             </label>
                             <input
-                                onChange={(event) => {
-                                    setUserDetails({
-                                        ...userDetails,
-                                        password: event.target.value,
-                                    });
-                                }}
+                                onChange={handlePasswordChange}
                                 type='password'
                                 placeholder='••••••••'
                                 className='bg-gray-50 border border-gray-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 '
@@ -72,27 +103,7 @@ export const LoginPage = ({setUserLoginCookies}) => {
                             />
                         </div>
                         <button
-                            onClick={async (event) => {
-                                event.preventDefault();
-
-                                if (
-                                    userDetails.password.match(/([a-z?'!0-9])/gi).join('') ===
-                                    userDetails.password
-                                ) {
-                                    try {
-                                        const data = await handleLogin();
-                                        setUserLoginCookies(data);
-                                        showSuccessToast('Successfully signed in!');
-
-                                    } catch (e) {
-                                        console.error(e);
-                                        showErrorToast("Some of your details are invalid");
-                                    }
-
-                                } else {
-                                    showErrorToast('That email or password is invalid');
-                                }
-                            }}
+                            onClick={handleLogin}
                             type='submit'
                             className='w-full text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-nonefont-medium rounded-lg text-sm px-5 py-2.5 text-center'
                         >
