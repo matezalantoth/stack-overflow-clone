@@ -16,6 +16,9 @@ import QuestionPage from "./Pages/SingleQuestion/QuestionPage.jsx";
 import AskQuestion from "./Pages/AskQuestion/AskQuestion.jsx";
 import PublicUser from "./Pages/User/PublicUser.jsx";
 import AdminPage from "./Pages/Admin/AdminPage.jsx";
+
+import UpdateProfile from "./Pages/User/UpdateProfile.jsx";
+
 import TagsPage from "./Pages/TagsPage/TagsPage.jsx";
 
 
@@ -47,8 +50,11 @@ export default function App() {
                         <Route path="/login"
                                element={<LoginPage setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/askquestion" element={<AskQuestion setUserLoginCookies={setUserLoginCookies}/>}/>
-                        <Route path="/profile"
-                               element={<ProfilePage setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path="/profile" element={<ProfilePage setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path='/EditPage'
+                               element={<UpdateProfile cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
+
+
                         <Route path='question/:questionId'
                                element={<QuestionPage setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path='/user/:userName'
@@ -56,6 +62,7 @@ export default function App() {
                         <Route path='/admin' element={<AdminPage setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path='/tags' element={<TagsPage tags={tags} setTags={setTags}
                                                                setUserLoginCookies={setUserLoginCookies}/>}/>
+
                     </Routes>
                     <Toaster/>
 
