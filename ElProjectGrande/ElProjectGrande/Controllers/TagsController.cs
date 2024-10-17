@@ -62,4 +62,11 @@ public class TagsController(ITagFactory tagFactory ,ITagRepository tagRepository
         
         return Ok(tagRepository.UpdateTag(updated));
     }
+
+    [HttpGet("search/{searchTerm}")]
+    [Authorize(Roles="Admin, User")]
+    public ActionResult<List<TagDTO>> SearchTags(string searchTerm)
+    {
+        return Ok(tagRepository.SearchTags(searchTerm));
+    }
 }
