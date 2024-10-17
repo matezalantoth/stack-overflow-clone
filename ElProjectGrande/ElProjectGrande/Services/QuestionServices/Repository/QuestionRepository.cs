@@ -16,16 +16,6 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
         return await context.Questions.FirstOrDefaultAsync(q => q.Id == id) != null;
     }
 
-    public IEnumerable<QuestionDTO> GetQuestions()
-    {
-        return context.Questions
-            .Include(q => q.User)
-            .Include(q => q.Answers)
-            .Include(q => q.Tags)
-            .ThenInclude(t => t.Questions)
-            .Select(q => q.ToDTO());
-    }
-
     public Task<Question?> GetQuestionById(Guid id)
     {
         return context.Questions
@@ -35,18 +25,15 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
             .FirstOrDefaultAsync(q => q.Id == id);
     }
 
-    public Task<Question?> GetQuestionByIdWithoutAnswers(Guid id)
-    {
-        return context.Questions
-            .Include(q => q.User)
-            .Include(q => q.Tags)
-            .FirstOrDefaultAsync(q => q.Id == id);
-    }
+    public QuestionDTO CreateQuestion(NewQuestion newQuestion, User user)
 
-    public QuestionDTO CreateQuestion(Question question, User user)
     {
-        var tags = context.Tags.Where(x => question.Tags.Select(t => t.TagName).Contains(x.TagName)).ToList();
-        question.Tags = tags;
+        var tags = context.Tags.Where(x => newQuestion.Tags.Select(t => t.TagName).Contains(x.TagName)).ToList();
+         var question = new Question
+        {
+            Title = newQuestion.Title, Content = newQuestion.Content, Id = Guid.NewGuid(), User = user,
+            UserId = user.Id, PostedAt = newQuestion.PostedAt, Answers = [], Tags = tags
+        };
         user.Questions.Add(question);
         context.Questions.Add(question);
         foreach (var tag in question.Tags) tag.Questions.Add(question);

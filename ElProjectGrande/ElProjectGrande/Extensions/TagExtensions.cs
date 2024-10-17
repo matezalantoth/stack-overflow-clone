@@ -9,7 +9,7 @@ public static class TagExtensions
     {
         return new TagDTO
         {
-            TagName = tag.TagName, Id = tag.Id
+            TagName = tag.TagName, Id = tag.Id, Description = tag.Description
         };
     }
 }

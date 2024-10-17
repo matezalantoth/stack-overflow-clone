@@ -1,8 +1,10 @@
 using ElProjectGrande.Data;
+using ElProjectGrande.Exceptions;
 using ElProjectGrande.Extensions;
 using ElProjectGrande.Models.QuestionModels;
 using ElProjectGrande.Models.TagModels;
 using ElProjectGrande.Models.TagModels.DTOs;
+using FuzzySharp;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElProjectGrande.Services.TagServices.Repository;
@@ -34,6 +36,7 @@ public class TagRepository(ApiDbContext context) : ITagRepository
         {
             Id = tag.Id,
             TagName = tag.TagName,
+            Description = tag.Description
         };
     }
 
@@ -42,5 +45,33 @@ public class TagRepository(ApiDbContext context) : ITagRepository
         context.Tags.Remove(tag);
         context.SaveChanges();
     }
-    
+
+    public IEnumerable<TagDTO> GetTagsByName(string nameSubstring)
+    {
+        var closestName = Process.ExtractSorted(nameSubstring, context.Tags.Select(t => t.TagName).ToArray())
+            .Select(res => res.Value)
+            .Take(10);
+
+        var tags = context.Tags
+            .Include(t => t.Questions);
+        
+        return closestName
+            .Select(name => tags.FirstOrDefault(t => t.TagName == name))
+            .Select(t => t?.ToDTO() ?? throw new NotFoundException("Tag not found"));
+    }
+
+    public IEnumerable<TagDTO> GetTagsByDescription(string descriptionSubstring)
+    {
+        var closestDescription = Process
+            .ExtractSorted(descriptionSubstring, context.Tags.Select(t => t.Description).ToArray())
+            .Select(res => res.Value)
+            .Take(10);
+        
+        var tags = context.Tags
+            .Include(t => t.Questions);
+        
+        return closestDescription
+            .Select(description => tags.FirstOrDefault(t => t.Description == description))
+            .Select(t => t?.ToDTO() ?? throw new NotFoundException("Tag not found"));
+    }
 }

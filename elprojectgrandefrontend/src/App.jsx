@@ -2,26 +2,31 @@ import {StrictMode, useState} from 'react'
 import './style.css'
 import {BrowserRouter, Route, Routes} from "react-router-dom"
 import {CookiesProvider, useCookies} from 'react-cookie';
-import {SignupPage} from "./Pages/SingUp/SignUpPage.jsx";
+import {SignupPage} from "./Pages/SignUp/SignUpPage.jsx";
 import ProfilePage from "./Pages/User/ProfilePage.jsx";
 
 
-import WelcomePage from './Pages/Welcome/WelcomePage'
+import WelcomePage from './Pages/WelcomePage/WelcomePage'
 import Navbar from './components/navbar/Navbar'
 import {Toaster} from "react-hot-toast";
 import {LoginPage} from "./Pages/LogIn/LogIn.jsx";
 
-import QuestionPage from "./Pages/QuestionPage.jsx";
+import QuestionPage from "./Pages/SingleQuestion/QuestionPage.jsx";
 
 import AskQuestion from "./Pages/AskQuestion/AskQuestion.jsx";
 import PublicUser from "./Pages/User/PublicUser.jsx";
 import AdminPage from "./Pages/Admin/AdminPage.jsx";
+
 import UpdateProfile from "./Pages/User/UpdateProfile.jsx";
+
+import TagsPage from "./Pages/TagsPage/TagsPage.jsx";
+
 
 export default function App() {
     const [cookies, setCookies] = useCookies(['user'])
     const [searchQuestion, setsearchQuestion] = useState([])
     const [normalQuestion, setNormalQuestion] = useState([])
+    const [tags, setTags] = useState([])
 
     function setUserLoginCookies(user) {
         setCookies('user', user, {path: '/'})
@@ -38,18 +43,25 @@ export default function App() {
                         <Route path="/"
                                element={<WelcomePage searchQuestion={searchQuestion} normalQuestion={normalQuestion}
                                                      setNormalQuestion={setNormalQuestion}
-                                                     setsearchQuestion={setsearchQuestion}/>}/>
+                                                     setsearchQuestion={setsearchQuestion}
+                                                     setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/signup"
-                               element={<SignupPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
+                               element={<SignupPage setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/login"
-                               element={<LoginPage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
-                        <Route path="/askquestion" element={<AskQuestion cookies={cookies}/>}/>
+                               element={<LoginPage setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path="/askquestion" element={<AskQuestion setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/profile"
-                               element={<ProfilePage cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
-                        <Route path='question/:questionId' element={<QuestionPage cookies={cookies}/>}/>
-                        <Route path='/user/:userName' element={<PublicUser/>}/>
-                        <Route path='/admin' element={<AdminPage cookies={cookies}/>}/>
                         <Route path='/EditPage' element={<UpdateProfile cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>
+
+                               element={<ProfilePage setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path='question/:questionId'
+                               element={<QuestionPage setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path='/user/:userName'
+                               element={<PublicUser setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path='/admin' element={<AdminPage setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path='/tags' element={<TagsPage tags={tags} setTags={setTags}
+                                                               setUserLoginCookies={setUserLoginCookies}/>}/>
+
                     </Routes>
                     <Toaster/>
 

@@ -17,24 +17,20 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     : ControllerBase
 {
     [HttpPost("signup")]
-    public async Task<ActionResult<Guid>> CreateUserAndLogin([FromBody] NewUser newUser)
+    public async Task<ActionResult<UserDTO>> CreateUserAndLogin([FromBody] NewUser newUser)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        if (await userRepository.AreCredentialsTaken(newUser.Email, newUser.UserName))
-            return BadRequest("Some of your credentials are invalid");
-
+        if (!ModelState.IsValid) throw new Exception();
+        if (await userRepository.AreCredentialsTaken(newUser.Email, newUser.UserName)) throw new BadRequestException("Some of your credentials are invalid");
         var user = userFactory.CreateUser(newUser);
         await userRepository.CreateUser(user, newUser.Password, "User");
         user.SessionToken = await userRepository.LoginUser(newUser.Email, newUser.Password);
-        return Ok(user);
+        return Ok(user.ToDTO());
     }
 
     [HttpPost("login")]
     public async Task<ActionResult<string>> Login([FromBody] LoginCredentials loginCredentials)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
+        if (!ModelState.IsValid) throw new Exception();
         var token = await userRepository.LoginUser(loginCredentials.Email, loginCredentials.Password);
         return Content($"\"{token}\"", "application/json");
     }
@@ -45,7 +41,6 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     public async Task<ActionResult> LogoutUser([FromHeader(Name = "Authorization")] string sessionToken)
     {
         sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-        if (!userRepository.IsUserLoggedIn(sessionToken)) throw new NotFoundException("This user could not be found");
         await userRepository.LogoutUser(sessionToken);
         return Ok();
     }
@@ -57,18 +52,17 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
         var user = await userRepository.GetUserBySessionToken(sessionToken);
         if (user == null) throw new NotFoundException($"User of session token: {sessionToken} could not be found");
-
         return Ok(user.ToDTO());
     }
 
     [HttpGet("/getUserByUserName")]
-    [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<UserDTO>> GetUserByUserName(string userName)
     {
         var user = await userRepository.GetUserByUserName(userName);
+
         if (user == null) throw new NotFoundException($"User of session token: {userName} could not be found");
 
-        return Ok(user.ToDTO());
+        return Ok(user.ToPublicDTO());
     }
 
     [HttpGet("IsUserAdmin")]
@@ -81,6 +75,7 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
 
         return Ok(userRepository.IsUserAdmin(user));
     }
+
     [Authorize (Roles = "User")]
     [HttpPatch("update-profile")]
 
@@ -114,5 +109,12 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         var user = await userRepository.GetUserBySessionToken(sessionToken) ?? throw new NotFoundException();
 
         return Ok( new VerifyUserDTO{Email = user.Email?? throw new Exception(), Verified = await userRepository.VerifyUser(user, password)});
+
+
+    [HttpGet("/ping")]
+    [Authorize(Roles = "Admin, User")]
+    public ActionResult Ping()
+    {
+        return Ok();
     }
 }

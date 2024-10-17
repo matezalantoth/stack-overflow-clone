@@ -19,5 +19,5 @@ public class UserDTO
 
     public bool Banned { get; set; } = false;
 
-    public int MutedFor { get; set; } = 0;
+    public DateTime? MutedUntil { get; set; }
 }

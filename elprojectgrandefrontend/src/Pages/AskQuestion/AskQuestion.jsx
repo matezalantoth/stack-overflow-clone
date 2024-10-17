@@ -2,8 +2,9 @@ import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {toast} from "react-hot-toast";
 import {useCookies} from "react-cookie";
+import {CheckIfSessionExpired} from "../../CheckIfSessionExpired.jsx";
 
-export default function AskQuestion() {
+export default function AskQuestion({setUserLoginCookies}) {
     const [cookies] = useCookies(['user']);
     const navigate = useNavigate();
     const [question, setQuestion] = useState({});
@@ -43,6 +44,19 @@ export default function AskQuestion() {
         return await res.json();
     }
 
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        createQuestion(event).then((data) => {
+            if (data.message) {
+                showErrorToast(data.message);
+                return;
+            }
+            showSuccessToast("Successfully posted question!");
+            navigate('/question/' + data.id);
+        });
+    }
+
+    CheckIfSessionExpired(setUserLoginCookies);
 
     return (
         <div className="flex flex-col items-center justify-center mt-24 p-4">
@@ -80,19 +94,9 @@ export default function AskQuestion() {
                     </div>
 
                     <button
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg transition duration-200 shadow-md focus:ring-2 focus:ring-blue-300"
-                        onClick={(event) => {
-                            event.preventDefault();
-                            createQuestion(event).then((data) => {
-                                if (data.id) {
-                                    showSuccessToast("Successfully posted question!");
-                                    navigate('/question/' + data.id);
-                                    return;
-                                }
-                                showErrorToast("Something went wrong")
-
-                            });
-                        }}
+                        className="w-full bg-blue-500 disabled:bg-gray-400 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg transition duration-200 shadow-md focus:ring-2 focus:ring-blue-300"
+                        disabled={!submittable}
+                        onClick={handleSubmit}
                     >
                         Submit
                     </button>

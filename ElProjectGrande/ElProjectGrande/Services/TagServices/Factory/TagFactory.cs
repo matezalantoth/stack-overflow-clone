@@ -7,6 +7,6 @@ public class TagFactory : ITagFactory
 {
     public Tag CreateTag(NewTag newTag)
     {
-        return new Tag { TagName = newTag.TagName, Id = Guid.NewGuid(), Questions = []};
+        return new Tag { TagName = newTag.TagName, Id = Guid.NewGuid(), Questions = [], Description = newTag.Description};
     }
 }

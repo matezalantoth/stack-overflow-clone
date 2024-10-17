@@ -29,11 +29,11 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     public async Task<string> LoginUser(string email, string password)
     {
         var managedUser = await userManager.FindByEmailAsync(email);
-        if (managedUser == null) throw new Exception("Invalid credentials");
+        if (managedUser == null) throw new BadRequestException("Invalid credentials");
         var isPasswordValid = await userManager.CheckPasswordAsync(managedUser, password);
-        if (!isPasswordValid) throw new Exception("Invalid credentials");
+        if (!isPasswordValid) throw new BadRequestException("Invalid credentials");
         var roles = await userManager.GetRolesAsync(managedUser);
-        var token = tokenService.CreateToken(managedUser, roles[0] ?? "User");
+        var token = tokenService.CreateToken(managedUser, roles[0]);
         managedUser.SessionToken = token;
         await userManager.UpdateAsync(managedUser);
         return token;
@@ -59,15 +59,7 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         return await context.Users
             .Include(u => u.Questions)
             .ThenInclude(q => q.Tags)
-            .Include(u => u.Questions)
-            .ThenInclude(q => q.Answers)
-            .ThenInclude(a => a.User)
             .Include(u => u.Answers)
-            .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.User)
-            .Include(u => u.Answers)
-            .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.Tags)
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
@@ -106,16 +98,8 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
     {
         return await context.Users
             .Include(u => u.Questions)
-            .ThenInclude(q => q.Answers)
-            .ThenInclude(a => a.User)
-            .Include(u => u.Questions)
             .ThenInclude(q => q.Tags)
             .Include(u => u.Answers)
-            .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.User)
-            .Include(u => u.Answers)
-            .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.Tags)
             .FirstOrDefaultAsync(u => u.UserName == username);
     }
 
@@ -134,9 +118,9 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
             .FirstOrDefaultAsync(u => u.SessionToken == sessionToken);
     }
 
-    public async ValueTask<User> BanUserById(string userId)
+    public async ValueTask<User> BanUserByUsername(string username)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == username);
         if (user == null) throw new NotFoundException("This user could not be found");
         user.Banned = true;
         await userManager.UpdateAsync(user);
@@ -148,65 +132,50 @@ public class UserRepository(UserManager<User> userManager, ApiDbContext context,
         if (user.Muted)
         {
             var now = DateTime.Now;
-            var unMutedAt = now.AddMinutes(user.MutedFor);
-            if (unMutedAt < now) throw new UnauthorizedAccessException();
+            if (user.MutedUntil > now) throw new ForbiddenException("You are muted, please contact support");
 
-            await UnMuteUserById(user.Id);
+            await UnMuteUserByUsername(user.UserName ?? throw new BadRequestException("Something went wrong!"));
         }
 
-        if (user.Banned) throw new UnauthorizedAccessException();
+        if (user.Banned) throw new ForbiddenException("You are banned, please contact support");
     }
 
-    public async ValueTask<User> MuteUserById(string userId, int mutedFor)
+    public async ValueTask<User> MuteUserByUsername(string username, int mutedFor)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == username);
         if (user == null) throw new NotFoundException("This user could not be found");
-        user.MutedFor += mutedFor;
         user.Muted = true;
+        user.MutedUntil = user.MutedUntil == null ? DateTime.Now.AddHours(mutedFor) : user.MutedUntil?.AddHours(mutedFor);
         await userManager.UpdateAsync(user);
         return user;
     }
 
-    public async ValueTask<User> UnBanUserById(string userId)
+    public async ValueTask<User> UnBanUserByUsername(string username)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == username);
         if (user == null) throw new NotFoundException("This user could not be found");
         user.Banned = false;
         await userManager.UpdateAsync(user);
         return user;
     }
 
-    public async ValueTask<User> UnMuteUserById(string userId)
+    public async ValueTask<User> UnMuteUserByUsername(string username)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ??
+        var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == username) ??
                    throw new NotFoundException("User could not be found");
         user.Muted = false;
         await userManager.UpdateAsync(user);
         return user;
     }
 
-    public IEnumerable<UserDTO> GetUsersWithSimilarUsernames(string usernameSubstring)
+    public IEnumerable<string> GetUsersWithSimilarUsernames(string usernameSubstring)
     {
         var bestResults = Process.ExtractSorted(usernameSubstring, context.Users.Select(u => u.UserName))
             .Select(res => res.Value)
             .ToList()
             .Take(10);
-        var users = context.Users
-            .Include(u => u.Questions)
-            .ThenInclude(q => q.Answers)
-            .ThenInclude(a => a.User)
-            .Include(u => u.Questions)
-            .ThenInclude(q => q.Tags)
-            .Include(u => u.Answers)
-            .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.User)
-            .Include(u => u.Answers)
-            .ThenInclude(a => a.Question)
-            .ThenInclude(q => q.Tags)
-            .ToList();
-        return bestResults
-            .Select(username => users.FirstOrDefault(u => u.UserName == username))
-            .Select(user => user?.ToDTO() ?? throw new NotFoundException("This user could not be found"));
+
+        return bestResults;
     }
 
     public bool IsUserAdmin(User user)

@@ -3,8 +3,10 @@ import {useEffect, useState} from "react";
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
 import ResultInteractionComponent from "./ResultInteractionComponent.jsx";
+import {toast} from "react-hot-toast";
+import {CheckIfSessionExpired} from "../../CheckIfSessionExpired.jsx";
 
-export default function AdminPage() {
+export default function AdminPage({setUserLoginCookies}) {
     const [cookies] = useCookies(['user']);
     const navigate = useNavigate();
     const [adminCheck, setAdminCheck] = useState(false);
@@ -14,7 +16,9 @@ export default function AdminPage() {
     const [searchBar, setSearchBar] = useState(null);
     const [searchData, setSearchData] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
+    const showErrorToast = (message) => toast.error(message);
 
+    CheckIfSessionExpired(setUserLoginCookies);
 
     useEffect(() => {
         const fetchCheckIfAdmin = async () => {
@@ -70,6 +74,17 @@ export default function AdminPage() {
                 case "Answers":
                     url += "/answers/searchByContent/" + searchBar;
                     break;
+                case "Tags":
+                    url += "/tags";
+                    switch (searchingBy) {
+                        case "Name":
+                            url += "/searchByTagName/" + searchBar;
+                            break;
+                        case "Description":
+                            url += "/searchByTagDescription/" + searchBar;
+                            break;
+                    }
+                    break;
             }
         } else {
             setSearchData(() => []);
@@ -86,6 +101,10 @@ export default function AdminPage() {
                     }
                 })
                 const data = await res.json();
+                if (data.message) {
+                    showErrorToast(data.message);
+                    return;
+                }
                 setSearchData(() => data);
             }
             fetchUrl();
@@ -96,21 +115,39 @@ export default function AdminPage() {
         if (searchData.length > 0 && showSearchBar) {
             switch (searching) {
                 case "Users":
-                    setSearchResults(() => searchData.map(u => u.userName));
+                    setSearchResults(() => searchData.map(u => {
+                        return {value: u, id: u}
+                    }));
                     break;
                 case "Questions":
                     switch (searchingBy) {
                         case "Title":
-                            setSearchResults(() => searchData.map(q => q.title));
+                            setSearchResults(() => searchData.map(q => {
+                                return {value: q.title, id: q.id}
+                            }));
                             break;
                         case "Content":
-                            setSearchResults(() => searchData.map(q => q.content));
+                            setSearchResults(() => searchData.map(q => {
+                                return {value: q.content, id: q.id}
+                            }));
                             break;
                     }
                     break;
                 case "Answers":
-                    setSearchResults(() => searchData.map(a => a.content));
+                    setSearchResults(() => searchData.map(a => {
+                        console.log(a);
+                        return {value: a.content, id: a.id}
+                    }));
                     break;
+                case "Tags":
+                    switch (searchingBy) {
+                        case "Name":
+                            setSearchResults(() => searchData.map(t => t.tagName));
+                            break;
+                        case "Description":
+                            setSearchResults(() => searchData.map(t => t.description));
+                            break;
+                    }
             }
         }
     }, [searchData]);
@@ -133,6 +170,7 @@ export default function AdminPage() {
                     <option>Users</option>
                     <option>Questions</option>
                     <option>Answers</option>
+                    <option>Tags</option>
                 </select>
                 {' '}
                 By
@@ -154,6 +192,9 @@ export default function AdminPage() {
                                 <option>Content</option>
                             </> : searching === 'Answers' ? <>
                                 <option>Content</option>
+                            </> : searching === 'Tags' ? <>
+                                <option>Name</option>
+                                <option>Description</option>
                             </> : <></>}
                 </select>
             </span>
@@ -171,11 +212,11 @@ export default function AdminPage() {
                                     <li className="p-2 border-b-2 border-gray-200"
                                         key={i}>
                                         <div className="w-4/5 inline-block">
-                                            <div className="truncate">{u}</div>
+                                            <div className="truncate">{u.value}</div>
 
                                         </div>
                                         <ResultInteractionComponent
-                                            searchModel={searching}/>
+                                            searchModel={searching} id={u.id} setSearchResults={setSearchResults}/>
                                     </li>
                                 </>;
                             })}

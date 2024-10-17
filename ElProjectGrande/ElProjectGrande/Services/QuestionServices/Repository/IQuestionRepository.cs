@@ -8,13 +8,10 @@ namespace ElProjectGrande.Services.QuestionServices.Repository;
 public interface IQuestionRepository
 {
     public Task<bool> CheckIfQuestionExists(Guid id);
-    public IEnumerable<QuestionDTO> GetQuestions();
 
     public Task<Question?> GetQuestionById(Guid id);
 
-    public Task<Question?> GetQuestionByIdWithoutAnswers(Guid id);
-
-    public QuestionDTO CreateQuestion(Question question, User user);
+    public QuestionDTO CreateQuestion(NewQuestion newQuestion, User user);
 
     public void DeleteQuestion(Question question, User user);
 

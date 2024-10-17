@@ -3,12 +3,11 @@ import AnswersElement from "./AnswersElement.jsx";
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 
-export default  function ProfileRenderer ({user})
-{
+export default function ProfileRenderer({user}) {
     const navigate = useNavigate()
-    const[selectedTab, setSelectedTab] = useState(null)
+    const [selectedTab, setSelectedTab] = useState(null)
     return user ? (
-            <div className="Users bg-gray-50 min-h-screen p-8">
+            <div className="Users  min-h-screen p-8">
                 <div className="user bg-white p-8 rounded-xl shadow-lg max-w-md mx-auto flex flex-col items-center">
 
                     {/* Profile Info */}
@@ -24,7 +23,7 @@ export default  function ProfileRenderer ({user})
                                 <span className="text-gray-900">{user.karma}</span>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>
 

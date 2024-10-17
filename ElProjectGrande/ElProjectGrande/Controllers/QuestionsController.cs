@@ -22,7 +22,7 @@ public class QuestionsController(
     public async Task<ActionResult<QuestionDTO>> GetQuestionById(Guid id)
     {
         var question = await questionRepository.GetQuestionById(id);
-        if (question == null) throw new ArgumentException();
+        if (question == null) throw new NotFoundException("Question could not be found");
 
         return Ok(question.ToDTO());
     }
@@ -40,19 +40,17 @@ public class QuestionsController(
         [FromBody] NewQuestion newQuestion)
     {
         sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-
         if (!userRepository.IsUserLoggedIn(sessionToken))
             return Unauthorized("That session token is expired or invalid");
 
-        var user = await userRepository.GetUserBySessionTokenOnlyQuestions(sessionToken);
-        if (user == null) throw new Exception("User could not be found");
+        var user = await userRepository.GetUserBySessionTokenOnlyQuestions(sessionToken) ?? throw new NotFoundException("This user could not be found");
         await userRepository.CheckIfUserIsMutedOrBanned(user);
 
         var karma = 5;
         await userRepository.UpdateKarma(user, karma);
+        
+        return Ok(questionRepository.CreateQuestion(newQuestion, user));
 
-        var question = questionFactory.CreateQuestion(newQuestion, user);
-        return Ok(questionRepository.CreateQuestion(question, user));
     }
 
     [HttpDelete("{id}")]
@@ -65,10 +63,9 @@ public class QuestionsController(
                        throw new NotFoundException($"Question of id {id} could not be found!");
         var user = await userRepository.GetUserBySessionTokenOnlyQuestions(sessionToken) ??
                    throw new NotFoundException("this user could not be found!");
-        await userRepository.CheckIfUserIsMutedOrBanned(user);
 
         if (question.User.SessionToken != user.SessionToken && !userRepository.IsUserAdmin(user))
-            return Forbid("You do not have permission to delete this question");
+            throw new ForbiddenException("You do not have permission to delete this question!");
 
         questionRepository.DeleteQuestion(question, question.User);
         return NoContent();
@@ -87,7 +84,9 @@ public class QuestionsController(
                    throw new NotFoundException("this user could not be found");
         await userRepository.CheckIfUserIsMutedOrBanned(user);
         if (question.User.Id != user.Id && !userRepository.IsUserAdmin(user))
-            return Forbid("You do not have permission to update this question");
+        {
+            throw new ForbiddenException("You do not have permission to update this question");
+        }
 
         var updated = questionFactory.CreateNewUpdatedQuestionFromUpdatesAndOriginal(updatedQuestion, question);
         return Ok(questionRepository.UpdateQuestion(updated));

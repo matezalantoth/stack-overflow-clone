@@ -11,16 +11,6 @@ public static class AnswerExtensions
         {
             Id = answer.Id,
             Content = answer.Content, PostedAt = answer.PostedAt, Username = answer.User.UserName,
-            Question = answer.Question.ToDTO(), Accepted = answer.Accepted, Votes = answer.Votes
-        };
-    }
-
-    public static AnswersOfQuestionDTO ToAnswerOfQuestionDTO(this Answer answer)
-    {
-        return new AnswersOfQuestionDTO
-        {
-            Id = answer.Id,
-            Content = answer.Content, PostedAt = answer.PostedAt, Username = answer.User.UserName,
             Accepted = answer.Accepted, Votes = answer.Votes
         };
     }

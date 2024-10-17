@@ -14,4 +14,8 @@ public interface ITagRepository
     public TagDTO CreateTag(Tag tag);
 
     public void DeleteTag(Tag tag);
+
+    public IEnumerable<TagDTO> GetTagsByName(string nameSubstring);
+
+    public IEnumerable<TagDTO> GetTagsByDescription(string descriptionSubstring);
 }
