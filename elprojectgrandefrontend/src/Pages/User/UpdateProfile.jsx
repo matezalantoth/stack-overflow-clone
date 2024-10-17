@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
+import Verify from "../../components/Verify/Verify.jsx";
 
 export default function UpdateProfile ({setUserLoginCookies})
 {
@@ -8,6 +9,8 @@ export default function UpdateProfile ({setUserLoginCookies})
     const [statusMessage, setStatusMessage] = useState('');
     const [cookies] = useCookies(['user'])
     const navigate = useNavigate();
+    
+    const[verified, setVerified] = useState(false)
     
     
     
@@ -42,9 +45,10 @@ export default function UpdateProfile ({setUserLoginCookies})
     
     
 };
+    
 
-
-    return (
+    return verified ? (
+        
         <div className="form-div">
             <form className='space-y-6' action='#'>
                 <div>
@@ -95,5 +99,7 @@ export default function UpdateProfile ({setUserLoginCookies})
                 </button>
             </form>
         </div>
-    )
+    ) :
+        <Verify setDetails={setUserDetails}
+        setVerified={setVerified}/>
 }
