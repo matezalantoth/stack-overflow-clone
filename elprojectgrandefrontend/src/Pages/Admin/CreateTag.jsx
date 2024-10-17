@@ -13,7 +13,7 @@ export default function CreateTag() {
     const showSuccessToast = (message) => toast.success(message);
 
     const createTag = async () => {
-        const response = await fetch ('/api/Tags', {
+        const response = await fetch('/api/Tags', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -28,11 +28,11 @@ export default function CreateTag() {
     return (
         <div className="relative w-72">
             <form className='space-y-6' action='#'>
-                <h5 className='text-xl font-medium text-gray-900'>
-                    Make a Tag!
-                </h5>
+                {/*<h5 className='text-xl font-medium text-gray-900'>*/}
+                {/*    Make a Tag!*/}
+                {/*</h5>*/}
                 <div>
-                    <label className='block mb-2 text-sm font-medium text-gray-900'>
+                    <label className='block mb-2 mt-2 text-sm font-medium text-gray-900'>
                         Tag Name
                     </label>
                     <input
@@ -75,7 +75,8 @@ export default function CreateTag() {
                                 console.error(e);
                                 showErrorToast("Something went wrong");
                             }
-                    }}}
+                        }
+                    }}
                     type='submit'
                     className='w-full text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-nonefont-medium rounded-lg text-sm px-5 py-2.5 text-center'
                 >

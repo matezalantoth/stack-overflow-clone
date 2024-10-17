@@ -163,8 +163,20 @@ export default function AdminPage({setUserLoginCookies}) {
 
 
     return adminCheck ? (
+        <>
+            <div className="relative left-6">
+                <button
+                    className="mr-2 border-2 border-blue-600 h-10 text-blue-600 w-24 px-2 rounded text-sm"
+                    onClick={toggleOpen}
+                >
+                    Create Tag
+                </button>
+                {isOpen && (
+                    <CreateTag/>
+                )}
+            </div>
 
-        <div className="m-auto block mx-auto ml-6 mt-4">
+            <div className="m-auto block mx-auto ml-6 mt-4">
             <span>
                 Search
                 {' '}
@@ -207,40 +219,32 @@ export default function AdminPage({setUserLoginCookies}) {
                             </> : <></>}
                 </select>
             </span>
-            <br/>
-            {showSearchBar ?
-                <div className="rounded-md border-2 w-1/5 mt-2">
-                    <input
-                        className="w-full"
-                        onChange={(event) => setSearchBar(() => event.target.value === "" ? null : event.target.value)}
-                        placeholder='Search...'/>
-                    {searchResults.length > 0 ?
-                        <ul>
-                            {searchResults.map((u, i) => {
-                                return <>
-                                    <li className="p-2 border-b-2 border-gray-200"
-                                        key={i}>
-                                        <div className="w-4/5 inline-block">
-                                            <div className="truncate">{u.value}</div>
+                <br/>
 
-                                        </div>
-                                        <ResultInteractionComponent
-                                            searchModel={searching} id={u.id} setSearchResults={setSearchResults}/>
-                                    </li>
-                                </>;
-                            })}
-                        </ul> : <></>}
-                </div> : <></>}
-            <div className="relative left-3/4">
-                <button
-                    className="mr-2 border-2 border-blue-600 h-10 text-blue-600 w-20 px-2 rounded text-sm"
-                    onClick={toggleOpen}
-                >
-                    Create Tag
-                </button>
-                {isOpen && (
-                    <CreateTag />
-                )}
+                {showSearchBar ?
+                    <div className="rounded-md border-2 w-1/5 mt-2">
+                        <input
+                            className="w-full"
+                            onChange={(event) => setSearchBar(() => event.target.value === "" ? null : event.target.value)}
+                            placeholder='Search...'/>
+                        {searchResults.length > 0 ?
+                            <ul>
+                                {searchResults.map((u, i) => {
+                                    return <>
+                                        <li className="p-2 border-b-2 border-gray-200"
+                                            key={i}>
+                                            <div className="w-4/5 inline-block">
+                                                <div className="truncate">{u.value}</div>
+
+                                            </div>
+                                            <ResultInteractionComponent
+                                                searchModel={searching} id={u.id} setSearchResults={setSearchResults}/>
+                                        </li>
+                                    </>;
+                                })}
+                            </ul> : <></>}
+                    </div> : <></>}
+
             </div>
-        </div>) : <>404</>
+        </>) : <>404</>
 }
