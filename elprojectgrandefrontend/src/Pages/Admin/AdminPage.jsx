@@ -1,8 +1,9 @@
 // eslint-disable-next-line no-unused-vars,react/prop-types
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
 import ResultInteractionComponent from "./ResultInteractionComponent.jsx";
+import CreateTag from "./CreateTag.jsx";
 
 export default function AdminPage() {
     const [cookies] = useCookies(['user']);
@@ -14,7 +15,7 @@ export default function AdminPage() {
     const [searchBar, setSearchBar] = useState(null);
     const [searchData, setSearchData] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
-
+    const [isOpen, setIsOpen] = React.useState(false);
 
     useEffect(() => {
         const fetchCheckIfAdmin = async () => {
@@ -147,6 +148,10 @@ export default function AdminPage() {
         }
     }, [searchData]);
 
+    const toggleOpen = () => {
+        setIsOpen(!isOpen);
+    };
+
 
     return adminCheck ? (
 
@@ -217,5 +222,16 @@ export default function AdminPage() {
                             })}
                         </ul> : <></>}
                 </div> : <></>}
+            <div className="relative left-3/4">
+                <button
+                    className="mr-2 border-2 border-blue-600 h-10 text-blue-600 w-20 px-2 rounded text-sm"
+                    onClick={toggleOpen}
+                >
+                    Create Tag
+                </button>
+                {isOpen && (
+                    <CreateTag />
+                )}
+            </div>
         </div>) : <>404</>
 }
