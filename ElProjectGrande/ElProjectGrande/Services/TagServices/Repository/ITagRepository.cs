@@ -20,4 +20,6 @@ public interface ITagRepository
     public IEnumerable<TagDTO> GetTagsByName(string nameSubstring);
 
     public IEnumerable<TagDTO> GetTagsByDescription(string descriptionSubstring);
+
+    public IEnumerable<TagDTO> SearchTags(string searchTerm);
 }
