@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using ElProjectGrande.Models.ExceptionModels;
 using ElProjectGrande.Models.UserModels;
 using ElProjectGrande.Models.UserModels.DTOs;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
@@ -42,9 +43,10 @@ public class BanUserTest(ITestOutputHelper outputHelper) : Tester(outputHelper)
         Assert.NotNull(token);
 
         var banRes = await AHelper.BanUser("fake.username", token);
-        var message = await banRes.Content.ReadFromJsonAsync<string>();
+        var error = await banRes.Content.ReadFromJsonAsync<Error>();
+        Assert.NotNull(error);
         Assert.Equal(HttpStatusCode.NotFound, banRes.StatusCode);
-        Assert.Equal("This user could not be found", message);
+        Assert.Equal("This user could not be found", error.Message);
     }
 
     [Fact]

@@ -22,7 +22,6 @@ public class CreateTagTest(ITestOutputHelper outputHelper) : Tester(outputHelper
         var getRes = await TagHelper.GetAllTags();
         getRes.EnsureSuccessStatusCode();
         var tags = await getRes.Content.ReadFromJsonAsync<List<TagDTO>>();
-
         Assert.NotNull(tags);
         Assert.True(tags.Count > 0);
         Assert.Contains(tags, tag => tag.TagName == "name");

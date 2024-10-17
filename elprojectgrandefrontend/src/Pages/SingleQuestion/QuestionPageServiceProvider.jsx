@@ -1,7 +1,13 @@
+import {toast} from "react-hot-toast";
+
 export const fetchAnswers = async (questionId, setAnswers) => {
     try {
         const res = await fetch('/api/Answers?questionId=' + questionId);
         const data = await res.json();
+        if (data.message) {
+            toast.error(data.message);
+            return;
+        }
         setAnswers(data.sort((a, b) => b.votes - a.votes));
     } catch (error) {
         console.log(error);
@@ -33,28 +39,32 @@ export const formatTimeDifference = (postedAt) => {
     const postedDate = new Date(tempPostedAt.getTime() + offset * 60000);
     let differenceInSeconds = Math.floor(((now - postedDate) / 1000));
     if (differenceInSeconds < 60) {
-        return `${differenceInSeconds} seconds ago`;
+        return `${differenceInSeconds} second${differenceInSeconds === 1 ? '' : 's'} ago`;
     } else if (differenceInSeconds < 3600) {
         const minutes = Math.floor(differenceInSeconds / 60);
-        return `${minutes} minutes ago`;
+        return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
     } else if (differenceInSeconds < 86400) {
         const hours = Math.floor(differenceInSeconds / 3600);
-        return `${hours} hours ago`;
+        return `${hours} hour${hours === 1 ? '' : 's'} ago`;
     }
     const days = Math.floor(differenceInSeconds / 86400);
-    return `${days} days ago`;
+    return `${days} day${days === 1 ? '' : 's'} ago`;
 
 };
 
 export const handleAccept = async (id, cookies, setAnswers, setQuestionData) => {
     const res = await fetch('/api/accept/' + id, {
-        method: 'POST',
-        headers: {
-            Authorization: "Bearer " + cookies.user
+            method: 'POST',
+            headers: {
+                Authorization: "Bearer " + cookies.user
+            }
         }
-    });
-
+    );
     const data = await res.json();
+    if (data.message) {
+        toast.error(data.message);
+        return;
+    }
     if (data.accepted) {
         setAnswers((answers) => answers.map(ans => {
             if (ans.id === data.id) {
@@ -67,23 +77,33 @@ export const handleAccept = async (id, cookies, setAnswers, setQuestionData) => 
 }
 
 export const sendUpvote = async (id, cookies) => {
-    await fetch('/api/Answers/' + id + '/upvote', {
+    const res = await fetch('/api/Answers/' + id + '/upvote', {
         method: 'PATCH',
         headers: {
             Authorization: "Bearer " + cookies.user
         }
     })
+    const data = await res.json();
+    if (data.message) {
+        toast.error(data.message);
+        throw new Error();
+    }
 }
 
 
 export const sendDownvote = async (id, cookies) => {
 
-    await fetch('/api/Answers/' + id + '/downvote', {
+    const res = await fetch('/api/Answers/' + id + '/downvote', {
         method: 'PATCH',
         headers: {
             Authorization: "Bearer " + cookies.user
         }
     })
+    const data = await res.json();
+    if (data.message) {
+        toast.error(data.message);
+        throw new Error();
+    }
 }
 
 export const checkIfUpvoted = (id, user) => {
@@ -100,7 +120,6 @@ export const handleUpvoting = async (answer, user, cookies, showErrorToast, setA
             await sendUpvote(answer.id, cookies);
         } catch (e) {
             console.log(e);
-            showErrorToast("Something went wrong");
             return;
         }
         setAnswers(prevAnswers =>
@@ -119,7 +138,6 @@ export const handleUpvoting = async (answer, user, cookies, showErrorToast, setA
             await sendUpvote(answer.id, cookies);
         } catch (error) {
             console.log(error);
-            showErrorToast("Something went wrong");
             return;
         }
         setAnswers(prevAnswers =>
@@ -145,7 +163,6 @@ export const handleDownvoting = async (answer, user, cookies, showErrorToast, se
             await sendDownvote(answer.id, cookies);
         } catch (e) {
             console.log(e);
-            showErrorToast("Something went wrong");
             return;
         }
 
@@ -164,7 +181,6 @@ export const handleDownvoting = async (answer, user, cookies, showErrorToast, se
             await sendDownvote(answer.id, cookies);
         } catch (e) {
             console.log(e);
-            showErrorToast("Something went wrong");
             return;
         }
 

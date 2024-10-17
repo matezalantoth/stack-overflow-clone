@@ -7,7 +7,7 @@ namespace ElProjectGrande.Services.AnswerServices.Repository;
 
 public interface IAnswerRepository
 {
-    public IEnumerable<AnswersOfQuestionDTO> GetAllAnswersByQuestionId(Guid questionId);
+    public IEnumerable<AnswerDTO> GetAllAnswersByQuestionId(Guid questionId);
 
     public Task<AnswerDTO> CreateAnswer(Answer answer, User user, Question question);
 
@@ -15,9 +15,9 @@ public interface IAnswerRepository
 
     public Task DeleteAnswer(Answer answer, User user);
 
-    public Task<AnswersOfQuestionDTO> UpdateAnswer(Answer answer);
+    public Task<AnswerDTO> UpdateAnswer(Answer answer);
 
-    public Task<AnswersOfQuestionDTO> AcceptAnswer(Answer answer);
+    public Task<AnswerDTO> AcceptAnswer(Answer answer);
 
     public void VoteAnswer(Answer answer, int vote);
 

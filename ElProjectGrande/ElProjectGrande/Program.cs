@@ -3,6 +3,7 @@ using System.Text;
 using DotNetEnv;
 using ElProjectGrande.Data;
 using ElProjectGrande.Exceptions;
+using ElProjectGrande.Models.ExceptionModels;
 using ElProjectGrande.Models.UserModels;
 using ElProjectGrande.Services.AnswerServices.Factory;
 using ElProjectGrande.Services.AnswerServices.Repository;
@@ -86,23 +87,23 @@ app.UseExceptionHandler(appBuilder =>
         {
             case UnauthorizedAccessException:
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                await context.Response.WriteAsJsonAsync(new Error{Message = exceptionHandlerPathFeature.Error.Message});
                 break;
             case NotFoundException:
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                await context.Response.WriteAsJsonAsync(new Error{Message = exceptionHandlerPathFeature.Error.Message});
                 break;
             case BadRequestException:
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                await context.Response.WriteAsJsonAsync(new Error{Message = exceptionHandlerPathFeature.Error.Message});
                 break;
             case ForbiddenException:
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                await context.Response.WriteAsJsonAsync(exceptionHandlerPathFeature.Error.Message);
+                await context.Response.WriteAsJsonAsync(new Error{Message = exceptionHandlerPathFeature.Error.Message});
                 break;
             default:
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                await context.Response.WriteAsJsonAsync("Something went wrong.");
+                await context.Response.WriteAsJsonAsync(new Error{Message = "Something went wrong."});
                 break;
         }
     });

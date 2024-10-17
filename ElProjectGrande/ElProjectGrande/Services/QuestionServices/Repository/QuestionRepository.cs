@@ -16,29 +16,11 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
         return await context.Questions.FirstOrDefaultAsync(q => q.Id == id) != null;
     }
 
-    public IEnumerable<QuestionDTO> GetQuestions()
-    {
-        return context.Questions
-            .Include(q => q.User)
-            .Include(q => q.Answers)
-            .Include(q => q.Tags)
-            .ThenInclude(t => t.Questions)
-            .Select(q => q.ToDTO());
-    }
-
     public Task<Question?> GetQuestionById(Guid id)
     {
         return context.Questions
             .Include(q => q.User)
             .Include(q => q.Answers)
-            .Include(q => q.Tags)
-            .FirstOrDefaultAsync(q => q.Id == id);
-    }
-
-    public Task<Question?> GetQuestionByIdWithoutAnswers(Guid id)
-    {
-        return context.Questions
-            .Include(q => q.User)
             .Include(q => q.Tags)
             .FirstOrDefaultAsync(q => q.Id == id);
     }

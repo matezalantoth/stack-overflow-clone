@@ -20,7 +20,7 @@ public class AnswersController(
     ITokenService tokenService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AnswersOfQuestionDTO>>> GetAllAnswersForQuestion(Guid questionId)
+    public async Task<ActionResult<IEnumerable<AnswerDTO>>> GetAllAnswersForQuestion(Guid questionId)
     {
         if (!await questionRepository.CheckIfQuestionExists(questionId)) throw new NotFoundException($"Question of id {questionId} could not be found");
         return Ok(answerRepository.GetAllAnswersByQuestionId(questionId));
@@ -62,7 +62,7 @@ public class AnswersController(
 
     [HttpPut("{id:guid}")]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult<AnswersOfQuestionDTO>> UpdateAnswer(
+    public async Task<ActionResult<AnswerDTO>> UpdateAnswer(
         [FromHeader(Name = "Authorization")] string sessionToken,
         Guid id, [FromBody] string newContent)
     {

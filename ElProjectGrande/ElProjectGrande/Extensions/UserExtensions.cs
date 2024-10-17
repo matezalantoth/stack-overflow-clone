@@ -1,5 +1,6 @@
 using ElProjectGrande.Models;
 using ElProjectGrande.Models.UserModels;
+using ElProjectGrande.Models.UserModels.DTOs;
 using UserDTO = ElProjectGrande.Models.UserModels.DTOs.UserDTO;
 
 namespace ElProjectGrande.Extensions;
@@ -26,8 +27,18 @@ public static class UserExtensions
             UserName = user.UserName, Name = user.Name, SessionToken = user.SessionToken,
             Answers = user.Answers.Select(answer => answer.ToDTO()).ToList(),
             Email = user.Email, Questions = user.Questions.Select(question => question.ToDTO()).ToList(),
-            Karma = user.Karma, Upvotes = upvotes, Downvotes = downvotes, MutedFor = user.MutedFor, Muted = user.Muted,
+            Karma = user.Karma, Upvotes = upvotes, Downvotes = downvotes, MutedUntil = user.MutedUntil, Muted = user.Muted,
             Banned = user.Banned,
+        };
+    }
+
+    public static PublicUserDTO ToPublicDTO(this User user)
+    {
+        return new PublicUserDTO
+        {
+            UserName = user.UserName, Karma = user.Karma, Answers = user.Answers.Select(a => a.ToDTO()).ToList(),
+            Questions = user.Questions.Select(q => q.ToDTO()).ToList(), MutedUntil = user.MutedUntil, Muted = user.Muted,
+            Banned = user.Banned
         };
     }
 }

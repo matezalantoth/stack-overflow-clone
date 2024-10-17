@@ -9,7 +9,7 @@ namespace ElProjectGrande.Services.AuthenticationServices.TokenService;
 
 public class TokenService : ITokenService
 {
-    private const int ExpirationMinutes = 1440;
+    private const int ExpirationMinutes = 30;
 
     public string CreateToken(IdentityUser user, string role)
     {

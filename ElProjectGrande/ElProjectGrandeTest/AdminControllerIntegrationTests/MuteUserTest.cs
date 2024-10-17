@@ -30,7 +30,7 @@ public class MuteUserTest(ITestOutputHelper outputHelper) : Tester(outputHelper)
         var mutedUser = await getRes.Content.ReadFromJsonAsync<UserDTO>();
         Assert.NotNull(mutedUser);
         Assert.True(mutedUser.Muted);
-        Assert.Equal(30, mutedUser.MutedFor);
+        Assert.True(DateTime.Now < mutedUser.MutedUntil);
     }
 
     [Fact]
@@ -50,16 +50,20 @@ public class MuteUserTest(ITestOutputHelper outputHelper) : Tester(outputHelper)
         var muteRes = await AHelper.MuteUser("matezalantoth", token);
         muteRes.EnsureSuccessStatusCode();
 
+        var getRes = await UHelper.GetUserByUsername("matezalantoth");
+        getRes.EnsureSuccessStatusCode();
+        var mutedUser = await getRes.Content.ReadFromJsonAsync<UserDTO>();
+        Assert.NotNull(mutedUser);
+
         var secondMuteRes = await AHelper.MuteUser("matezalantoth", token);
         secondMuteRes.EnsureSuccessStatusCode();
 
-        var getRes = await UHelper.GetUserByUsername("matezalantoth");
-        getRes.EnsureSuccessStatusCode();
-
-        var mutedUser = await getRes.Content.ReadFromJsonAsync<UserDTO>();
-        Assert.NotNull(mutedUser);
-        Assert.True(mutedUser.Muted);
-        Assert.Equal(60, mutedUser.MutedFor);
+        var getRes2 = await UHelper.GetUserByUsername("matezalantoth");
+        getRes2.EnsureSuccessStatusCode();
+        var mutedUser2 = await getRes2.Content.ReadFromJsonAsync<UserDTO>();
+        Assert.NotNull(mutedUser2);
+        Assert.True(mutedUser2.Muted);
+        Assert.True(mutedUser2.MutedUntil > mutedUser.MutedUntil);
     }
 
     [Fact]
