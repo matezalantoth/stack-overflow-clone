@@ -8,11 +8,13 @@ export default function AskQuestion() {
     const [cookies] = useCookies(['user']);
     const navigate = useNavigate();
     const [question, setQuestion] = useState({});
+    const [searching, setSearching] = useState('Tags');
     const [submittable, setSubmittable] = useState(false);
     const showErrorToast = (message) => toast.error(message);
     const showSuccessToast = (message) => toast.success(message);
     const [searchResults, setSearchResults] = useState([]);
     const [searchBar, setSearchBar] = useState(null);
+    const [searchData, setSearchData] = useState([]);
 
     useEffect(() => {
         if (
@@ -45,6 +47,35 @@ export default function AskQuestion() {
         });
         return await res.json();
     }
+
+    useEffect(() => {
+        let url = "/api/Tags/search/"
+            if(searchBar){
+                url += searchBar;
+            } else {
+                setSearchData(() => []);
+                setSearchResults(() => []);
+            }
+
+        const fetchUrl = async () => {
+            const res = await fetch(url, {
+                headers: {
+                    'Authorization': "Bearer " + cookies.user
+                }
+            });
+            const data = await res.json();
+            setSearchData(() => data);
+        }
+        fetchUrl();
+    }, [searchBar]);
+
+    useEffect(() => {
+        if (searchData.length > 0) {
+            setSearchResults(() => searchData.map(t => {
+                return {value: t.tagName, id: t.id}
+            }));
+        }
+    }, [searchData]);
 
 
     return (
