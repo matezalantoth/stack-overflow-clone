@@ -1,7 +1,8 @@
 import {useNavigate} from "react-router-dom";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {toast} from "react-hot-toast";
 import {useCookies} from "react-cookie";
+import ResultInteractionComponent from "../Admin/ResultInteractionComponent.jsx";
 
 export default function AskQuestion() {
     const [cookies] = useCookies(['user']);
@@ -10,6 +11,8 @@ export default function AskQuestion() {
     const [submittable, setSubmittable] = useState(false);
     const showErrorToast = (message) => toast.error(message);
     const showSuccessToast = (message) => toast.success(message);
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchBar, setSearchBar] = useState(null);
 
     useEffect(() => {
         if (
@@ -77,6 +80,33 @@ export default function AskQuestion() {
                             placeholder="Provide more details about your question"
                             className="border border-gray-300 rounded-lg px-4 py-2 h-32 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         ></textarea>
+                    </div>
+
+                    <div className="flex flex-col">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Please enter any tags, max 5
+                        </label>
+                        <input
+                            onChange={(event) => setSearchBar(() => event.target.value === "" ? null : event.target.value)}
+                            placeholder='Search...'
+                            className="border border-gray-300 rounded-lg px-4 py-2 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        ></input>
+                        {searchResults.length > 0 ?
+                            <ul>
+                                {searchResults.map((u, i) => {
+                                    return <>
+                                        <li className="p-2 border-b-2 border-gray-200"
+                                            key={i}>
+                                            <div className="w-4/5 inline-block">
+                                                <div className="truncate">{u.value}</div>
+
+                                            </div>
+                                            <ResultInteractionComponent
+                                                searchModel={searching} id={u.id}/>
+                                        </li>
+                                    </>;
+                                })}
+                            </ul> : <></>}
                     </div>
 
                     <button
