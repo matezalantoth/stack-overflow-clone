@@ -32,7 +32,7 @@
     depends_on:
       - db-setup-migrate
     ports:
-      - "8080:80"
+      - "8080:8080"
     env_file:
       - ./ElProjectGrande/.env
     volumes:

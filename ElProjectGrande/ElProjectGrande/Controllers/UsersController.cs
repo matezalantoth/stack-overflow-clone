@@ -103,13 +103,17 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
 
     [HttpPost("VerifyUser")]
     [Authorize(Roles = "User")]
-    public async Task<ActionResult<VerifyUserDTO>> VerifyUser([FromHeader(Name = "Authorization")] string sessionToken, [FromBody] string password)
+    public async Task<ActionResult<VerifyUserDTO>> VerifyUser([FromHeader(Name = "Authorization")] string sessionToken,
+        [FromBody] string password)
     {
         sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
         var user = await userRepository.GetUserBySessionToken(sessionToken) ?? throw new NotFoundException();
 
-        return Ok( new VerifyUserDTO{Email = user.Email?? throw new Exception(), Verified = await userRepository.VerifyUser(user, password)});
-
+        return Ok(new VerifyUserDTO
+        {
+            Email = user.Email ?? throw new Exception(), Verified = await userRepository.VerifyUser(user, password)
+        });
+    }
 
     [HttpGet("/ping")]
     [Authorize(Roles = "Admin, User")]
