@@ -112,7 +112,7 @@ public class AnswersController(
             answerRepository.VoteAnswer(answer, unVote);
             await userRepository.UpdateKarma(answerUser, unVote);
 
-            return Ok("Unvoted answer");
+            return Content("\"Unvoted answer\"", "application/json");
         }
 
         if (user.Downvotes.Contains(answer.Id))
@@ -123,7 +123,7 @@ public class AnswersController(
             await userRepository.UpdateKarma(answerUser, reVote);
             await userRepository.Upvote(user, answer.Id);
 
-            return Ok("Upvoted answer");
+            return Content("\"Upvoted answer\"", "application/json");
         }
 
         var vote = 1;
@@ -131,7 +131,7 @@ public class AnswersController(
         await userRepository.UpdateKarma(answerUser, vote);
         await userRepository.Upvote(user, answer.Id);
 
-        return Ok("Upvoted answer");
+        return Content("\"Upvoted answer\"", "application/json");
     }
 
     [HttpPatch("{id:guid}/downvote")]
@@ -153,7 +153,7 @@ public class AnswersController(
             answerRepository.VoteAnswer(answer, unVote);
             await userRepository.UpdateKarma(answerUser, unVote);
 
-            return Ok("Unvoted answer");
+            return Content("\"Unvoted answer\"", "application/json");
         }
 
         if (user.Upvotes.Contains(answer.Id))
@@ -163,7 +163,7 @@ public class AnswersController(
             answerRepository.VoteAnswer(answer, reVote);
             await userRepository.UpdateKarma(answerUser, reVote);
             await userRepository.Downvote(user, answer.Id);
-            return Ok("Downvoted answer");
+            return Content("\"Downvoted answer\"", "application/json");
         }
 
         var vote = -1;
@@ -171,7 +171,7 @@ public class AnswersController(
         await userRepository.UpdateKarma(answerUser, vote);
         await userRepository.Downvote(user, answer.Id);
 
-        return Ok("Downvoted answer");
+        return Content("\"Downvote answer\"", "application/json");
     }
 
     [HttpGet("question/{id}")]

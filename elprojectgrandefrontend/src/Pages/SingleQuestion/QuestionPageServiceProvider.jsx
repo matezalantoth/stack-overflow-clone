@@ -83,11 +83,14 @@ export const sendUpvote = async (id, cookies) => {
             Authorization: "Bearer " + cookies.user
         }
     })
-    const data = await res.json();
+    let data;
+    data = await res.json();
     if (data.message) {
         toast.error(data.message);
         throw new Error();
     }
+
+
 }
 
 
@@ -99,10 +102,10 @@ export const sendDownvote = async (id, cookies) => {
             Authorization: "Bearer " + cookies.user
         }
     })
-    const data = await res.json();
+    let data;
+    data = await res.json();
     if (data.message) {
         toast.error(data.message);
-        throw new Error();
     }
 }
 

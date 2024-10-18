@@ -1,51 +1,48 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {useCookies} from "react-cookie";
-import {Link, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import Verify from "../../components/Verify/Verify.jsx";
 
-export default function UpdateProfile ({setUserLoginCookies})
-{
-    const [userDetails, setUserDetails] = useState({ email: '', password: '' });
+export default function UpdateProfile({setUserLoginCookies}) {
+    const [userDetails, setUserDetails] = useState({email: '', password: ''});
     const [statusMessage, setStatusMessage] = useState('');
     const [cookies] = useCookies(['user'])
     const navigate = useNavigate();
-    
-    const[verified, setVerified] = useState(false)
-    
-    
-    
-    
+
+    const [verified, setVerified] = useState(false)
+
+
     const handleUpdate = async (e) => {
-    e.preventDefault();
-    
-    const updateProfileRequest = {
-        email: userDetails.email,
-        password: userDetails.password,
-    };
-    
-    try {
-        const response = await fetch(`http://localhost:5212/Users/update-profile`,{
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': "Bearer " + cookies.user
-            },
-            body: JSON.stringify(updateProfileRequest),
-        });
-        if (response.ok) {
-            setStatusMessage('Profile updated Successfully')
-        } else {
-            const errorData = await response.json();
-            setStatusMessage(`Error: ${errorData.message}`);
+        e.preventDefault();
+
+        const updateProfileRequest = {
+            email: userDetails.email,
+            password: userDetails.password,
+        };
+
+        try {
+            const response = await fetch(`/api/Users/update-profile`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': "Bearer " + cookies.user
+                },
+                body: JSON.stringify(updateProfileRequest),
+            });
+            if (response.ok) {
+                setStatusMessage('Profile updated Successfully')
+            } else {
+                const errorData = await response.json();
+                setStatusMessage(`Error: ${errorData.message}`);
+            }
+        } catch (error) {
+            console.error(error);
+            setStatusMessage('An error occurred. Please try again.');
         }
-    } catch (error) {
-        console.error(error);
-        setStatusMessage('An error occurred. Please try again.');
-    }
-    
-    
-};
-    
+
+
+    };
+
 
     return verified ? (
 
@@ -98,8 +95,8 @@ export default function UpdateProfile ({setUserLoginCookies})
                     </form>
                 </div>
             </div>
-        
-) :
-    <Verify setDetails={setUserDetails}
-            setVerified={setVerified}/>
+
+        ) :
+        <Verify setDetails={setUserDetails}
+                setVerified={setVerified}/>
 }

@@ -1,35 +1,29 @@
 import {useState} from "react";
 import {useCookies} from "react-cookie";
-import {Link, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
-export default function Verify ({setDetails, setVerified})
-{
-    const[userDetails, setUserDetails] = useState(null);
+export default function Verify({setDetails, setVerified}) {
+    const [userDetails, setUserDetails] = useState(null);
     const [cookies] = useCookies(['user'])
     const navigate = useNavigate()
-    const handleVerify = async (e) =>
-    {
+    const handleVerify = async (e) => {
         e.preventDefault();
-        
-        
-        
-            const response = await fetch('http://localhost:5212/Users/VerifyUser', {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json',
-                    'Authorization': "Bearer " + cookies.user
-                },
-                body: JSON.stringify(userDetails),
-            });
-            return await response.json();
-                
-        
-        
+
+
+        const response = await fetch('/api/Users/VerifyUser', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json',
+                'Authorization': "Bearer " + cookies.user
+            },
+            body: JSON.stringify(userDetails),
+        });
+        return await response.json();
+
+
     };
-    
-    
-    
-    
+
+
     return (
 
         <div className='relative flex justify-center top-48'>
@@ -72,8 +66,7 @@ export default function Verify ({setDetails, setVerified})
                 </form>
             </div>
         </div>
-        
-   
 
-)
+
+    )
 }

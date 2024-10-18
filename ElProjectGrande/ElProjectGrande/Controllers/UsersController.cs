@@ -84,11 +84,8 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     {
         sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
 
-        var user = await userRepository.GetUserBySessionToken(sessionToken);
-        if (user == null)
-        {
-            throw new NotFoundException("User could not be found");
-        }
+        var user = await userRepository.GetUserBySessionToken(sessionToken) ??  throw new NotFoundException("User could not be found");
+
 
         if (!string.IsNullOrEmpty(updateProfileRequest.Email))
         {
