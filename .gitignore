@@ -2,6 +2,7 @@
 /obj
 /bin
 /Migrations
+/Backend/BackendServer/bin
 
 ../.idea
 obj
