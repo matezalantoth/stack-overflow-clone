@@ -1,1 +1,9 @@
+.env
+/obj
+/bin
+/Migrations
 
+../.idea
+obj
+/.env
+../.env
