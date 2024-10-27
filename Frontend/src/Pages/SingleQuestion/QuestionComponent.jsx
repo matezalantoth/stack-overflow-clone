@@ -16,18 +16,22 @@ export default function QuestionComponent({
     const [cookies] = useCookies(['user']);
 
     const deleteQuestion = async (id) => {
-        const res = await fetch('/api/questions/' + id, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': "Bearer " + cookies.user
+        try {
+            const res = await fetch('/api/questions/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': "Bearer " + cookies.user
+                }
+            })
+            const data = await res.json()
+            if (data.message) {
+                toast.error(data.message);
             }
-        })
-        const data = await res.json()
-        if (data.message) {
-            toast.error(data.message);
-            return;
+        } catch (e) {
+            console.error(e);
+            navigate('/');
         }
-        navigate('/');
+
     }
 
 

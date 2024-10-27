@@ -25,9 +25,6 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
 
-      - name: List Files within ElProjectGrande sln
-        run: cd ElProjectGrande && ls
-
       # Step 3: Restore dependencies for the entire solution
       - name: Restore Dependencies
         run: dotnet restore ./BackendServer/BackendServer.sln

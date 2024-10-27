@@ -30,18 +30,21 @@ export const AnswerComponent = ({
     const [renderForm, setRenderForm] = useState(editingAnswerId === answer.id);
 
     const deleteAnswer = async (id) => {
-        const res = await fetch("/api/answers/" + id, {
-            method: "DELETE",
-            headers: {
-                "Authorization": "Bearer " + cookies.user
+        try {
+            const res = await fetch("/api/answers/" + id, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": "Bearer " + cookies.user
+                }
+            })
+            const data = await res.json();
+            if (data.message) {
+                showErrorToast(data.message);
             }
-        })
-        const data = await res.json();
-        if (data.message) {
-            showErrorToast(data.message);
-            return;
+        } catch (e) {
+            console.error(e);
+            setAnswers(prevAnswers => prevAnswers.filter(answer => answer.id !== id));
         }
-        setAnswers(prevAnswers => prevAnswers.filter(answer => answer.id !== id));
     }
 
     return editingAnswerId === answer.id || renderForm ?
