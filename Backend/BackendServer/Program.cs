@@ -98,18 +98,11 @@ app.UseExceptionHandler(appBuilder =>
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
-try
-{
-    var context = services.GetRequiredService<ApiDbContext>();
-    context.Database.Migrate();
-    Console.WriteLine("Database migrated successfully.");
-    var authenticationSeeder = services.GetRequiredService<AuthenticationSeeder>();
-    authenticationSeeder.SeedRoles();
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"An error occurred while migrating the database: {ex.Message}");
-}
+
+var context = services.GetRequiredService<ApiDbContext>();
+if (context.Database.IsRelational()) context.Database.Migrate();
+var authenticationSeeder = services.GetRequiredService<AuthenticationSeeder>();
+authenticationSeeder.SeedRoles();
 
 
 // Configure the HTTP request pipeline.
@@ -201,4 +194,8 @@ void AddSwaggerGen()
             }
         });
     });
+}
+
+public partial class Program
+{
 }

@@ -1,4 +1,3 @@
-
 using BackendServer.Exceptions;
 using BackendServer.Extensions;
 using BackendServer.Models;
@@ -20,8 +19,8 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     [HttpPost("signup")]
     public async Task<ActionResult<UserDTO>> CreateUserAndLogin([FromBody] NewUser newUser)
     {
-        if (!ModelState.IsValid) throw new Exception();
-        if (await userRepository.AreCredentialsTaken(newUser.Email, newUser.UserName)) throw new BadRequestException("Some of your credentials are invalid");
+        if (await userRepository.AreCredentialsTaken(newUser.Email, newUser.UserName))
+            throw new BadRequestException("Some of your credentials are invalid");
         var user = userFactory.CreateUser(newUser);
         await userRepository.CreateUser(user, newUser.Password, "User");
         user.SessionToken = await userRepository.LoginUser(newUser.Email, newUser.Password);
@@ -31,7 +30,6 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     [HttpPost("login")]
     public async Task<ActionResult<string>> Login([FromBody] LoginCredentials loginCredentials)
     {
-        if (!ModelState.IsValid) throw new Exception();
         var token = await userRepository.LoginUser(loginCredentials.Email, loginCredentials.Password);
         return Content($"\"{token}\"", "application/json");
     }
@@ -77,25 +75,22 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
         return Ok(userRepository.IsUserAdmin(user));
     }
 
-    [Authorize (Roles = "User")]
+    [Authorize(Roles = "User")]
     [HttpPatch("update-profile")]
-
     public async Task<ActionResult> UpdateProfile([FromBody] UpdateProfileRequest updateProfileRequest,
         [FromHeader(Name = "Authorization")] string sessionToken)
     {
         sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
 
-        var user = await userRepository.GetUserBySessionToken(sessionToken) ??  throw new NotFoundException("User could not be found");
+        var user = await userRepository.GetUserBySessionToken(sessionToken) ??
+                   throw new NotFoundException("User could not be found");
 
 
-        if (!string.IsNullOrEmpty(updateProfileRequest.Email))
-        {
-            user.Email = updateProfileRequest.Email;
-        }
+        if (!string.IsNullOrEmpty(updateProfileRequest.Email)) user.Email = updateProfileRequest.Email;
 
-        
-        
-        await userRepository.UpdateUser(user, string.IsNullOrEmpty(updateProfileRequest.Password)?null: updateProfileRequest.Password);
+
+        await userRepository.UpdateUser(user,
+            string.IsNullOrEmpty(updateProfileRequest.Password) ? null : updateProfileRequest.Password);
         return Ok("Profile updated successfully");
     }
 
