@@ -26,7 +26,7 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
 
       - name: Check File Structure
-        run: ls /Backend
+        run: ls Backend
 
       # Step 3: Restore dependencies for the entire solution
       - name: Restore Dependencies
