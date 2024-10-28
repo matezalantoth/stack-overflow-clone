@@ -30,7 +30,7 @@ jobs:
 
       # Step 3: Restore dependencies for the entire solution
       - name: Restore Dependencies
-        run: dotnet restore Backend/BackendServer/BackendServer.sln
+        run: dotnet restore Backend/Backend.sln
 
       # Step 4: Build the backend project in Debug mode
       - name: Build Backend Project
