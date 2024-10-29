@@ -59,7 +59,7 @@ export default function UpdateProfile({setUserLoginCookies}) {
                                     setUserDetails({...userDetails, email: event.target.value});
                                 }}
                                 type='email'
-                                className='bg-gray-50 border border-gray-300  text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 text-white'
+                                className='bg-gray-50 border border-gray-300  text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 '
                                 defaultValue={userDetails.email}
                                 required
                             />
@@ -77,7 +77,7 @@ export default function UpdateProfile({setUserLoginCookies}) {
                                 }}
                                 type='password'
                                 placeholder='••••••••'
-                                className='bg-gray-50 border border-gray-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 '
+                                className='bg-gray-50 border border-gray-300  text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 '
                                 required
                             />
                         </div>
