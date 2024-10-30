@@ -3,8 +3,13 @@ import Tag from "../../components/Tag/Tag.jsx";
 import {useNavigate, useParams} from "react-router-dom";
 import {useCookies} from "react-cookie";
 import {toast} from "react-hot-toast";
+import QuestionComponent from "../SingleQuestion/QuestionComponent.jsx";
+import {QuestionsComponent} from "../WelcomePage/QuestionsComponent.jsx";
+import {CheckIfSessionExpired} from "../../CheckIfSessionExpired.jsx";
+import TagComponent from "./TagComponent.jsx";
+import TagForm from "./TagForm.jsx";
 
-export default function TagPage() {
+export default function TagPage({setUserLoginCookies}) {
     const navigate = useNavigate();
     const [cookies] = useCookies(['user']);
     const {tagId} = useParams();
@@ -27,6 +32,10 @@ export default function TagPage() {
                     }
                 });
                 const data = await res.json();
+                if (data.message) {
+                    showErrorToast(data.message);
+                    return;
+                }
                 setTagData(() => data);
             } catch (error) {
                 console.log(error);
@@ -37,7 +46,12 @@ export default function TagPage() {
                 const res = await fetch('/api/Users/GetBySessionToken', {
                     headers: {'Authorization': "Bearer " + cookies.user}
                 })
-                setUser(await res.json());
+                const data = await res.json();
+                if (data.message) {
+                    showErrorToast(data.message);
+                    return;
+                }
+                setUser(data);
             } catch (e) {
                 console.log(e);
                 showErrorToast("Something went wrong")
@@ -50,6 +64,10 @@ export default function TagPage() {
             })
 
             const data = await res.json();
+            if (data.message) {
+                showErrorToast(data.message);
+                return;
+            }
             setIsAdmin(data);
         }
         checkIfAdmin();
@@ -68,31 +86,12 @@ export default function TagPage() {
         }
     }, [isAdmin])
 
-    return (
-        <div className>
-            <div className="text-center">
-                <h1>{tagData.tagName}</h1>
-                <label>{tagData.description}</label>
-            </div>
-            <div
-                className="text-center w-120 flex justify-center items-center flex-col mt-4">
-                {tagData.questions.map((question) => (
-                    <div
-                        className='relative h-20 text-black border-b-2 border-l-2 rounded hover:bg-gray-100 transition w-120 overflow-hidden'
-                    >
-                        <h2 className='text-blue-700 cursor-pointer ml-2 break-words' onClick={() => {
-                            navigate(`/question/${question.id}`);
-                        }}>{question.title}</h2>
-                        <p className='text-xs line-clamp-3 text-gray-600 leading-4 break-words ml-2'>{question.content}</p>
-                        <div className="flex flex-row gap-3 justify-center">
-                            {question.tags.map((tag) => {
-                                return (<Tag key={tag} tag={tag}/>)
-                            })}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
+    CheckIfSessionExpired(setUserLoginCookies);
+
+    return tagData && (<div> {
+        renderForm ? <TagForm tag={tagData} setTag={setTagData} setRenderForm={setRenderForm}/> :
+        <TagComponent tag={tagData} setTag={setTagData} isAdmin={isAdmin} user={user} renderForm={renderForm} setRenderForm={setRenderForm}/>}
+    </div>
     );
 }
 

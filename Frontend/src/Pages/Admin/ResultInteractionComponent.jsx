@@ -2,6 +2,7 @@ import {useState} from "react";
 import {UserResultsComponent} from "./UserResultsComponent.jsx";
 import {QuestionResultsComponent} from "./QuestionResultsComponent.jsx";
 import {AnswerResultsComponent} from "./AnswerResultsComponent.jsx";
+import TagResultComponent from "./TagResultComponent.jsx";
 
 export default function ResultInteractionComponent({searchModel, id, setSearchResults}) {
 
@@ -24,10 +25,7 @@ export default function ResultInteractionComponent({searchModel, id, setSearchRe
         case 'Questions':
             return <QuestionResultsComponent id={id} setSearchResults={setSearchResults}/>
         case 'Tags':
-            return (<>
-                <button className="text-red-500" title="Delete" onClick={() => deleteTag(id)}><FontAwesomeIcon
-                    icon={faX}/></button>
-            </>)
+            return <TagResultComponent id={id} setSearchResults={setSearchResults}/>
         case 'Users':
             return <UserResultsComponent selected={selected} setSelected={setSelected} username={id}/>
 

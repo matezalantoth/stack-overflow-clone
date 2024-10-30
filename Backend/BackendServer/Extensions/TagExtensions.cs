@@ -12,4 +12,12 @@ public static class TagExtensions
             TagName = tag.TagName, Id = tag.Id, Description = tag.Description
         };
     }
+    
+    public static TagWithQuestionsDTO IncludeQuestionsToDTO(this Tag tag)
+    {
+        return new TagWithQuestionsDTO
+        {
+            TagName = tag.TagName, Id = tag.Id, Description = tag.Description, Questions = tag.Questions.Select(q => q.ToDTO()).ToList()
+        };
+    }
 }

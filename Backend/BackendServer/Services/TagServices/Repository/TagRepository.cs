@@ -24,6 +24,7 @@ public class TagRepository(ApiDbContext context) : ITagRepository
     {
         return context.Tags
             .Include(t => t.Questions)
+            .ThenInclude(q => q.User)
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 

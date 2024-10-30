@@ -16,7 +16,7 @@ export const QuestionsComponent = ({questions}) => {
                 <p className='text-xs line-clamp-3 text-gray-600 leading-4 break-words ml-2'>{question.content}</p>
                 <div className={"flex flex-row gap-3 justify-center"}>
                     {question.tags.map((tag) => {
-                        return (<Tag key={tag} tag={tag}/>)
+                        return (<Tag key={tag.id} tag={tag}/>)
                     })}
                 </div>
             </div>)

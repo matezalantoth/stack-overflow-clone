@@ -22,12 +22,12 @@ public class TagsController(ITagFactory tagFactory ,ITagRepository tagRepository
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TagDTO>> GetTagById(Guid id)
+    public async Task<ActionResult<TagWithQuestionsDTO>> GetTagById(Guid id)
     {
         var tag = await tagRepository.GetTagById(id);
         if (tag == null) throw new NotFoundException($"Tag could not be found");
 
-        return Ok(tag.ToDTO());
+        return Ok(tag.IncludeQuestionsToDTO());
     }
 
     [HttpPost, Authorize(Roles = "Admin")]
