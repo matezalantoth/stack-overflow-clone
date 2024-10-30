@@ -50,7 +50,7 @@ export default function App() {
                                element={<SignupPage setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path="/login"
                                element={<LoginPage setUserLoginCookies={setUserLoginCookies}/>}/>
-                        <Route path="/askquestion" element={<AskQuestion setUserLoginCookies={setUserLoginCookies}/>}/>
+                        <Route path="/askquestion" element={<AskQuestion setUserLoginCookies={setUserLoginCookies} setTags={setTags} tags={tags} />}/>
                         <Route path="/profile" element={<ProfilePage setUserLoginCookies={setUserLoginCookies}/>}/>
                         <Route path='/EditPage'
                                element={<UpdateProfile cookies={cookies} setUserLoginCookies={setUserLoginCookies}/>}/>

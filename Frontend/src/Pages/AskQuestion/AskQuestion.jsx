@@ -3,19 +3,18 @@ import React, {useEffect, useState} from "react";
 import {toast} from "react-hot-toast";
 import {useCookies} from "react-cookie";
 import {CheckIfSessionExpired} from "../../CheckIfSessionExpired.jsx";
-import ResultInteractionComponent from "../Admin/ResultInteractionComponent.jsx";
 
-export default function AskQuestion({setUserLoginCookies}) {
+import { MultiSelect } from "react-multi-select-component";
+
+export default function AskQuestion({setUserLoginCookies, tags, setTags}) {
     const [cookies] = useCookies(['user']);
     const navigate = useNavigate();
     const [question, setQuestion] = useState({});
-    const [searching, setSearching] = useState('Tags');
     const [submittable, setSubmittable] = useState(false);
     const showErrorToast = (message) => toast.error(message);
     const showSuccessToast = (message) => toast.success(message);
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchBar, setSearchBar] = useState(null);
-    const [searchData, setSearchData] = useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
+    const options = [];
 
     useEffect(() => {
         if (
@@ -33,6 +32,8 @@ export default function AskQuestion({setUserLoginCookies}) {
     }, [cookies])
 
     const createQuestion = async () => {
+        let tagsForQuestion = [];
+        selectedTags.forEach(tag => tagsForQuestion.push( { tagName: tag.label } ));
         const res = await fetch('/api/Questions', {
             method: 'POST',
             headers: {
@@ -43,12 +44,32 @@ export default function AskQuestion({setUserLoginCookies}) {
             body: JSON.stringify({
                 ...question,
                 sessionToken: cookies.user,
-                postedAt: new Date(Date.now()).toISOString()
+                postedAt: new Date(Date.now()).toISOString(),
+                tags: tagsForQuestion,
             }),
         });
         return await res.json();
     }
 
+    const getTags = async () => {
+        const res = await fetch('/api/Tags', {
+            method: 'GET'
+        });
+        const data = await res.json();
+        if (data.message) {
+            toast.error(data.message);
+            return;
+        }
+        setTags(() => data);
+    }
+
+    tags.map((tag) => {
+        options.push( { label: tag.tagName, value: tag.tagName } );
+    });
+
+    useEffect(() => {
+        getTags();
+    }, []);
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -63,35 +84,6 @@ export default function AskQuestion({setUserLoginCookies}) {
     }
 
     CheckIfSessionExpired(setUserLoginCookies);
-
-    useEffect(() => {
-        let url = "/api/Tags/search/"
-            if(searchBar){
-                url += searchBar;
-            } else {
-                setSearchData(() => []);
-                setSearchResults(() => []);
-            }
-
-        const fetchUrl = async () => {
-            const res = await fetch(url, {
-                headers: {
-                    'Authorization': "Bearer " + cookies.user
-                }
-            });
-            const data = await res.json();
-            setSearchData(() => data);
-        }
-        fetchUrl();
-    }, [searchBar]);
-
-    useEffect(() => {
-        if (searchData.length > 0) {
-            setSearchResults(() => searchData.map(t => {
-                return {value: t.tagName, id: t.id}
-            }));
-        }
-    }, [searchData]);
 
 
     return (
@@ -128,32 +120,17 @@ export default function AskQuestion({setUserLoginCookies}) {
                             className="border border-gray-300 rounded-lg px-4 py-2 h-32 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         ></textarea>
                     </div>
-
                     <div className="flex flex-col">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Please enter any tags, max 5
                         </label>
-                        <input
-                            onChange={(event) => setSearchBar(() => event.target.value === "" ? null : event.target.value)}
-                            placeholder='Search...'
-                            className="border border-gray-300 rounded-lg px-4 py-2 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        ></input>
-                        {searchResults.length > 0 ?
-                            <ul>
-                                {searchResults.map((u, i) => {
-                                    return <>
-                                        <li className="p-2 border-b-2 border-gray-200"
-                                            key={i}>
-                                            <div className="w-4/5 inline-block">
-                                                <div className="truncate">{u.value}</div>
-
-                                            </div>
-                                            <ResultInteractionComponent
-                                                searchModel={searching} id={u.id}/>
-                                        </li>
-                                    </>;
-                                })}
-                            </ul> : <></>}
+                        <MultiSelect
+                            options={options}
+                            value={selectedTags}
+                            onChange={setSelectedTags}
+                            labelledBy="Select"
+                            hasSelectAll={false}>
+                        </MultiSelect>
                     </div>
 
                     <button
