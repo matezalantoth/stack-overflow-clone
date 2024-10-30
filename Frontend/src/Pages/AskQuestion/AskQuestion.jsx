@@ -63,7 +63,7 @@ export default function AskQuestion({setUserLoginCookies, tags, setTags}) {
         setTags(() => data);
     }
 
-    tags.map((tag) => {
+    tags.forEach((tag) => {
         options.push( { label: tag.tagName, value: tag.tagName } );
     });
 
@@ -129,8 +129,15 @@ export default function AskQuestion({setUserLoginCookies, tags, setTags}) {
                             value={selectedTags}
                             onChange={setSelectedTags}
                             labelledBy="Select"
-                            hasSelectAll={false}>
+                            hasSelectAll={false}
+                            disabled={selectedTags.length >= 5}
+                            >
                         </MultiSelect>
+                        <button
+                        onClick={(event) => {
+                            event.preventDefault();
+                            setSelectedTags([])}}
+                        >reset tags</button>
                     </div>
 
                     <button
