@@ -99,7 +99,6 @@ public class UserControllerIntegrationTest(ITestOutputHelper outputHelper) : Tes
         });
     }
 
-    //May need to change dto, if changes are made to the controller
     [Fact]
     public async Task GetUserWithUsername()
     {

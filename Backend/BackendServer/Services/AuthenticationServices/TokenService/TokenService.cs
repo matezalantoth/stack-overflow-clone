@@ -2,8 +2,7 @@ using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using BackendServer.Services.AuthenticationServices.TokenService;
-using Microsoft.AspNetCore.Identity;
+using BackendServer.Models.UserModels;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BackendServer.Services.AuthenticationServices.TokenService;
@@ -12,7 +11,7 @@ public class TokenService : ITokenService
 {
     private const int ExpirationMinutes = 30;
 
-    public string CreateToken(IdentityUser user, string role)
+    public string CreateToken(User user, string role)
     {
         var expiration = DateTime.UtcNow.AddMinutes(ExpirationMinutes);
         var token = CreateJwtToken(
@@ -41,7 +40,7 @@ public class TokenService : ITokenService
         );
     }
 
-    private List<Claim> CreateClaims(IdentityUser user, string? role)
+    private List<Claim> CreateClaims(User user, string? role)
     {
         try
         {
@@ -54,8 +53,13 @@ public class TokenService : ITokenService
                     ClaimValueTypes.Integer64),
                 new(ClaimTypes.NameIdentifier, user.Id),
                 new(ClaimTypes.Name, user.UserName),
-                new(ClaimTypes.Email, user.Email)
+                new(ClaimTypes.Email, user.Email),
+                new("Muted", user.Muted.ToString()),
+                new("Banned", user.Banned.ToString()),
+                new("Karma", user.Karma.ToString()),
+                new("SessionToken", user.SessionToken)
             };
+
             if (role != null) claims.Add(new Claim(ClaimTypes.Role, role));
 
             return claims;
@@ -67,18 +71,15 @@ public class TokenService : ITokenService
         }
     }
 
+
     private SigningCredentials CreateSigningCredentials()
     {
         var issuingKey = "";
         if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
-        {
             issuingKey = "xR3!m9QpT4hK8jLa!Vw6D%Zc5N2fUrT3D";
-        }
         else
-        {
             issuingKey = Environment.GetEnvironmentVariable("ISSUING_KEY") ??
                          throw new Exception("ISSUING_KEY not found");
-        }
         return new SigningCredentials(
             new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(issuingKey)

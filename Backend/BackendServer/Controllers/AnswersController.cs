@@ -1,8 +1,8 @@
+using System.Security.Claims;
 using BackendServer.Exceptions;
 using BackendServer.Models.AnswerModels.DTOs;
 using BackendServer.Services.AnswerServices.Factory;
 using BackendServer.Services.AnswerServices.Repository;
-using BackendServer.Services.AuthenticationServices.TokenService;
 using BackendServer.Services.QuestionServices.Repository;
 using BackendServer.Services.UserServices.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -16,29 +16,27 @@ public class AnswersController(
     IAnswerRepository answerRepository,
     IUserRepository userRepository,
     IQuestionRepository questionRepository,
-    IAnswerFactory answerFactory,
-    ITokenService tokenService) : ControllerBase
+    IAnswerFactory answerFactory) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AnswerDTO>>> GetAllAnswersForQuestion(Guid questionId)
     {
-        if (!await questionRepository.CheckIfQuestionExists(questionId)) throw new NotFoundException($"Question of id {questionId} could not be found");
+        if (!await questionRepository.CheckIfQuestionExists(questionId))
+            throw new NotFoundException($"Question of id {questionId} could not be found");
         return Ok(answerRepository.GetAllAnswersByQuestionId(questionId));
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult<AnswerDTO>> PostNewAnswerToQuestion(
-        [FromHeader(Name = "Authorization")] string sessionToken,
-        Guid questionId, [FromBody] NewAnswer newAnswer)
+    public async Task<ActionResult<AnswerDTO>> PostNewAnswerToQuestion(Guid questionId, [FromBody] NewAnswer newAnswer)
     {
-
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-        var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken) ?? throw new NotFoundException("This user could not be found");
-        var question = await questionRepository.GetQuestionById(questionId) ?? throw new NotFoundException("This question could not be found");
+        var username = User.FindFirstValue(ClaimTypes.Name) ?? throw new BadRequestException("This token is invalid");
+        var user = await userRepository.GetUserOnlyAnswers(username) ??
+                   throw new NotFoundException("This user could not be found");
+        var question = await questionRepository.GetQuestionById(questionId) ??
+                       throw new NotFoundException("This question could not be found");
 
         await userRepository.CheckIfUserIsMutedOrBanned(user);
-
         var answer = answerFactory.CreateAnswer(newAnswer, question, user);
         await userRepository.UpdateKarma(user, 5);
         return Ok(await answerRepository.CreateAnswer(answer, user, question));
@@ -46,31 +44,32 @@ public class AnswersController(
 
     [HttpDelete("{answerId:guid}")]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult> DeleteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
-        Guid answerId)
+    public async Task<ActionResult> DeleteAnswer(Guid answerId)
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-
-        var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken) ?? throw new NotFoundException("This user could not be foound");
-        var answer = await answerRepository.GetAnswerById(answerId) ?? throw new NotFoundException("This answer could not be found");
+        var username = User.FindFirstValue(ClaimTypes.Name) ?? throw new BadRequestException("This token is invalid");
+        var user = await userRepository.GetUserOnlyAnswers(username) ??
+                   throw new NotFoundException("This user could not be foound");
+        var answer = await answerRepository.GetAnswerById(answerId) ??
+                     throw new NotFoundException("This answer could not be found");
 
         await userRepository.CheckIfUserIsMutedOrBanned(user);
-        if (user.Id != answer.UserId && !userRepository.IsUserAdmin(user)) return Forbid();
+        if (user.Id != answer.UserId && !User.IsInRole("Admin"))
+            throw new ForbiddenException("You are not authorized to delete this answer.");
         await answerRepository.DeleteAnswer(answer, user);
         return NoContent();
     }
 
     [HttpPut("{id:guid}")]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult<AnswerDTO>> UpdateAnswer(
-        [FromHeader(Name = "Authorization")] string sessionToken,
-        Guid id, [FromBody] string newContent)
+    public async Task<ActionResult<AnswerDTO>> UpdateAnswer(Guid id, [FromBody] string newContent)
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-
-        var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken) ?? throw new NotFoundException("This user could not be found");
-        var answer = await answerRepository.GetAnswerById(id) ?? throw new NotFoundException("This answer could not be found");
-        if (user.Id != answer.UserId && !userRepository.IsUserAdmin(user)) throw new ForbiddenException("You did not post this answer, you don't have permission to edit it");
+        var username = User.FindFirstValue(ClaimTypes.Name) ?? throw new BadRequestException("This token is invalid");
+        var user = await userRepository.GetUserOnlyAnswers(username) ??
+                   throw new NotFoundException("This user could not be found");
+        var answer = await answerRepository.GetAnswerById(id) ??
+                     throw new NotFoundException("This answer could not be found");
+        if (user.Id != answer.UserId && !User.IsInRole("Admin"))
+            throw new ForbiddenException("You did not post this answer, you don't have permission to edit it");
 
         var newAnswer = answerFactory.UpdateAnswer(newContent, answer);
         return Ok(await answerRepository.UpdateAnswer(newAnswer));
@@ -78,15 +77,18 @@ public class AnswersController(
 
     [HttpPost("/accept/{answerId:guid}")]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult<AnswerDTO>> AcceptAnswer([FromHeader(Name = "Authorization")] string sessionToken,
-        Guid answerId)
+    public async Task<ActionResult<AnswerDTO>> AcceptAnswer(Guid answerId)
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-
-        var answer = await answerRepository.GetAnswerById(answerId) ?? throw new NotFoundException($"answer of {answerId} could not be found");
-        var userId = (await userRepository.GetUserBySessionToken(sessionToken) ?? throw new NotFoundException("this user could not be found")).Id;
-        if (answer.Question.UserId != userId && !userRepository.IsUserAdmin(userId)) throw new ForbiddenException("You do not have permission to accept this answer");
-        if (answer.Question.HasAccepted()) throw new BadRequestException("This question already has an accepted answer");
+        var answer = await answerRepository.GetAnswerById(answerId) ??
+                     throw new NotFoundException($"answer of {answerId} could not be found");
+        var username = User.FindFirstValue(ClaimTypes.Name) ??
+                       throw new BadRequestException("This is not a valid token");
+        var userId = (await userRepository.GetUserByUserName(username) ??
+                      throw new NotFoundException("this user could not be found")).Id;
+        if (answer.Question.UserId != userId && !User.IsInRole("Admin"))
+            throw new ForbiddenException("You do not have permission to accept this answer");
+        if (answer.Question.HasAccepted())
+            throw new BadRequestException("This question already has an accepted answer");
 
         var answerUser = answer.User;
         var karma = 20;
@@ -97,12 +99,13 @@ public class AnswersController(
 
     [HttpPatch("{id:guid}/upvote")]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult> UpVoteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
-        Guid id)
+    public async Task<ActionResult> UpVoteAnswer(Guid id)
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-        var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken) ?? throw new NotFoundException("This user could not be found");
-        var answer = await answerRepository.GetAnswerById(id) ?? throw new NotFoundException("This answer could not be found");
+        var username = User.FindFirstValue(ClaimTypes.Name) ?? throw new BadRequestException("This token is invalid");
+        var user = await userRepository.GetUserOnlyAnswers(username) ??
+                   throw new NotFoundException("This user could not be found");
+        var answer = await answerRepository.GetAnswerById(id) ??
+                     throw new NotFoundException("This answer could not be found");
         await userRepository.CheckIfUserIsMutedOrBanned(user);
         var answerUser = answer.User;
         if (user.Upvotes.Contains(answer.Id))
@@ -136,12 +139,13 @@ public class AnswersController(
 
     [HttpPatch("{id:guid}/downvote")]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult> DownVoteAnswer([FromHeader(Name = "Authorization")] string sessionToken,
-        Guid id)
+    public async Task<ActionResult> DownVoteAnswer(Guid id)
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-        var user = await userRepository.GetUserBySessionTokenOnlyAnswers(sessionToken) ?? throw new NotFoundException("This user could not be found");
-        var answer = await answerRepository.GetAnswerById(id) ?? throw new NotFoundException("This answer could not be found");
+        var username = User.FindFirstValue(ClaimTypes.Name) ?? throw new BadRequestException("This token is invalid");
+        var user = await userRepository.GetUserOnlyAnswers(username) ??
+                   throw new NotFoundException("This user could not be found");
+        var answer = await answerRepository.GetAnswerById(id) ??
+                     throw new NotFoundException("This answer could not be found");
         await userRepository.CheckIfUserIsMutedOrBanned(user);
 
         var answerUser = answer.User;

@@ -1,4 +1,4 @@
-
+using System.Security.Claims;
 using BackendServer.Exceptions;
 using BackendServer.Extensions;
 using BackendServer.Models.QuestionModels.DTOs;
@@ -37,35 +37,27 @@ public class QuestionsController(
 
     [HttpPost]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult<QuestionDTO>> PostQuestion([FromHeader(Name = "Authorization")] string sessionToken,
-        [FromBody] NewQuestion newQuestion)
+    public async Task<ActionResult<QuestionDTO>> PostQuestion([FromBody] NewQuestion newQuestion)
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-        if (!userRepository.IsUserLoggedIn(sessionToken))
-            return Unauthorized("That session token is expired or invalid");
-
-        var user = await userRepository.GetUserBySessionTokenOnlyQuestions(sessionToken) ?? throw new NotFoundException("This user could not be found");
+        var username = User.FindFirstValue(ClaimTypes.Name) ?? throw new BadRequestException("This token is not valid");
+        var user = await userRepository.GetUserOnlyQuestions(username) ??
+                   throw new NotFoundException("This user could not be found");
+        if (!userRepository.IsUserLoggedIn(username)) throw new UnauthorizedAccessException("You are not logged in");
         await userRepository.CheckIfUserIsMutedOrBanned(user);
-
-        var karma = 5;
-        await userRepository.UpdateKarma(user, karma);
-        
+        await userRepository.UpdateKarma(user, 5);
         return Ok(questionRepository.CreateQuestion(newQuestion, user));
-
     }
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult> DeleteQuestion([FromHeader(Name = "Authorization")] string sessionToken, Guid id)
+    public async Task<ActionResult> DeleteQuestion(Guid id)
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-
+        var username = User.FindFirstValue(ClaimTypes.Name) ?? throw new BadRequestException("This token is not valid");
         var question = await questionRepository.GetQuestionById(id) ??
                        throw new NotFoundException($"Question of id {id} could not be found!");
-        var user = await userRepository.GetUserBySessionTokenOnlyQuestions(sessionToken) ??
+        var user = await userRepository.GetUserOnlyQuestions(username) ??
                    throw new NotFoundException("this user could not be found!");
-
-        if (question.User.SessionToken != user.SessionToken && !userRepository.IsUserAdmin(user))
+        if (question.User.Id != user.Id && !User.IsInRole("Admin"))
             throw new ForbiddenException("You do not have permission to delete this question!");
 
         questionRepository.DeleteQuestion(question, question.User);
@@ -75,19 +67,16 @@ public class QuestionsController(
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin, User")]
     public async Task<ActionResult<QuestionDTO>> UpdateQuestion(
-        [FromHeader(Name = "Authorization")] string sessionToken,
         [FromBody] UpdatedQuestion updatedQuestion, Guid id)
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
+        var username = User.FindFirstValue(ClaimTypes.Name) ?? throw new BadRequestException("This token is not valid");
         var question = await questionRepository.GetQuestionById(id) ??
                        throw new NotFoundException($"Question of id {id} could not be found!");
-        var user = await userRepository.GetUserBySessionTokenOnlyQuestions(sessionToken) ??
+        var user = await userRepository.GetUserOnlyQuestions(username) ??
                    throw new NotFoundException("this user could not be found");
         await userRepository.CheckIfUserIsMutedOrBanned(user);
-        if (question.User.Id != user.Id && !userRepository.IsUserAdmin(user))
-        {
+        if (question.User.Id != user.Id && !User.IsInRole("Admin"))
             throw new ForbiddenException("You do not have permission to update this question");
-        }
 
         var updated = questionFactory.CreateNewUpdatedQuestionFromUpdatesAndOriginal(updatedQuestion, question);
         return Ok(questionRepository.UpdateQuestion(updated));
