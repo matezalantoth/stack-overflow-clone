@@ -6,6 +6,7 @@
 /Backend/BackendTest/bin
 /Backend/BackendServer/obj
 /Backend/BackendTest/obj
+/Backend/BackendServer/Migrations
 
 ../.idea
 obj
