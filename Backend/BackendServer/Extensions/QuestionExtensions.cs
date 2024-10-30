@@ -1,4 +1,3 @@
-
 using BackendServer.Models.QuestionModels;
 using BackendServer.Models.QuestionModels.DTOs;
 
@@ -10,7 +9,8 @@ public static class QuestionExtensions
     {
         return new QuestionDTO
         {
-            Title = question.Title, Username = question.User.UserName, PostedAt = question.PostedAt, Id = question.Id,
+            Title = question.Title, Username = question.User.UserName, PostedAt = question.PostedAt,
+            Id = question.Id,
             Content = question.Content, HasAccepted = question.HasAccepted(),
             Tags = question.Tags.Select(t => t.ToDTO()).ToList()
         };

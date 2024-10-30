@@ -29,7 +29,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
 
     {
         var tags = context.Tags.Where(x => newQuestion.Tags.Select(t => t.TagName).Contains(x.TagName)).ToList();
-         var question = new Question
+        var question = new Question
         {
             Title = newQuestion.Title, Content = newQuestion.Content, Id = Guid.NewGuid(), User = user,
             UserId = user.Id, PostedAt = newQuestion.PostedAt, Answers = [], Tags = tags
@@ -38,11 +38,7 @@ public class QuestionRepository(ApiDbContext context) : IQuestionRepository
         context.Questions.Add(question);
         foreach (var tag in question.Tags) tag.Questions.Add(question);
         context.SaveChanges();
-        return new QuestionDTO
-        {
-            Title = question.Title, Content = question.Content, Username = question.User.UserName,
-            PostedAt = question.PostedAt, Id = question.Id
-        };
+        return question.ToDTO();
     }
 
     public void DeleteQuestion(Question question, User user)

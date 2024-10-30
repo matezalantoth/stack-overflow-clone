@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using BackendServer.Exceptions;
 using BackendServer.Extensions;
 using BackendServer.Models;
@@ -37,20 +38,20 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
 
     [HttpPost("logout")]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult> LogoutUser([FromHeader(Name = "Authorization")] string sessionToken)
+    public async Task<ActionResult> LogoutUser()
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-        await userRepository.LogoutUser(sessionToken);
+        var username = User.FindFirstValue(ClaimTypes.Name) ?? throw new BadRequestException("This token is invalid");
+        await userRepository.LogoutUser(username);
         return Ok();
     }
 
     [HttpGet("GetBySessionToken")]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult<UserDTO>> GetUser([FromHeader(Name = "Authorization")] string sessionToken)
+    public async Task<ActionResult<UserDTO>> GetUser()
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-        var user = await userRepository.GetUserBySessionToken(sessionToken);
-        if (user == null) throw new NotFoundException($"User of session token: {sessionToken} could not be found");
+        var username = User.FindFirstValue(ClaimTypes.Name) ??
+                       throw new BadRequestException("Session token is not valid");
+        var user = await userRepository.GetUserByUserName(username) ?? throw new NotFoundException("User not found");
         return Ok(user.ToDTO());
     }
 
@@ -59,30 +60,26 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
     {
         var user = await userRepository.GetUserByUserName(userName);
 
-        if (user == null) throw new NotFoundException($"User of session token: {userName} could not be found");
+        if (user == null) throw new NotFoundException("User could not be found");
 
         return Ok(user.ToPublicDTO());
     }
 
     [HttpGet("IsUserAdmin")]
     [Authorize(Roles = "Admin, User")]
-    public async Task<ActionResult<bool>> IsUserAdmin([FromHeader(Name = "Authorization")] string sessionToken)
+    public ActionResult<bool> IsUserAdmin()
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-        var user = await userRepository.GetUserBySessionToken(sessionToken) ??
-                   throw new NotFoundException("This user could not be found");
-
-        return Ok(userRepository.IsUserAdmin(user));
+        return Ok(User.IsInRole("Admin"));
     }
 
     [Authorize(Roles = "User")]
     [HttpPatch("update-profile")]
-    public async Task<ActionResult> UpdateProfile([FromBody] UpdateProfileRequest updateProfileRequest,
-        [FromHeader(Name = "Authorization")] string sessionToken)
+    public async Task<ActionResult> UpdateProfile([FromBody] UpdateProfileRequest updateProfileRequest)
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                     throw new BadRequestException("Session token is not valid");
 
-        var user = await userRepository.GetUserBySessionToken(sessionToken) ??
+        var user = await userRepository.GetUserById(userId) ??
                    throw new NotFoundException("User could not be found");
 
 
@@ -96,11 +93,11 @@ public class UsersController(IUserRepository userRepository, IUserFactory userFa
 
     [HttpPost("VerifyUser")]
     [Authorize(Roles = "User")]
-    public async Task<ActionResult<VerifyUserDTO>> VerifyUser([FromHeader(Name = "Authorization")] string sessionToken,
-        [FromBody] string password)
+    public async Task<ActionResult<VerifyUserDTO>> VerifyUser([FromBody] string password)
     {
-        sessionToken = tokenService.ValidateAndGetSessionToken(sessionToken);
-        var user = await userRepository.GetUserBySessionToken(sessionToken) ?? throw new NotFoundException();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                     throw new BadRequestException("Session token is not valid");
+        var user = await userRepository.GetUserById(userId) ?? throw new NotFoundException("User could not be found");
 
         return Ok(new VerifyUserDTO
         {

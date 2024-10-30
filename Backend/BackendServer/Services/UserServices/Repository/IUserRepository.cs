@@ -1,4 +1,3 @@
-
 using BackendServer.Models.UserModels;
 
 namespace BackendServer.Services.UserServices.Repository;
@@ -17,7 +16,7 @@ public interface IUserRepository
 
     public Task LogoutUser(string sessionToken);
 
-    public ValueTask<User?> GetUserBySessionToken(string sessionToken);
+    public ValueTask<User?> GetUserById(string id);
 
     public Task CheckIfUserIsMutedOrBanned(User user);
 
@@ -33,9 +32,9 @@ public interface IUserRepository
 
     public ValueTask<User?> GetUserByUserName(string username);
 
-    public ValueTask<User?> GetUserBySessionTokenOnlyAnswers(string sessionToken);
+    public ValueTask<User?> GetUserOnlyAnswers(string username);
 
-    public ValueTask<User?> GetUserBySessionTokenOnlyQuestions(string sessionToken);
+    public ValueTask<User?> GetUserOnlyQuestions(string username);
 
     public ValueTask<User> BanUserByUsername(string username);
 
@@ -44,10 +43,6 @@ public interface IUserRepository
     public ValueTask<User> UnBanUserByUsername(string username);
 
     public IEnumerable<string> GetUsersWithSimilarUsernames(string usernameSubstring);
-
-    public bool IsUserAdmin(User user);
-
-    public bool IsUserAdmin(string userId);
 
     public Task UpdateUser(User user, string? password);
 
