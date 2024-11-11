@@ -24,13 +24,12 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Env.Load("../../.env");
+Env.Load();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 AddSwaggerGen();
 
 builder.Services.AddDbContext<ApiDbContext>(options => { options.UseMySQL(GetConnString()); });
-
 builder.Services.AddIdentityCore<User>(options =>
     {
         options.SignIn.RequireConfirmedAccount = false;
