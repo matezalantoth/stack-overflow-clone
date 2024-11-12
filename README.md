@@ -28,6 +28,7 @@ Stack Overflow Clone, as the name implies, is an attempt to replicate Stack Over
 - Tailwind CSS
 - ASP.NET
 - MySQL
+- Docker
 
 ## Prerequisites: 
 - Docker
