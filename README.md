@@ -126,6 +126,7 @@ ISSUING_KEY={JWT_ISSUING_KEY}
     - Note: The way the project is set up on the repo, it expects the backend on port `8080` and the frontend on port `5173`. If you wish to change these, you need to manually modify the frontend `Dockerfile` and `vite.config.js`, otherwise, enjoy! The only port that needs to open on your machine is `5173`.
 
 ## Contributors
-- matezalantoth
-- qeed97
-- BalintCoder
+[![MatezAlantoth's GitHub Profile](https://img.shields.io/badge/GitHub-MatezAlantoth-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/matezalantoth)
+[![Qeed97's GitHub Profile](https://img.shields.io/badge/GitHub-Qeed97-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/qeed97)
+[![BalintCoder's GitHub Profile](https://img.shields.io/badge/GitHub-BalintCoder-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/BalintCoder)
+
