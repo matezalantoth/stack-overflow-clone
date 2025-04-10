@@ -23,7 +23,7 @@ Stack Overflow Clone, as the name implies, is an attempt to replicate Stack Over
     - Karma
   - Public profile page
 
-##Built using:
+## Built using:
 <p align="left">
   <a href="https://react.dev/" target="_blank"><img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React"/></a>
   <a href="https://vitejs.dev/" target="_blank"><img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"/></a>
